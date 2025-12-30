@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Card } from "../components/Card";
 import { Sheet, type SheetSide } from "../components/Sheet";
 
@@ -139,16 +140,16 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 					}
 
 					if (entry.config.type === 'dialog') {
-						return (
+						return createPortal(
 							<div
 								key={entry.id}
 								style={{
-									position: 'absolute',
+									position: 'fixed',
 									inset: 0,
 									display: 'flex',
 									alignItems: 'center',
 									justifyContent: 'center',
-									zIndex: 10 + index,
+									zIndex: 100 + index,
 								}}
 							>
 								<div
@@ -162,13 +163,14 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 								>
 									<Component {...entry.params} />
 								</Card>
-							</div>
+							</div>,
+							document.body
 						);
 					}
 
 					if (entry.config.type === 'bottomSheet') {
-						return (
-							<div key={entry.id} style={{ position: 'absolute', inset: 0, zIndex: 10 + index }}>
+						return createPortal(
+							<div key={entry.id} style={{ position: 'fixed', inset: 0, zIndex: 100 + index }}>
 								<div
 									className={entry.isExiting ? "animate-overlay-out" : "animate-overlay-in"}
 									style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }}
@@ -180,7 +182,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 										bottom: 0,
 										left: 0,
 										right: 0,
-										background: 'white',
+										background: 'var(--color-surface)',
 										padding: 20,
 										borderTopLeftRadius: 16,
 										borderTopRightRadius: 16,
@@ -190,7 +192,8 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 								>
 									<Component {...entry.params} />
 								</div>
-							</div>
+							</div>,
+							document.body
 						);
 					}
 
@@ -203,6 +206,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 								side={entry.config.side}
 								title={entry.params?.title || entry.config.title}
 								description={entry.params?.description || entry.config.description}
+								className={index > 0 ? `z-[${index * 10 + 50}]` : undefined}
 							>
 								<Component {...entry.params} />
 							</Sheet>

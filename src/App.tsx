@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "./components/Button";
 import { NavHost, useNavigation } from "./core/Router";
 import { Sheet } from "./components/Sheet";
-import { DataTableDemo, UserDetailsSheet } from "./screens/DataTableDemo";
+import { DataTableDemo, UserDetailsSheet, EditProfileSheet, BlockUserDialog } from "./screens/DataTableDemo";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -148,6 +148,12 @@ export default function App() {
 					title: 'Benutzerdetails',
 					description: 'Detaillierte Informationen und Aktionen'
 				});
+				nav.sheet('edit-profile', EditProfileSheet, {
+					side: 'right',
+					title: 'Profil bearbeiten',
+					description: 'Aktualisiere die Benutzerinformationen'
+				});
+				nav.dialog('block-user', BlockUserDialog);
 			}}
 		/>
 	);

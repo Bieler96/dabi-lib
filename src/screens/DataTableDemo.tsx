@@ -101,10 +101,72 @@ const UserDetailsSheet = ({ user }: { user: UserData }) => {
                     </div>
                 </div>
             </div>
-
             <div className="pt-4 flex flex-col gap-2">
-                <Button variant="filled" className="w-full">Profil Bearbeiten</Button>
-                <Button variant="ghost" className="w-full text-error" onClick={() => nav.popBackStack()}>Benutzer Deaktivieren</Button>
+                <Button variant="filled" className="w-full" onClick={() => nav.navigate('edit-profile', { user })}>
+                    Profil Bearbeiten
+                </Button>
+                <Button variant="ghost" className="w-full text-error" onClick={() => nav.navigate('block-user', { user })}>
+                    Benutzer Sperren
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+const EditProfileSheet = ({ user }: { user: UserData }) => {
+    const nav = useNavigation();
+    return (
+        <div className="space-y-6">
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Name</label>
+                    <input
+                        type="text"
+                        defaultValue={user.name}
+                        className="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:outline-primary"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Email</label>
+                    <input
+                        type="email"
+                        defaultValue={user.email}
+                        className="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:outline-primary"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Rolle</label>
+                    <select
+                        defaultValue={user.role}
+                        className="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:outline-primary"
+                    >
+                        <option>Admin</option>
+                        <option>Editor</option>
+                        <option>User</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="pt-8 flex flex-col gap-2">
+                <Button variant="filled" className="w-full" onClick={() => nav.popBackStack()}>Speichern</Button>
+                <Button variant="ghost" className="w-full" onClick={() => nav.popBackStack()}>Abbrechen</Button>
+            </div>
+        </div>
+    );
+};
+
+const BlockUserDialog = ({ user }: { user: UserData }) => {
+    const nav = useNavigation();
+    return (
+        <div className="p-2">
+            <h3 className="text-xl font-bold mb-2">Benutzer sperren?</h3>
+            <p className="text-on-surface-variant mb-6">
+                Sind Sie sicher, dass Sie <strong>{user.name}</strong> sperren möchten?
+                Der Benutzer wird keinen Zugriff mehr auf das System haben.
+            </p>
+            <div className="flex justify-end gap-3">
+                <Button variant="ghost" onClick={() => nav.popBackStack()}>Abbrechen</Button>
+                <Button variant="filled" className="bg-error text-on-error" onClick={() => { window.location.reload() }}>Sperren</Button>
             </div>
         </div>
     );
@@ -245,4 +307,4 @@ export const DataTableDemo = () => {
     );
 };
 
-export { UserDetailsSheet };
+export { UserDetailsSheet, EditProfileSheet, BlockUserDialog };
