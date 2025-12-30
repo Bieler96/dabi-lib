@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Card } from "../components/Card";
 import { Sheet, type SheetSide } from "../components/Sheet";
@@ -75,19 +75,115 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		return b.routes;
 	}, [builder]);
 
-	const [stack, setStack] = useState<NavEntry[]>([
-		{
-			id: 'root',
-			path: startDestination,
-			config: routeMap[startDestination]
+	const getPathFromUrl = (map: Record<string, RouteConfig>) => {
+		const path = window.location.pathname.slice(1);
+		if (map[path]) return path;
+		return null;
+	};
+
+	const getParamsFromUrl = () => {
+		const params = new URLSearchParams(window.location.search);
+		const result: Record<string, any> = {};
+		params.forEach((value, key) => {
+			if (value && !isNaN(Number(value)) && !value.startsWith('0')) {
+				result[key] = Number(value);
+			} else if (value === 'true') {
+				result[key] = true;
+			} else if (value === 'false') {
+				result[key] = false;
+			} else {
+				result[key] = value;
+			}
+		});
+		return result;
+	};
+
+	const syncUrl = (path: string, params?: any) => {
+		const url = new URL(window.location.href);
+		url.pathname = `/${path}`;
+		url.search = '';
+		if (params) {
+			Object.entries(params).forEach(([key, value]) => {
+				if (value !== undefined && value !== null) {
+					url.searchParams.set(key, String(value));
+				}
+			});
 		}
-	]);
+		if (window.location.pathname + window.location.search !== url.pathname + url.search) {
+			window.history.pushState({ path, params }, '', url.toString());
+		}
+	};
+
+	const [stack, setStack] = useState<NavEntry[]>(() => {
+		const initialPath = getPathFromUrl(routeMap) || startDestination;
+		const initialParams = getParamsFromUrl();
+		return [
+			{
+				id: 'root',
+				path: initialPath,
+				params: initialParams,
+				config: routeMap[initialPath]
+			}
+		];
+	});
+
+	useEffect(() => {
+		const handlePopState = () => {
+			const path = getPathFromUrl(routeMap) || startDestination;
+			const params = getParamsFromUrl();
+
+			setStack(prev => {
+				const last = prev[prev.length - 1];
+				if (last.path === path && JSON.stringify(last.params) === JSON.stringify(params)) {
+					return prev;
+				}
+
+				// existingIndex calculation
+				let existingIndex = -1;
+				for (let i = prev.length - 1; i >= 0; i--) {
+					if (prev[i].path === path && JSON.stringify(prev[i].params) === JSON.stringify(params)) {
+						existingIndex = i;
+						break;
+					}
+				}
+
+				if (existingIndex !== -1) {
+					if (existingIndex === prev.length - 2) {
+						const entryToPop = prev[prev.length - 1];
+						const newStack = [...prev];
+						newStack[prev.length - 1] = { ...entryToPop, isExiting: true };
+
+						setTimeout(() => {
+							setStack(curr => curr.filter(e => e.id !== entryToPop.id));
+						}, 350);
+
+						return newStack;
+					}
+					return prev.slice(0, existingIndex + 1);
+				}
+
+				return [...prev, {
+					id: Date.now().toString(),
+					path,
+					params,
+					config: routeMap[path]
+				}];
+			});
+		};
+
+		window.addEventListener('popstate', handlePopState);
+		return () => window.removeEventListener('popstate', handlePopState);
+	}, [routeMap, startDestination]);
 
 	const navigate = (path: string, params?: any) => {
 		const config = routeMap[path];
 		if (!config) {
 			console.warn(`Route ${path} not found`);
 			return;
+		}
+
+		if (config.type === 'screen') {
+			syncUrl(path, params);
 		}
 		setStack(prev => [...prev, { id: Date.now().toString(), path, params, config }]);
 	};
@@ -96,22 +192,23 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		const entryToPop = stack[stack.length - 1];
 		if (!entryToPop || entryToPop.isExiting || stack.length <= 1) return;
 
-		setStack(prev => {
-			const next = [...prev];
-			const index = next.findIndex(e => e.id === entryToPop.id);
-			if (index !== -1) {
-				next[index] = { ...next[index], isExiting: true };
-			}
-			return next;
-		});
-
-		setTimeout(() => {
+		if (entryToPop.config.type === 'screen') {
+			window.history.back();
+		} else {
+			// Local pop for dialogs/sheets
 			setStack(prev => {
-				const index = prev.findIndex(e => e.id === entryToPop.id);
-				if (index === -1) return prev;
-				return prev.filter(e => e.id !== entryToPop.id);
+				const next = [...prev];
+				const index = next.findIndex(e => e.id === entryToPop.id);
+				if (index !== -1) {
+					next[index] = { ...next[index], isExiting: true };
+				}
+				return next;
 			});
-		}, 350);
+
+			setTimeout(() => {
+				setStack(prev => prev.filter(e => e.id !== entryToPop.id));
+			}, 350);
+		}
 	};
 
 	const visibleEntries = useMemo(() => {
