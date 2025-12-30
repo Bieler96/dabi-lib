@@ -68,14 +68,12 @@ interface NavHostProps {
 }
 
 export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) => {
-	// 1. Routen konfigurieren
 	const routeMap = useMemo(() => {
 		const b = new RouteBuilder();
 		builder(b);
 		return b.routes;
 	}, [builder]);
 
-	// 2. Der BackStack State
 	const [stack, setStack] = useState<NavEntry[]>([
 		{
 			id: 'root',
@@ -84,7 +82,6 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		}
 	]);
 
-	// 3. Navigation Actions
 	const navigate = (path: string, params?: any) => {
 		const config = routeMap[path];
 		if (!config) {
@@ -116,12 +113,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		}, 350);
 	};
 
-	// 4. Rendering Logic (Das Herzstück)
-	// Wir müssen den "tiefsten" Screen finden, der sichtbar sein soll.
-	// Alles danach (Dialoge/Sheets) wird darüber gerendert.
-
 	const visibleEntries = useMemo(() => {
-		// Finde den Index des letzten "Screen"-Typs
 		let lastScreenIndex = 0;
 		for (let i = stack.length - 1; i >= 0; i--) {
 			if (stack[i].config.type === 'screen') {
@@ -129,20 +121,18 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 				break;
 			}
 		}
-		// Rendere diesen Screen und alles was danach kommt (Dialoge/Sheets)
 		return stack.slice(lastScreenIndex);
 	}, [stack]);
 
 	return (
 		<NavigationContext.Provider value={{ navigate, popBackStack, currentRoute: stack[stack.length - 1].path }}>
-			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'clip' }}>
 				{visibleEntries.map((entry, index) => {
 					const Component = entry.config.component;
 
-					// Wrapper basierend auf Typ
 					if (entry.config.type === 'screen') {
 						return (
-							<div key={entry.id} className="screen-wrapper" style={{ position: 'absolute', inset: 0, background: 'white' }}>
+							<div key={entry.id} className="screen-wrapper" style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}>
 								<Component {...entry.params} />
 							</div>
 						);

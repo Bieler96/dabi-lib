@@ -11,12 +11,12 @@ export type HeaderGroup = {
 	children: string[];
 };
 
-export function getHeaderGroups(data: Array<Record<string, unknown>>): HeaderGroup[] {
+export function getHeaderGroups(data: Array<any>): HeaderGroup[] {
 	const allKeys = new Set<string>();
 	data.forEach((row) => {
 		Object.keys(row).forEach((key) => {
 			if (row[key] && typeof row[key] === "object" && !Array.isArray(row[key])) {
-				Object.keys(row[key] as Record<string, unknown>).forEach((childKey) => {
+				Object.keys(row[key]).forEach((childKey) => {
 					allKeys.add(`${key}.${childKey}`);
 				});
 			} else {

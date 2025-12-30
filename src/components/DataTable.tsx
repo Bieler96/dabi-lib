@@ -34,11 +34,11 @@ function getHeaderGroupsFromColumns<T>(columns: ColumnDef<T>[]): HeaderGroup[] {
     }));
 }
 
-function getValue(obj: Record<string, unknown>, path: string): unknown {
-    return path.split(".").reduce((acc: Record<string, unknown> | undefined, key) => (acc ? acc[key] as Record<string, unknown> | undefined : undefined), obj);
+function getValue(obj: any, path: string): unknown {
+    return path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), obj);
 }
 
-export function DataTable<TData extends Record<string, unknown>>({
+export function DataTable<TData extends object>({
     data,
     columns,
     headerAlignment = Alignment.CENTER,

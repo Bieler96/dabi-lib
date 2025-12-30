@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "./components/Button";
 import { NavHost, useNavigation } from "./core/Router";
 import { Sheet } from "./components/Sheet";
+import { DataTableDemo, UserDetailsSheet } from "./screens/DataTableDemo";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -12,6 +13,7 @@ const HomeScreen = () => {
 			<div className="flex flex-col gap-4 items-start">
 				<Button variant="filled" onClick={() => nav.navigate('details', { id: 42 })}>Go to Router Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('sheet-demo')}>Go to Sheet Demo</Button>
+				<Button variant="outlined" onClick={() => nav.navigate('datatable-demo')}>Go to DataTable Demo</Button>
 			</div>
 		</div>
 	);
@@ -132,6 +134,7 @@ export default function App() {
 				nav.screen('home', HomeScreen);
 				nav.screen('sheet-demo', SheetDemo);
 				nav.screen('details', DetailsScreen);
+				nav.screen('datatable-demo', DataTableDemo);
 
 				nav.dialog('confirm-dialog', ConfirmDialog);
 				nav.bottomSheet('options-sheet', OptionsSheet);
@@ -139,6 +142,11 @@ export default function App() {
 					side: 'right',
 					title: 'Settings',
 					description: 'Manage your application preferences'
+				});
+				nav.sheet('user-details', UserDetailsSheet, {
+					side: 'right',
+					title: 'Benutzerdetails',
+					description: 'Detaillierte Informationen und Aktionen'
 				});
 			}}
 		/>
