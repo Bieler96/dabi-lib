@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { Card } from "../components/Card";
-import { Sheet, type SheetSide } from "./Sheet";
+import { Sheet, type SheetSide } from "../components/Sheet";
 
 type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet";
 

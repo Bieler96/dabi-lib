@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "./core/Button";
+import { Button } from "./components/Button";
 import { NavHost, useNavigation } from "./core/Router";
-import { Sheet } from "./core/Sheet";
+import { Sheet } from "./components/Sheet";
 
 // Screens.tsx
 const HomeScreen = () => {
