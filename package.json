@@ -1,7 +1,7 @@
 {
 	"name": "dabi-lib",
 	"private": true,
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"bin": {
 		"dabi": "./bin/dabi.ts"
 	},
@@ -15,7 +15,11 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"update-package": "npm run build && npm publish",
+		"patch": "npm version patch && npm run update-package",
+		"minor": "npm version minor && npm run update-package",
+		"major": "npm version major && npm run update-package"
 	},
 	"dependencies": {
 		"@floating-ui/react": "^0.27.14",
