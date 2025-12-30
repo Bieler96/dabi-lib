@@ -200,7 +200,8 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			return;
 		}
 
-		if (config.type === 'screen') {
+
+		if (config.type === 'screen' || config.type === 'list') {
 			syncUrl(path, params);
 		}
 		setStack(prev => [...prev, { id: Date.now().toString(), path, params, config }]);
@@ -210,7 +211,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		const entryToPop = stack[stack.length - 1];
 		if (!entryToPop || entryToPop.isExiting || stack.length <= 1) return;
 
-		if (entryToPop.config.type === 'screen') {
+		if (entryToPop.config.type === 'screen' || entryToPop.config.type === 'list') {
 			window.history.back();
 		} else {
 			// Local pop for dialogs/sheets
@@ -230,15 +231,34 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 	};
 
 	const visibleEntries = useMemo(() => {
-		let lastScreenIndex = 0;
+		// Find the index of the primary active screen (topmost non-exiting screen)
+		let primaryScreenIndex = 0;
 		for (let i = stack.length - 1; i >= 0; i--) {
-			if (stack[i].config.type === 'screen') {
-				lastScreenIndex = i;
+			if ((stack[i].config.type === 'screen' || stack[i].config.type === 'list') && !stack[i].isExiting) {
+				primaryScreenIndex = i;
 				break;
 			}
 		}
-		return stack.slice(lastScreenIndex);
+
+		// Find the secondary screen (immediately below primary) to keep visible for transition
+		let secondaryScreenIndex = -1;
+		for (let i = primaryScreenIndex - 1; i >= 0; i--) {
+			if (stack[i].config.type === 'screen' || stack[i].config.type === 'list') {
+				secondaryScreenIndex = i;
+				break;
+			}
+		}
+
+		const startIndex = secondaryScreenIndex !== -1 ? secondaryScreenIndex : primaryScreenIndex;
+		return stack.slice(Math.max(0, startIndex));
 	}, [stack]);
+
+	const getPageAnimation = (entry: NavEntry) => {
+		if (entry.isExiting) return "animate-page-out";
+		// Don't animate the root screen on initial load
+		if (entry.id === stack[0].id) return "";
+		return "animate-page-in";
+	};
 
 	return (
 		<NavigationContext.Provider value={{ navigate, popBackStack, currentRoute: stack[stack.length - 1].path }}>
@@ -248,7 +268,11 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 					if (entry.config.type === 'list' && entry.config.listOptions) {
 						return (
-							<div key={entry.id} className="screen-wrapper" style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}>
+							<div
+								key={entry.id}
+								className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)}`}
+								style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}
+							>
 								<div className="p-8 max-w-7xl mx-auto space-y-6">
 									<div>
 										<h1 className="text-3xl font-bold text-on-surface">{entry.config.title}</h1>
@@ -269,7 +293,11 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 					if (entry.config.type === 'screen') {
 						return (
-							<div key={entry.id} className="screen-wrapper" style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}>
+							<div
+								key={entry.id}
+								className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)}`}
+								style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}
+							>
 								<Component {...entry.params} />
 							</div>
 						);
