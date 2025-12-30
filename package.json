@@ -1,6 +1,6 @@
 {
 	"name": "dabi-lib",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A modern React component library and CLI for fast project generation.",
 	"bin": {
 		"dabi": "./bin/dabi.ts"
@@ -9,13 +9,16 @@
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
+	"sideEffects": [
+		"**/*.css"
+	],
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs"
 		},
-		"./style.css": "./dist/dabi-lib.css"
+		"./style.css": "./dist/index.css"
 	},
 	"files": [
 		"dist",
@@ -69,6 +72,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/fs-extra": "^11.0.4",
 		"@types/inquirer": "^9.0.9",
 		"@types/node": "^24.10.4",
@@ -82,6 +86,7 @@
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.46.4",
 		"vite": "^7.2.4",
-		"vite-plugin-dts": "^4.5.4"
+		"vite-plugin-dts": "^4.5.4",
+		"vite-plugin-lib-inject-css": "^2.2.2"
 	}
 }

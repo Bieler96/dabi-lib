@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { libInjectCss } from 'vite-plugin-lib-inject-css'
 import dts from 'vite-plugin-dts'
 import { resolve } from 'path'
 import { apiRoutes } from './src/vite/index'
@@ -10,6 +11,7 @@ export default defineConfig({
 	plugins: [
 		react(),
 		tailwindcss(),
+		libInjectCss(),
 		apiRoutes(),
 		dts({
 			include: ['src'],
