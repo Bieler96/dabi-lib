@@ -4,7 +4,10 @@ import { Card } from "../components/Card";
 import { DataTable, type ColumnDef } from "../components/DataTable";
 import { Sheet, type SheetSide } from "../components/Sheet";
 
+
 type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet" | "list";
+
+export type Guard = (params?: any) => boolean | Promise<boolean>;
 
 export interface RouteConfig {
 	path: string;
@@ -18,6 +21,8 @@ export interface RouteConfig {
 		columns: ColumnDef<any>[];
 		data: any[];
 	};
+	canActivate?: Guard[];
+	canDeactivate?: Guard[];
 }
 
 interface NavEntry {
@@ -45,19 +50,19 @@ export const useNavigation = () => {
 export class RouteBuilder {
 	routes: Record<string, RouteConfig> = {};
 
-	screen(path: string, component: React.ComponentType<any>) {
-		this.routes[path] = { path, component, type: 'screen' };
+	screen(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
+		this.routes[path] = { path, component, type: 'screen', ...options };
 	}
 
-	dialog(path: string, component: React.ComponentType<any>) {
-		this.routes[path] = { path, component, type: 'dialog' };
+	dialog(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
+		this.routes[path] = { path, component, type: 'dialog', ...options };
 	}
 
-	bottomSheet(path: string, component: React.ComponentType<any>) {
-		this.routes[path] = { path, component, type: 'bottomSheet' };
+	bottomSheet(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
+		this.routes[path] = { path, component, type: 'bottomSheet', ...options };
 	}
 
-	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string; className?: string }) {
+	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string; className?: string, canActivate?: Guard[], canDeactivate?: Guard[] }) {
 		this.routes[path] = {
 			path,
 			component,
@@ -66,11 +71,12 @@ export class RouteBuilder {
 			title: options?.title,
 			description: options?.description,
 			className: options?.className,
-		} as any; // Cast to any because RouteConfig interface needs update too, but let's update interface first in another block or do it all here if possible. 
-		// Actually I should update the interface RouteConfig first.
+			canActivate: options?.canActivate,
+			canDeactivate: options?.canDeactivate
+		} as any;
 	}
 
-	list<T>(path: string, options: { title: string; description?: string; columns: ColumnDef<T>[]; data: T[] }) {
+	list<T>(path: string, options: { title: string; description?: string; columns: ColumnDef<T>[]; data: T[], canActivate?: Guard[], canDeactivate?: Guard[] }) {
 		this.routes[path] = {
 			path,
 			type: 'list',
@@ -79,7 +85,9 @@ export class RouteBuilder {
 			listOptions: {
 				columns: options.columns,
 				data: options.data
-			}
+			},
+			canActivate: options.canActivate,
+			canDeactivate: options.canDeactivate
 		};
 	}
 }
@@ -149,9 +157,27 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 	});
 
 	useEffect(() => {
-		const handlePopState = () => {
+		const handlePopState = async () => {
 			const path = getPathFromUrl(routeMap) || startDestination;
 			const params = getParamsFromUrl();
+
+			// Check canDeactivate for the current top of the stack
+			const currentEntry = stack[stack.length - 1];
+			// Only check if we are actually popping/changing route.
+			// Comparing with new path isn't enough because we might be navigating forward/backward.
+			// However, if the path is DIFFERENT from current top, we are moving.
+			if (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params)) {
+				if (currentEntry.config.canDeactivate) {
+					for (const guard of currentEntry.config.canDeactivate) {
+						const canDeactivate = await guard(currentEntry.params);
+						if (!canDeactivate) {
+							// If not allowed, push the state back to revert the browser's back navigation
+							syncUrl(currentEntry.path, currentEntry.params);
+							return;
+						}
+					}
+				}
+			}
 
 			setStack(prev => {
 				const last = prev[prev.length - 1];
@@ -194,15 +220,21 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		window.addEventListener('popstate', handlePopState);
 		return () => window.removeEventListener('popstate', handlePopState);
-	}, [routeMap, startDestination]);
+	}, [routeMap, startDestination, stack]);
 
-	const navigate = (path: string, params?: any) => {
+	const navigate = async (path: string, params?: any) => {
 		const config = routeMap[path];
 		if (!config) {
 			console.warn(`Route ${path} not found`);
 			return;
 		}
 
+		if (config.canActivate) {
+			for (const guard of config.canActivate) {
+				const canActivate = await guard(params);
+				if (!canActivate) return;
+			}
+		}
 
 		if (config.type === 'screen' || config.type === 'list') {
 			syncUrl(path, params);
@@ -210,9 +242,16 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		setStack(prev => [...prev, { id: Date.now().toString(), path, params, config }]);
 	};
 
-	const popBackStack = () => {
+	const popBackStack = async () => {
 		const entryToPop = stack[stack.length - 1];
 		if (!entryToPop || entryToPop.isExiting || stack.length <= 1) return;
+
+		if (entryToPop.config.canDeactivate) {
+			for (const guard of entryToPop.config.canDeactivate) {
+				const canDeactivate = await guard(entryToPop.params);
+				if (!canDeactivate) return;
+			}
+		}
 
 		if (entryToPop.config.type === 'screen' || entryToPop.config.type === 'list') {
 			window.history.back();

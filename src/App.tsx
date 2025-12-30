@@ -6,6 +6,7 @@ import { DataTableDemo, UserDetailsSheet, EditProfileSheet, BlockUserDialog } fr
 import { users, userColumns } from "./screens/UserList";
 import { JiraBoard, JiraTaskDetails } from "./screens/JiraClone";
 import { ButtonGroup, ButtonGroupSeparator } from "./components/ButtonGroup";
+import { GuardDemoScreen, ProtectedPage, DirtyPage, authGuard, confirmExitGuard } from "./screens/GuardDemo";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -22,6 +23,7 @@ const HomeScreen = () => {
 					<ButtonGroupSeparator />
 					<Button variant="tonal" onClick={() => nav.navigate('jira-board')}>Go to Jira Clone</Button>
 				</ButtonGroup>
+				<Button variant="outlined" onClick={() => nav.navigate('guard-demo')}>Go to Guard Demo</Button>
 			</div>
 		</div>
 	);
@@ -174,6 +176,10 @@ export default function App() {
 					className: '!max-w-2xl'
 				});
 				nav.dialog('block-user', BlockUserDialog);
+
+				nav.screen('guard-demo', GuardDemoScreen);
+				nav.screen('protected-page', ProtectedPage, { canActivate: [authGuard] });
+				nav.screen('dirty-page', DirtyPage, { canDeactivate: [confirmExitGuard] });
 			}}
 		/>
 	);
