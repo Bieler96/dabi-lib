@@ -16,36 +16,133 @@ program
     .version('0.0.1');
 
 program
-    .command('init <name>')
-    .description('Initialize a new dabi-lib project')
+    .command('init [name]')
+    .description('Initialize a new dabi-lib project or update an existing one')
     .action(async (name) => {
-        const targetDir = path.resolve(process.cwd(), name);
-        console.log(pc.blue(`Creating new project in ${targetDir}...`));
-
-        // In a real scenario, we might clone a template repo or copy from the package.
-        // For now, let's assume we copy from the current project (excluding node_modules, etc.)
+        const isNewDir = !!name;
+        const targetDir = name ? path.resolve(process.cwd(), name) : process.cwd();
         const templateDir = path.resolve(__dirname, '..');
 
         try {
-            if (fs.existsSync(targetDir)) {
+            if (isNewDir && fs.existsSync(targetDir)) {
                 console.error(pc.red(`Error: Directory ${name} already exists.`));
                 process.exit(1);
             }
 
-            await fs.copy(templateDir, targetDir, {
-                filter: (src) => {
-                    const relative = path.relative(templateDir, src);
-                    return !relative.startsWith('node_modules') &&
-                        !relative.startsWith('.git') &&
-                        !relative.startsWith('dist') &&
-                        !relative.startsWith('bin'); // Don't copy the CLI itself into the new project? Or maybe do?
-                }
-            });
+            if (isNewDir) {
+                console.log(pc.blue(`Creating new project in ${targetDir}...`));
+                await fs.ensureDir(targetDir);
+            } else {
+                console.log(pc.blue(`Updating dabi-lib structure in ${targetDir}...`));
+            }
 
-            console.log(pc.green(`Project ${name} created successfully!`));
-            console.log(pc.yellow(`Next steps:\n  cd ${name}\n  npm install\n  npm run dev`));
+            // 1. Create essential folders
+            const essentialFolders = [
+                'src/api',
+                'src/screens',
+                'src/db',
+                'src/components',
+                'src/core',
+                'src/hooks',
+                'src/utils',
+                'src/server',
+                'src/vite',
+                'public'
+            ];
+
+            for (const folder of essentialFolders) {
+                await fs.ensureDir(path.join(targetDir, folder));
+            }
+
+            // 2. Copy library core folders (synced/overwritten)
+            const libFolders = [
+                'src/components',
+                'src/core',
+                'src/hooks',
+                'src/utils',
+                'src/server',
+                'src/vite'
+            ];
+
+            for (const folder of libFolders) {
+                const src = path.join(templateDir, folder);
+                const dest = path.join(targetDir, folder);
+                if (fs.existsSync(src)) {
+                    await fs.copy(src, dest, { overwrite: true });
+                }
+            }
+
+            // 3. Copy individual essential files
+            const essentialFiles = [
+                'src/index.css',
+                'src/index.ts',
+                'src/server.ts'
+            ];
+
+            for (const file of essentialFiles) {
+                const src = path.join(templateDir, file);
+                const dest = path.join(targetDir, file);
+                if (fs.existsSync(src)) {
+                    await fs.copy(src, dest, { overwrite: true });
+                }
+            }
+
+            // 4. For new projects or if missing, copy configuration
+            const isExistingProject = fs.existsSync(path.join(targetDir, 'package.json'));
+            
+            if (isNewDir || !isExistingProject) {
+                const configFiles = [
+                    'package.json',
+                    'tsconfig.json',
+                    'tsconfig.app.json',
+                    'tsconfig.node.json',
+                    'vite.config.ts',
+                    'drizzle.config.ts',
+                    'eslint.config.js',
+                    'index.html',
+                    '.gitignore'
+                ];
+
+                for (const file of configFiles) {
+                    const src = path.join(templateDir, file);
+                    const dest = path.join(targetDir, file);
+                    if (fs.existsSync(src) && (!isExistingProject || !fs.existsSync(dest))) {
+                        await fs.copy(src, dest);
+                    }
+                }
+
+                // Copy basic App/main if they don't exist
+                const appFiles = ['src/App.tsx', 'src/main.tsx'];
+                for (const file of appFiles) {
+                    const src = path.join(templateDir, file);
+                    const dest = path.join(targetDir, file);
+                    if (fs.existsSync(src) && !fs.existsSync(dest)) {
+                        await fs.copy(src, dest);
+                    }
+                }
+                
+                // Update package.json name if it was newly created
+                if (isNewDir) {
+                    const pkgPath = path.join(targetDir, 'package.json');
+                    if (fs.existsSync(pkgPath)) {
+                        const pkg = await fs.readJson(pkgPath);
+                        pkg.name = name || path.basename(targetDir);
+                        pkg.version = "0.1.0";
+                        // Remove CLI bin from the initialized project
+                        if (pkg.bin) delete pkg.bin;
+                        await fs.writeJson(pkgPath, pkg, { spaces: 2 });
+                    }
+                }
+            }
+
+            console.log(pc.green(`\nSuccess! ${isNewDir ? 'Project created' : 'Structure updated'} successfully.`));
+            if (isNewDir) {
+                console.log(pc.yellow(`Next steps:\n  cd ${name}\n  npm install\n  npm run dev`));
+            } else {
+                console.log(pc.yellow(`Folders created and core files synced with dabi-lib.`));
+            }
         } catch (err) {
-            console.error(pc.red('Error creating project:'), err);
+            console.error(pc.red('Error during initialization:'), err);
         }
     });
 
