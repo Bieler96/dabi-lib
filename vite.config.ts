@@ -13,8 +13,16 @@ export default defineConfig({
 		apiRoutes(),
 		dts({
 			include: ['src'],
-			exclude: ['src/App.tsx', 'src/main.tsx', 'src/server.ts'],
-			insertTypesEntry: true
+			exclude: [
+				'src/App.tsx',
+				'src/main.tsx',
+				'src/server.ts',
+				'src/api/**',
+				'src/screens/**',
+				'src/db/schema.ts'
+			],
+			insertTypesEntry: true,
+			tsconfigPath: './tsconfig.app.json'
 		})
 	],
 	build: {

@@ -26,6 +26,8 @@ export * from './components/TagInput';
 export * from './components/Textarea';
 export * from './components/Toaster';
 export * from './components/Tooltip';
+export * from './components/command-menu/CommandMenu';
+export * from './components/command-menu/CommandMenuItem';
 
 // Core
 export * from './core/Router';
