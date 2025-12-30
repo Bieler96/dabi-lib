@@ -1,12 +1,16 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { Card } from "../components/Card";
+import { Sheet, type SheetSide } from "./Sheet";
 
-type DestinationType = "screen" | "dialog" | "bottomSheet";
+type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet";
 
 export interface RouteConfig {
 	path: string;
 	component: React.ComponentType<any>;
 	type: DestinationType;
+	side?: SheetSide;
+	title?: string;
+	description?: string;
 }
 
 interface NavEntry {
@@ -44,6 +48,17 @@ export class RouteBuilder {
 
 	bottomSheet(path: string, component: React.ComponentType<any>) {
 		this.routes[path] = { path, component, type: 'bottomSheet' };
+	}
+
+	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string }) {
+		this.routes[path] = {
+			path,
+			component,
+			type: 'sheet',
+			side: options?.side || 'right',
+			title: options?.title,
+			description: options?.description
+		};
 	}
 }
 
@@ -123,7 +138,6 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
 				{visibleEntries.map((entry, index) => {
 					const Component = entry.config.component;
-					const isTopParams = index === visibleEntries.length - 1;
 
 					// Wrapper basierend auf Typ
 					if (entry.config.type === 'screen') {
@@ -187,6 +201,21 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 									<Component {...entry.params} />
 								</div>
 							</div>
+						);
+					}
+
+					if (entry.config.type === 'sheet') {
+						return (
+							<Sheet
+								key={entry.id}
+								isOpen={!entry.isExiting}
+								onClose={popBackStack}
+								side={entry.config.side}
+								title={entry.params?.title || entry.config.title}
+								description={entry.params?.description || entry.config.description}
+							>
+								<Component {...entry.params} />
+							</Sheet>
 						);
 					}
 					return null;

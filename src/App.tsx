@@ -64,10 +64,34 @@ const DetailsScreen = ({ id }: { id: number }) => {
 				<Button onClick={() => nav.navigate('options-sheet')}>
 					Open Bottom Sheet (Router)
 				</Button>
+				<Button onClick={() => nav.navigate('settings-sheet')}>
+					Open Right Sheet (Router)
+				</Button>
 				<Button variant="ghost" onClick={() => nav.popBackStack()}>
 					Back
 				</Button>
 			</div>
+		</div>
+	);
+};
+
+const SettingsPage = () => {
+	const nav = useNavigation();
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="space-y-4">
+				<div className="flex items-center justify-between p-3 rounded-lg bg-surface-variant/50">
+					<span>Dark Mode</span>
+					<div className="w-10 h-6 bg-primary rounded-full" />
+				</div>
+				<div className="flex items-center justify-between p-3 rounded-lg bg-surface-variant/50">
+					<span>Notifications</span>
+					<div className="w-10 h-6 bg-outline-variant rounded-full" />
+				</div>
+			</div>
+			<Button variant="filled" className="mt-4" onClick={() => nav.popBackStack()}>
+				Save Changes
+			</Button>
 		</div>
 	);
 };
@@ -111,6 +135,11 @@ export default function App() {
 
 				nav.dialog('confirm-dialog', ConfirmDialog);
 				nav.bottomSheet('options-sheet', OptionsSheet);
+				nav.sheet('settings-sheet', SettingsPage, {
+					side: 'right',
+					title: 'Settings',
+					description: 'Manage your application preferences'
+				});
 			}}
 		/>
 	);
