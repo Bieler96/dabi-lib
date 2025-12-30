@@ -39,6 +39,22 @@ export function Sheet({
         }
     }, [isOpen, side]);
 
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && isOpen) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener("keydown", handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+
     const handleAnimationEnd = (e: React.AnimationEvent) => {
         // We close the portal only when the sheet's out-animation finishes.
         // The animation names from CSS are sheetOutLeft, sheetOutRight, etc.

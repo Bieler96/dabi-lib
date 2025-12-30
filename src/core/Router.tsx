@@ -13,6 +13,7 @@ export interface RouteConfig {
 	side?: SheetSide;
 	title?: string;
 	description?: string;
+	className?: string;
 	listOptions?: {
 		columns: ColumnDef<any>[];
 		data: any[];
@@ -56,15 +57,17 @@ export class RouteBuilder {
 		this.routes[path] = { path, component, type: 'bottomSheet' };
 	}
 
-	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string }) {
+	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string; className?: string }) {
 		this.routes[path] = {
 			path,
 			component,
 			type: 'sheet',
 			side: options?.side || 'right',
 			title: options?.title,
-			description: options?.description
-		};
+			description: options?.description,
+			className: options?.className,
+		} as any; // Cast to any because RouteConfig interface needs update too, but let's update interface first in another block or do it all here if possible. 
+		// Actually I should update the interface RouteConfig first.
 	}
 
 	list<T>(path: string, options: { title: string; description?: string; columns: ColumnDef<T>[]; data: T[] }) {
@@ -370,7 +373,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 								side={entry.config.side}
 								title={entry.params?.title || entry.config.title}
 								description={entry.params?.description || entry.config.description}
-								className={index > 0 ? `z-[${index * 10 + 50}]` : undefined}
+								className={index > 0 ? `z-[${index * 10 + 50}] ${entry.config.className || ''}` : entry.config.className}
 							>
 								<Component {...entry.params} />
 							</Sheet>

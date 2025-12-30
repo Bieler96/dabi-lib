@@ -4,6 +4,7 @@ import { NavHost, useNavigation } from "./core/Router";
 import { Sheet } from "./components/Sheet";
 import { DataTableDemo, UserDetailsSheet, EditProfileSheet, BlockUserDialog } from "./screens/DataTableDemo";
 import { users, userColumns } from "./screens/UserList";
+import { JiraBoard, JiraTaskDetails } from "./screens/JiraClone";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -16,6 +17,7 @@ const HomeScreen = () => {
 				<Button variant="outlined" onClick={() => nav.navigate('sheet-demo')}>Go to Sheet Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('datatable-demo')}>Go to DataTable Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('user-list')}>Go to User List (Router Type)</Button>
+				<Button variant="filled" onClick={() => nav.navigate('jira-board')}>Go to Jira Clone</Button>
 			</div>
 		</div>
 	);
@@ -161,6 +163,18 @@ export default function App() {
 					columns: userColumns,
 					data: users
 				});
+				nav.screen('jira-board', JiraBoard);
+				nav.sheet('jira-task-details', JiraTaskDetails, {
+					side: 'right',
+					title: ' ', // Empty title to let the component handle it or looks better without standard header duplications
+					className: '!max-w-2xl'
+				});
+				// Override sheet width for jira task details
+				// Note: Currently RouteBuilder.sheet doesn't accept className directly for the Sheet component in its third arg options.
+				// However, looking at Router.tsx:
+				// line 373: className={index > 0 ? `z-[${index * 10 + 50}]` : undefined}
+				// It doesn't seem to pass a custom className from config to the Sheet component.
+				// Wait, I should check Router.tsx to see if I can pass className.
 				nav.dialog('block-user', BlockUserDialog);
 			}}
 		/>
