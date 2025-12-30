@@ -1,3 +1,4 @@
+import { TestScreen } from "./screens/TestScreen";
 import { useState } from "react";
 import { Button } from "./components/Button";
 import { NavHost, useNavigation } from "./core/Router";
@@ -8,6 +9,7 @@ import { JiraBoard, JiraTaskDetails } from "./screens/JiraClone";
 import { ButtonGroup, ButtonGroupSeparator } from "./components/ButtonGroup";
 import { GuardDemoScreen, ProtectedPage, DirtyPage, authGuard, confirmExitGuard } from "./screens/GuardDemo";
 import { UserManagement } from "./screens/UserManagement";
+import { Settings } from "./screens/Settings";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -145,6 +147,9 @@ export default function App() {
 		<NavHost
 			startDestination="home"
 			builder={(nav) => {
+				nav.screen('settings', Settings);
+				nav.screen('testscreen', TestScreen);
+
 				nav.screen('home', HomeScreen);
 				nav.screen('sheet-demo', SheetDemo);
 				nav.screen('details', DetailsScreen);
