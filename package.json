@@ -18,6 +18,11 @@
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs"
 		},
+		"./vite": {
+			"types": "./dist/vite/index.d.ts",
+			"import": "./dist/vite.js",
+			"require": "./dist/vite.cjs"
+		},
 		"./style.css": "./dist/index.css"
 	},
 	"files": [

@@ -29,9 +29,10 @@ export default defineConfig({
 	],
 	build: {
 		lib: {
-			entry: resolve(__dirname, 'src/index.ts'),
-			name: 'DabiLib',
-			fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
+			entry: {
+				index: resolve(__dirname, 'src/index.ts'),
+				vite: resolve(__dirname, 'src/vite/index.ts')
+			},
 			formats: ['es', 'cjs']
 		},
 		rollupOptions: {
@@ -42,7 +43,13 @@ export default defineConfig({
 				'framer-motion',
 				'clsx',
 				'tailwind-merge',
-				'class-variance-authority'
+				'class-variance-authority',
+				'vite',
+				'hono',
+				'glob',
+				'node:path',
+				'node:fs',
+				'@hono/node-server'
 			],
 			output: {
 				globals: {
