@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-import { apiRoutes } from './vite-plugins/api-routes'
+import { apiRoutes } from './src/vite/index'
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [

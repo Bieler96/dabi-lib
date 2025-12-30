@@ -5,21 +5,26 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { getRequestListener } from '@hono/node-server';
 
-export function apiRoutes(): Plugin {
+export interface ApiRoutesOptions {
+    apiDir?: string;
+    routePrefix?: string;
+}
+
+export function apiRoutes(options: ApiRoutesOptions = {}): Plugin {
+    const apiDirRelative = options.apiDir || 'src/api';
+    const prefix = options.routePrefix || '/api';
+
     return {
         name: 'vite-plugin-dabi-api',
         configureServer(server) {
             server.middlewares.use(async (req, res, next) => {
-                if (!req.url?.startsWith('/api')) {
+                if (!req.url?.startsWith(prefix)) {
                     return next();
                 }
 
                 const app = new Hono();
+                const apiDir = path.resolve(process.cwd(), apiDirRelative);
 
-                // Fix for Hono to work with simple paths if needed, but we mount at / usually.
-                // Since we are creating a fresh app, we can just register routes matching the full URL.
-
-                const apiDir = path.resolve(process.cwd(), 'src/api');
                 if (fs.existsSync(apiDir)) {
                     const files = await glob('**/*.ts', { cwd: apiDir });
 
@@ -30,23 +35,27 @@ export function apiRoutes(): Plugin {
                         // Route mapping logic
                         // index -> /
                         // [id] -> :id
-                        // [...slug] -> * (catch all - optional)
 
-                        let routePath = '/api/' + relativePath
+                        let routePath = prefix + '/' + relativePath
                             .replace(/index$/, '')
                             .replace(/\[(.*?)\]/g, ':$1');
 
                         // Normalize trailing slashes
-                        if (routePath.endsWith('/') && routePath !== '/api/') {
+                        // If path is exactly /api/ don't strip it if it maps to index
+                        // But usually /api/index -> /api/
+
+                        if (routePath.endsWith('/') && routePath !== prefix && routePath !== prefix + '/') {
                             routePath = routePath.slice(0, -1);
                         }
-                        // If it was just index
-                        if (routePath === '/api/') routePath = '/api';
+
+                        // Double slash fix if prefix ends with / or relative starts with /
+                        routePath = routePath.replace('//', '/');
+
+                        if (routePath === prefix + '/') routePath = prefix;
+
 
                         try {
-                            // Use ssrLoadModule to compile TS on the fly and handle HMR
                             const mod = await server.ssrLoadModule(filePath);
-
                             const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'] as const;
 
                             methods.forEach(method => {
@@ -63,7 +72,6 @@ export function apiRoutes(): Plugin {
                     }
                 }
 
-                // Handle the request with Hono
                 const handler = getRequestListener(app.fetch);
                 handler(req, res);
             });
