@@ -1,233 +1,235 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-	--color-surface: #fcfaec;
-	/*surface container high*/
-	--color-surface-variant: #eae8dc;
-	--color-on-surface: #1c1c14;
-	--color-on-surface-variant: #47483b;
-	--color-outline: #78786a;
-	--color-outline-variant: #c8c7b7;
+@layer dabi {
+	@theme {
+		--color-surface: #fcfaec;
+		/*surface container high*/
+		--color-surface-variant: #eae8dc;
+		--color-on-surface: #1c1c14;
+		--color-on-surface-variant: #47483b;
+		--color-outline: #78786a;
+		--color-outline-variant: #c8c7b7;
 
-	--color-primary: #5c631d;
-	--color-primary-dark: #5c631d;
-	--color-primary-container: #e0e994;
-	--color-on-primary: #ffffff;
+		--color-primary: #5c631d;
+		--color-primary-dark: #5c631d;
+		--color-primary-container: #e0e994;
+		--color-on-primary: #ffffff;
 
-	--color-hover: rgb(224, 233, 148, 0.3);
+		--color-hover: rgb(224, 233, 148, 0.3);
 
-	--color-info: #2196f3;
-	--color-success: #4caf50;
-	--color-warning: #ff9800;
-	--color-error: #f44336;
+		--color-info: #2196f3;
+		--color-success: #4caf50;
+		--color-warning: #ff9800;
+		--color-error: #f44336;
 
-	--radius-lg: 1rem;
+		--radius-lg: 1rem;
 
-	--duration: 600ms;
-	--spring: cubic-bezier(0, 1.56, 0.64, 1.0);
+		--duration: 600ms;
+		--spring: cubic-bezier(0, 1.56, 0.64, 1.0);
 
-	--animate-dialog-in: dialogIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-dialog-out: dialogOut 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
-	--animate-overlay-in: overlayIn 0.3s ease-out forwards;
-	--animate-overlay-out: overlayOut 0.35s ease-in forwards;
+		--animate-dialog-in: dialogIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-dialog-out: dialogOut 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+		--animate-overlay-in: overlayIn 0.3s ease-out forwards;
+		--animate-overlay-out: overlayOut 0.35s ease-in forwards;
 
-	--animate-sheet-in-left: sheetInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-out-left: sheetOutLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-in-right: sheetInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-out-right: sheetOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-in-top: sheetInTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-out-top: sheetOutTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-in-bottom: sheetInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-sheet-out-bottom: sheetOutBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-in-left: sheetInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-out-left: sheetOutLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-in-right: sheetInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-out-right: sheetOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-in-top: sheetInTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-out-top: sheetOutTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-in-bottom: sheetInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-sheet-out-bottom: sheetOutBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
-	--animate-page-in: pageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-	--animate-page-out: pageOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-page-in: pageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		--animate-page-out: pageOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
-	@keyframes sheetInLeft {
-		from {
-			transform: translateX(-100%);
+		@keyframes sheetInLeft {
+			from {
+				transform: translateX(-100%);
+			}
+
+			to {
+				transform: translateX(0);
+			}
 		}
 
-		to {
-			transform: translateX(0);
+		@keyframes sheetOutLeft {
+			from {
+				transform: translateX(0);
+			}
+
+			to {
+				transform: translateX(-100%);
+			}
+		}
+
+		@keyframes sheetInRight {
+			from {
+				transform: translateX(100%);
+			}
+
+			to {
+				transform: translateX(0);
+			}
+		}
+
+		@keyframes sheetOutRight {
+			from {
+				transform: translateX(0);
+			}
+
+			to {
+				transform: translateX(100%);
+			}
+		}
+
+		@keyframes sheetInTop {
+			from {
+				transform: translateY(-100%);
+			}
+
+			to {
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes sheetOutTop {
+			from {
+				transform: translateY(0);
+			}
+
+			to {
+				transform: translateY(-100%);
+			}
+		}
+
+		@keyframes sheetInBottom {
+			from {
+				transform: translateY(100%);
+			}
+
+			to {
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes sheetOutBottom {
+			from {
+				transform: translateY(0);
+			}
+
+			to {
+				transform: translateY(100%);
+			}
+		}
+
+		@keyframes pageIn {
+			from {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes pageOut {
+			from {
+				transform: translateX(0);
+				opacity: 1;
+			}
+
+			to {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+		}
+
+		@keyframes dialogIn {
+			from {
+				opacity: 0;
+				transform: translateY(100px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes dialogOut {
+			from {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			to {
+				opacity: 0;
+				transform: translateY(100px);
+			}
+		}
+
+		@keyframes overlayIn {
+			from {
+				opacity: 0;
+			}
+
+			to {
+				opacity: 1;
+			}
+		}
+
+		@keyframes overlayOut {
+			from {
+				opacity: 1;
+			}
+
+			to {
+				opacity: 0;
+			}
 		}
 	}
 
-	@keyframes sheetOutLeft {
-		from {
-			transform: translateX(0);
-		}
+	.dark {
+		--color-surface: #13140d;
+		--color-surface-variant: #2a2a22;
+		--color-on-surface: #e5e3d6;
+		--color-on-surface-variant: #c8c7b7;
+		--color-outline: #929282;
+		--color-outline-variant: #47483b;
+		--color-primary: #c4cd7b;
+		--color-primary-dark: #a3b437;
+		--color-primary-container: #444b04;
+		--color-on-primary: #2e3300;
+		--color-hover: rgba(68, 75, 4, 0.3);
 
-		to {
-			transform: translateX(-100%);
-		}
+		--color-info: #2196f3;
+		--color-success: #4caf50;
+		--color-warning: #ff9800;
+		--color-error: #f44336;
 	}
 
-	@keyframes sheetInRight {
-		from {
-			transform: translateX(100%);
-		}
-
-		to {
-			transform: translateX(0);
-		}
+	body {
+		@apply bg-surface text-on-surface;
 	}
 
-	@keyframes sheetOutRight {
-		from {
-			transform: translateX(0);
-		}
-
-		to {
-			transform: translateX(100%);
-		}
+	.shrink-hover {
+		@apply transition-transform duration-150 hover:scale-95;
 	}
 
-	@keyframes sheetInTop {
-		from {
-			transform: translateY(-100%);
-		}
-
-		to {
-			transform: translateY(0);
-		}
+	.shrink-active {
+		@apply transition-transform duration-150 active:scale-90;
 	}
 
-	@keyframes sheetOutTop {
-		from {
-			transform: translateY(0);
-		}
-
-		to {
-			transform: translateY(-100%);
-		}
+	.grow-hover {
+		@apply transition-transform duration-150 hover:scale-105;
 	}
 
-	@keyframes sheetInBottom {
-		from {
-			transform: translateY(100%);
-		}
-
-		to {
-			transform: translateY(0);
-		}
+	.grow-active {
+		@apply transition-transform duration-150 active:scale-110;
 	}
-
-	@keyframes sheetOutBottom {
-		from {
-			transform: translateY(0);
-		}
-
-		to {
-			transform: translateY(100%);
-		}
-	}
-
-	@keyframes pageIn {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	@keyframes pageOut {
-		from {
-			transform: translateX(0);
-			opacity: 1;
-		}
-
-		to {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-	}
-
-	@keyframes dialogIn {
-		from {
-			opacity: 0;
-			transform: translateY(100px);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	@keyframes dialogOut {
-		from {
-			opacity: 1;
-			transform: translateY(0);
-		}
-
-		to {
-			opacity: 0;
-			transform: translateY(100px);
-		}
-	}
-
-	@keyframes overlayIn {
-		from {
-			opacity: 0;
-		}
-
-		to {
-			opacity: 1;
-		}
-	}
-
-	@keyframes overlayOut {
-		from {
-			opacity: 1;
-		}
-
-		to {
-			opacity: 0;
-		}
-	}
-}
-
-.dark {
-	--color-surface: #13140d;
-	--color-surface-variant: #2a2a22;
-	--color-on-surface: #e5e3d6;
-	--color-on-surface-variant: #c8c7b7;
-	--color-outline: #929282;
-	--color-outline-variant: #47483b;
-	--color-primary: #c4cd7b;
-	--color-primary-dark: #a3b437;
-	--color-primary-container: #444b04;
-	--color-on-primary: #2e3300;
-	--color-hover: rgba(68, 75, 4, 0.3);
-
-	--color-info: #2196f3;
-	--color-success: #4caf50;
-	--color-warning: #ff9800;
-	--color-error: #f44336;
-}
-
-body {
-	@apply bg-surface text-on-surface;
-}
-
-.shrink-hover {
-	@apply transition-transform duration-150 hover:scale-95;
-}
-
-.shrink-active {
-	@apply transition-transform duration-150 active:scale-90;
-}
-
-.grow-hover {
-	@apply transition-transform duration-150 hover:scale-105;
-}
-
-.grow-active {
-	@apply transition-transform duration-150 active:scale-110;
 }
