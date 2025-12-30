@@ -3,6 +3,7 @@ import { Button } from "./components/Button";
 import { NavHost, useNavigation } from "./core/Router";
 import { Sheet } from "./components/Sheet";
 import { DataTableDemo, UserDetailsSheet, EditProfileSheet, BlockUserDialog } from "./screens/DataTableDemo";
+import { users, userColumns } from "./screens/UserList";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -14,6 +15,7 @@ const HomeScreen = () => {
 				<Button variant="filled" onClick={() => nav.navigate('details', { id: 42 })}>Go to Router Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('sheet-demo')}>Go to Sheet Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('datatable-demo')}>Go to DataTable Demo</Button>
+				<Button variant="outlined" onClick={() => nav.navigate('user-list')}>Go to User List (Router Type)</Button>
 			</div>
 		</div>
 	);
@@ -152,6 +154,12 @@ export default function App() {
 					side: 'right',
 					title: 'Profil bearbeiten',
 					description: 'Aktualisiere die Benutzerinformationen'
+				});
+				nav.list('user-list', {
+					title: "Users",
+					description: "List of all registered users managed via Router 'list' type.",
+					columns: userColumns,
+					data: users
 				});
 				nav.dialog('block-user', BlockUserDialog);
 			}}

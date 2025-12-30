@@ -1,17 +1,22 @@
 import { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Card } from "../components/Card";
+import { DataTable, type ColumnDef } from "../components/DataTable";
 import { Sheet, type SheetSide } from "../components/Sheet";
 
-type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet";
+type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet" | "list";
 
 export interface RouteConfig {
 	path: string;
-	component: React.ComponentType<any>;
+	component?: React.ComponentType<any>;
 	type: DestinationType;
 	side?: SheetSide;
 	title?: string;
 	description?: string;
+	listOptions?: {
+		columns: ColumnDef<any>[];
+		data: any[];
+	};
 }
 
 interface NavEntry {
@@ -59,6 +64,19 @@ export class RouteBuilder {
 			side: options?.side || 'right',
 			title: options?.title,
 			description: options?.description
+		};
+	}
+
+	list<T>(path: string, options: { title: string; description?: string; columns: ColumnDef<T>[]; data: T[] }) {
+		this.routes[path] = {
+			path,
+			type: 'list',
+			title: options.title,
+			description: options.description,
+			listOptions: {
+				columns: options.columns,
+				data: options.data
+			}
 		};
 	}
 }
@@ -227,6 +245,27 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'clip' }}>
 				{visibleEntries.map((entry, index) => {
 					const Component = entry.config.component;
+
+					if (entry.config.type === 'list' && entry.config.listOptions) {
+						return (
+							<div key={entry.id} className="screen-wrapper" style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}>
+								<div className="p-8 max-w-7xl mx-auto space-y-6">
+									<div>
+										<h1 className="text-3xl font-bold text-on-surface">{entry.config.title}</h1>
+										{entry.config.description && (
+											<p className="mt-2 text-on-surface-variant">{entry.config.description}</p>
+										)}
+									</div>
+									<DataTable
+										columns={entry.config.listOptions.columns}
+										data={entry.config.listOptions.data}
+									/>
+								</div>
+							</div>
+						);
+					}
+
+					if (!Component) return null;
 
 					if (entry.config.type === 'screen') {
 						return (
