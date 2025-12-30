@@ -8,14 +8,20 @@
 		"build": "tsc -b && vite build",
 		"start": "tsx src/server.ts",
 		"lint": "eslint .",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@floating-ui/react": "^0.27.14",
 		"@hono/node-server": "^1.19.7",
 		"@tailwindcss/vite": "^4.1.18",
+		"better-sqlite3": "^12.5.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"drizzle-orm": "^0.45.1",
 		"glob": "^13.0.0",
 		"hono": "^4.11.3",
 		"lucide-react": "^0.525.0",

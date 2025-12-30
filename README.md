@@ -1,73 +1,124 @@
-# React + TypeScript + Vite
+# dabi-lib
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+`dabi-lib` ist eine meinungsstarke Fullstack-Library für React-Anwendungen, die eine nahtlose Integration von Frontend, Backend und Datenbank bietet. Sie ist darauf ausgelegt, schnell moderne Webanwendungen zu entwickeln.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: React 19, Vite, TailwindCSS (v4), Lucide Icons.
+- **Backend**: API Routes integriert via `Hono` (Server-Side).
+- **Datenbank**: SQLite via `drizzle-orm` und `better-sqlite3`.
+- **Router**: Eingebauter datei-basierter API-Router und client-seitiger Router mit Guards.
+- **UI Komponenten**: Fertige Komponenten wie DataTables, Sheets, Cards, etc.
 
-## React Compiler
+## Installation & Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Abhängigkeiten installieren:**
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. **Datenbank initialisieren:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Erstellt die lokale SQLite-Datenbank (`sqlite.db`) basierend auf dem Schema.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run db:push
 ```
+
+3. **Entwicklungsserver starten:**
+
+Startet das Frontend und die API-Endpunkte gleichzeitig.
+
+```bash
+npm run dev
+```
+
+## Datenbank Nutzung (Drizzle & SQLite)
+
+Die Library nutzt [Drizzle ORM](https://orm.drizzle.team/) mit SQLite.
+
+### Schema definieren
+
+Erstelle oder bearbeite Tabellen in `src/db/schema.ts`:
+
+```typescript
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+});
+```
+
+### Datenbank Updates
+
+Wenn du das Schema änderst, synchronisiere die Datenbank:
+
+```bash
+npm run db:push
+```
+
+Mit Drizzle Studio kannst du die Daten visuell verwalten:
+
+```bash
+npm run db:studio
+```
+
+### Datenbank Abfragen
+
+Importiere `db` aus `src/db` um Queries auszuführen (nur in API Routes oder Server-Dateien verwenden!):
+
+```typescript
+import { db } from '../db';
+import { users } from '../db/schema';
+
+// Alle User laden
+const allUsers = await db.select().from(users).all();
+
+// User erstellen
+await db.insert(users).values({
+    name: "Max Mustermann",
+    email: "max@example.com"
+});
+```
+
+## API Routes
+
+API Routes werden automatisch aus dem Ordner `src/api` geladen. Die Dateistruktur definiert die URL.
+
+Beispiel: `src/api/users.ts` -> `/api/users`
+
+```typescript
+import type { Context } from 'hono';
+import { db } from '../db';
+import { users } from '../db/schema';
+
+export const GET = async (c: Context) => {
+    const data = await db.select().from(users).all();
+    return c.json(data);
+};
+
+export const POST = async (c: Context) => {
+    const body = await c.req.json();
+    // ... Logik
+    return c.json({ success: true });
+};
+```
+
+## Nutzung in anderen Projekten
+
+Diese Library ist darauf ausgelegt, portabel zu sein.
+
+- Setze `DATABASE_URL` als Umgebungsvariable, um den Pfad zur SQLite-Datenbank zu ändern.
+- API-Routen und UI-Komponenten können direkt importiert und genutzt werden.
+
+## Projektstruktur
+
+- `src/api`: Backend API Endpunkte.
+- `src/components`: Wiederverwendbare UI-Komponenten.
+- `src/core`: Kern-Logik wie Router.
+- `src/db`: Datenbank-Konfiguration und Schema.
+- `src/screens`: Seiten/Screens der App.

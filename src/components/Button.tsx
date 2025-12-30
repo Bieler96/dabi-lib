@@ -34,7 +34,7 @@ export function Button({
 
 	return (
 		<div className={clsx(base, variants[variant], className)}>
-			<button {...props} className={clsx(sizes[size], "w-full h-full cursor-pointer transition-all duration-150")}>
+			<button {...props} className={clsx(sizes[size], "w-full h-full cursor-pointer transition-all duration-150 flex flex-row items-center justify-center")}>
 				{children}
 			</button>
 		</div>
