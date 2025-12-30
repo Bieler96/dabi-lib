@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import clsx from "clsx";
 import { Search } from "lucide-react";
-import { Input } from "../input/Input";
+import { Input } from "../Input";
 import { CommandMenuItem } from "./CommandMenuItem";
 
 export interface CommandMenuItemType {
@@ -151,7 +151,7 @@ export function CommandMenu({
 							placeholder="Search..."
 							className="pl-9 w-full"
 							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
 						/>
 					</div>
 					<div className="p-4 pt-0 max-h-[400px] overflow-y-auto">

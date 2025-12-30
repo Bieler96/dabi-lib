@@ -1,11 +1,35 @@
 {
 	"name": "dabi-lib",
-	"private": true,
 	"version": "1.0.0",
+	"description": "A modern React component library and CLI for fast project generation.",
 	"bin": {
 		"dabi": "./bin/dabi.ts"
 	},
 	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./style.css": "./dist/dabi-lib.css"
+	},
+	"files": [
+		"dist",
+		"bin",
+		"src",
+		"public",
+		"index.html",
+		"vite.config.ts",
+		"tsconfig*.json",
+		"eslint.config.js",
+		"drizzle.config.ts",
+		"README.md",
+		"CLI_README.md"
+	],
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
@@ -47,7 +71,7 @@
 		"@eslint/js": "^9.39.1",
 		"@types/fs-extra": "^11.0.4",
 		"@types/inquirer": "^9.0.9",
-		"@types/node": "^24.10.1",
+		"@types/node": "^24.10.4",
 		"@types/react": "^19.2.5",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.1",
@@ -57,6 +81,7 @@
 		"globals": "^16.5.0",
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.46.4",
-		"vite": "^7.2.4"
+		"vite": "^7.2.4",
+		"vite-plugin-dts": "^4.5.4"
 	}
 }

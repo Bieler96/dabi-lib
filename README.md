@@ -108,12 +108,48 @@ export const POST = async (c: Context) => {
 };
 ```
 
-## Nutzung in anderen Projekten
+## Installation via NPM
 
-Diese Library ist darauf ausgelegt, portabel zu sein.
+Du kannst die Library direkt in dein Projekt einbinden:
 
-- Setze `DATABASE_URL` als Umgebungsvariable, um den Pfad zur SQLite-Datenbank zu ändern.
-- API-Routen und UI-Komponenten können direkt importiert und genutzt werden.
+```bash
+npm install dabi-lib
+```
+
+### Setup
+
+1. **CSS importieren**:
+   Importiere das CSS in deiner Haupteinstiegsdatei (z.B. `main.tsx`):
+   ```tsx
+   import 'dabi-lib/style.css';
+   ```
+
+2. **Tailwind Konfiguration**:
+   Da die Library Tailwind CSS nutzt, stelle sicher, dass dein Projekt Tailwind v4 unterstützt.
+
+### Komponenten nutzen
+
+```tsx
+import { Button, DataTable, Card } from 'dabi-lib';
+
+function App() {
+  return (
+    <Card>
+      <Button onClick={() => alert('Hello!')}>Klick mich</Button>
+    </Card>
+  );
+}
+```
+
+## Projekt-CLI
+
+`dabi-lib` kommt mit einem CLI-Tool, um Projekte schnell zu initialisieren oder Komponenten zu generieren.
+
+```bash
+npx dabi init mein-projekt
+cd mein-projekt
+npx dabi generate screen Dashboard
+```
 
 ## Projektstruktur
 
