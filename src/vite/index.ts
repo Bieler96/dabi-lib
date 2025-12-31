@@ -4,6 +4,8 @@ import { glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
 import { getRequestListener } from '@hono/node-server';
+import { getAuthMiddleware } from '../server/auth.js';
+
 
 export interface ApiRoutesOptions {
     apiDir?: string;
@@ -60,11 +62,56 @@ export function apiRoutes(options: ApiRoutesOptions = {}): Plugin {
 
                             methods.forEach(method => {
                                 if (mod[method]) {
-                                    app.on(method, routePath, async (c) => {
-                                        return mod[method](c);
-                                    });
+                                    const authConfig = mod.auth || mod.config?.auth;
+
+                                    // Use method-specific functions
+                                    if (authConfig) {
+                                        const authMiddleware = getAuthMiddleware(authConfig);
+                                        switch (method) {
+                                            case 'GET':
+                                                app.get(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'POST':
+                                                app.post(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'PUT':
+                                                app.put(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'DELETE':
+                                                app.delete(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'PATCH':
+                                                app.patch(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'OPTIONS':
+                                                app.options(routePath, authMiddleware, async (c: any) => mod[method](c));
+                                                break;
+                                        }
+                                    } else {
+                                        switch (method) {
+                                            case 'GET':
+                                                app.get(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'POST':
+                                                app.post(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'PUT':
+                                                app.put(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'DELETE':
+                                                app.delete(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'PATCH':
+                                                app.patch(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                            case 'OPTIONS':
+                                                app.options(routePath, async (c: any) => mod[method](c));
+                                                break;
+                                        }
+                                    }
                                 }
                             });
+
                         } catch (e) {
                             console.error(`Error loading API route ${file}:`, e);
                             return next(e);

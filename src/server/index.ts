@@ -4,6 +4,8 @@ import { Hono } from 'hono';
 import { glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
+import { getAuthMiddleware } from './auth.js';
+
 
 export interface ServerOptions {
     port?: number;
@@ -48,10 +50,57 @@ export async function createServer(options: ServerOptions = {}) {
                     const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'] as const;
                     methods.forEach(method => {
                         if (mod[method]) {
-                            app.on(method, routePath, (c) => mod[method](c));
-                            console.log(`  - Registered ${method}`);
+                            const authConfig = mod.auth || mod.config?.auth;
+
+                            // Use method-specific functions
+                            if (authConfig) {
+                                const authMiddleware = getAuthMiddleware(authConfig);
+                                switch (method) {
+                                    case 'GET':
+                                        app.get(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                    case 'POST':
+                                        app.post(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                    case 'PUT':
+                                        app.put(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                    case 'DELETE':
+                                        app.delete(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                    case 'PATCH':
+                                        app.patch(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                    case 'OPTIONS':
+                                        app.options(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        break;
+                                }
+                            } else {
+                                switch (method) {
+                                    case 'GET':
+                                        app.get(routePath, (c: any) => mod[method](c));
+                                        break;
+                                    case 'POST':
+                                        app.post(routePath, (c: any) => mod[method](c));
+                                        break;
+                                    case 'PUT':
+                                        app.put(routePath, (c: any) => mod[method](c));
+                                        break;
+                                    case 'DELETE':
+                                        app.delete(routePath, (c: any) => mod[method](c));
+                                        break;
+                                    case 'PATCH':
+                                        app.patch(routePath, (c: any) => mod[method](c));
+                                        break;
+                                    case 'OPTIONS':
+                                        app.options(routePath, (c: any) => mod[method](c));
+                                        break;
+                                }
+                            }
+                            console.log(`  - Registered ${method}${authConfig ? ' (protected)' : ''}`);
                         }
                     });
+
                 } catch (err) {
                     console.error(`Failed to load route ${file}:`, err);
                 }

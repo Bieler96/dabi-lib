@@ -10,6 +10,14 @@
 - **Router**: Eingebauter datei-basierter API-Router und client-seitiger Router mit Guards.
 - **UI Komponenten**: Fertige Komponenten wie DataTables, Sheets, Cards, etc.
 
+## Authentifizierung
+
+`dabi-lib` bietet flexible Authentifizierungsoptionen für Ihre API-Endpunkte. Dazu gehören:
+- **API-Key-basierte Authentifizierung**: Einfache und effektive Methode zur Absicherung von Endpunkten.
+- **JWT (JSON Web Token) Authentifizierung**: Robuste, standardbasierte Authentifizierung für zustandslose APIs.
+
+Weitere Details und Beispiele finden Sie in den Dateien `API_AUTH.md` und `JWT_EXAMPLE.md`.
+
 ## Installation & Setup
 
 1. **Abhängigkeiten installieren:**
