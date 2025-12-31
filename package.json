@@ -43,7 +43,7 @@
 	],
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc -b && vite build --config vite.config.ts && vite build --config vite.config.node.ts",
+		"build": "tsc -b && vite build --config vite.config.lib.ts && vite build --config vite.config.node.ts",
 		"start": "tsx src/server.ts",
 		"lint": "eslint .",
 		"preview": "vite preview",

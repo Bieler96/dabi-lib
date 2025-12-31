@@ -37,6 +37,7 @@ export default defineConfig(({ command }) => {
 		].filter(Boolean),
 
 		build: {
+			emptyOutDir: false,
             // Target Node.js for these modules
             target: 'node20', // Specify Node.js version
             outDir: 'dist', // Output to dist folder
