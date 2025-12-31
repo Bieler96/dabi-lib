@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { AuthConfig } from '../server/auth.js';
+import type { AuthConfig } from '../api.js';
 
 // Configure both Bearer and API Key authentication (OR logic)
 export const auth: AuthConfig = {

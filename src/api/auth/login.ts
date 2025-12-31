@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { generateJWT } from '../../server/auth.js';
+import { generateJWT } from '../../api.js';
 
 // This endpoint generates a JWT token for testing
 export const POST = async (c: Context) => {

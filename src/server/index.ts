@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
-import { getAuthMiddleware } from './auth.js';
+import { getAuthMiddleware } from '../api.js';
 
 
 export interface ServerOptions {

@@ -5,7 +5,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { getRequestListener } from '@hono/node-server';
 
-import { getAuthMiddleware } from '../server/auth.js';
+import { getAuthMiddleware } from '../api.js';
 
 
 export interface ApiRoutesOptions {

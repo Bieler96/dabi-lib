@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { AuthConfig } from '../server/auth.js';
+import type { AuthConfig } from '../api.js';
 
 // Configure authentication for this route
 export const auth: AuthConfig = {

@@ -29,7 +29,7 @@ export default defineConfig(({ command }) => {
             // For building, it will be skipped by `command !== 'serve'`
 			command === 'serve' && apiRoutes(),
 			dts({
-				include: ['src/vite', 'src/server'], // Include only vite and server for d.ts
+				include: ['src/vite', 'src/server', 'src/api.ts'], // Include only vite and server for d.ts
 				insertTypesEntry: true,
 				tsconfigPath: './tsconfig.app.json' // Assuming tsconfig.app.json is fine for this too
 			}),
@@ -43,7 +43,8 @@ export default defineConfig(({ command }) => {
 			lib: {
 				entry: {
 					vite: resolve(__dirname, 'src/vite/index.ts'),
-					server: resolve(__dirname, 'src/server/index.ts')
+					server: resolve(__dirname, 'src/server/index.ts'),
+					api: resolve(__dirname, 'src/api.ts')
 				},
 				formats: ['es', 'cjs'] as LibraryFormats[]
 			},

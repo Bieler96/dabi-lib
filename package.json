@@ -23,18 +23,21 @@
 			"import": "./dist/vite.js",
 			"require": "./dist/vite.cjs"
 		},
+		"./server": {
+			"types": "./dist/server/index.d.ts",
+			"import": "./dist/server.js",
+			"require": "./dist/server.cjs"
+		},
+		"./api": {
+			"types": "./dist/api.d.ts",
+			"import": "./dist/api.js",
+			"require": "./dist/api.cjs"
+		},
 		"./style.css": "./dist/index.css"
 	},
 	"files": [
 		"dist",
 		"bin",
-		"src",
-		"public",
-		"index.html",
-		"vite.config.ts",
-		"tsconfig*.json",
-		"eslint.config.js",
-		"drizzle.config.ts",
 		"README.md",
 		"CLI_README.md"
 	],
