@@ -4,60 +4,56 @@ import tailwindcss from '@tailwindcss/vite'
 import { libInjectCss } from 'vite-plugin-lib-inject-css'
 import dts from 'vite-plugin-dts'
 import { resolve } from 'path'
-import { apiRoutes } from './src/vite/index'
+import type { LibraryFormats } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-	plugins: [
-		react(),
-		tailwindcss(),
-		libInjectCss(),
-		apiRoutes(),
-		dts({
-			include: ['src'],
-			exclude: [
-				'src/App.tsx',
-				'src/main.tsx',
-				'src/server.ts',
-				'src/api/**',
-				'src/screens/**',
-				'src/db/schema.ts'
-			],
-			insertTypesEntry: true,
-			tsconfigPath: './tsconfig.app.json'
-		})
-	],
-	build: {
-		lib: {
-			entry: {
-				index: resolve(__dirname, 'src/index.ts'),
-				vite: resolve(__dirname, 'src/vite/index.ts')
+export default defineConfig(() => { // Removed `command` as it's not needed for client build
+	return {
+		plugins: [
+			react(),
+			tailwindcss(),
+			libInjectCss(),
+			dts({
+				include: ['src'],
+				exclude: [
+					'src/App.tsx',
+					'src/main.tsx',
+					'src/server/**', // Exclude all server code
+					'src/api/**', // Exclude all api code
+					'src/screens/**',
+					'src/db/**', // Exclude db code
+					'src/vite/**' // Exclude vite plugin code
+				],
+				insertTypesEntry: true,
+				tsconfigPath: './tsconfig.app.json'
+			})
+		].filter(Boolean),
+
+		build: {
+			lib: {
+				entry: {
+					index: resolve(__dirname, 'src/index.ts')
+				},
+				formats: ['es', 'cjs'] as LibraryFormats[]
 			},
-			formats: ['es', 'cjs']
-		},
-		rollupOptions: {
-			external: [
-				'react',
-				'react-dom',
-				'lucide-react',
-				'framer-motion',
-				'clsx',
-				'tailwind-merge',
-				'class-variance-authority',
-				'vite',
-				'hono',
-				'glob',
-				'node:path',
-				'node:fs',
-				'@hono/node-server'
-			],
-			output: {
-				globals: {
-					react: 'React',
-					'react-dom': 'ReactDOM',
-					'lucide-react': 'LucideReact'
+			rollupOptions: {
+				external: [
+					'react',
+					'react-dom',
+					'lucide-react',
+					'framer-motion',
+					'clsx',
+					'tailwind-merge',
+					'class-variance-authority'
+				],
+				output: {
+					globals: {
+						react: 'React',
+						'react-dom': 'ReactDOM',
+						'lucide-react': 'LucideReact'
+					}
 				}
 			}
 		}
-	}
-})
+	};
+});

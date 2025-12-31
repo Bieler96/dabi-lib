@@ -40,7 +40,3 @@ export * from './hooks/useToast';
 // Utils
 export * from './utils/cn';
 export * from './utils/datatable';
-
-// Server
-export * from './server/auth';
-export * from './server/index';

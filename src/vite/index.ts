@@ -4,6 +4,7 @@ import { glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
 import { getRequestListener } from '@hono/node-server';
+
 import { getAuthMiddleware } from '../server/auth.js';
 
 
