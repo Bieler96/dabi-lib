@@ -7,7 +7,9 @@ import { Sheet, type SheetSide } from "../components/Sheet";
 
 type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet" | "list";
 
-export type Guard = (params?: any) => boolean | Promise<boolean>;
+type ImperativeNavigate = (path: string, params?: any) => void;
+
+export type Guard = (params?: any, navigate?: ImperativeNavigate) => boolean | Promise<boolean>;
 
 export interface RouteConfig {
 	path: string;
@@ -156,6 +158,19 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		];
 	});
 
+	// Internal navigate function that bypasses guards to prevent infinite loops
+	const internalNavigate: ImperativeNavigate = (targetPath, targetParams) => {
+		const targetConfig = routeMap[targetPath];
+		if (!targetConfig) {
+			console.warn(`Internal navigate: Route ${targetPath} not found`);
+			return;
+		}
+		if (targetConfig.type === 'screen' || targetConfig.type === 'list') {
+			syncUrl(targetPath, targetParams);
+		}
+		setStack(prev => [...prev, { id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig }]);
+	};
+
 	useEffect(() => {
 		const handlePopState = async () => {
 			const path = getPathFromUrl(routeMap) || startDestination;
@@ -169,7 +184,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			if (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params)) {
 				if (currentEntry.config.canDeactivate) {
 					for (const guard of currentEntry.config.canDeactivate) {
-						const canDeactivate = await guard(currentEntry.params);
+						const canDeactivate = await guard(currentEntry.params, internalNavigate);
 						if (!canDeactivate) {
 							// If not allowed, push the state back to revert the browser's back navigation
 							syncUrl(currentEntry.path, currentEntry.params);
@@ -231,7 +246,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		if (config.canActivate) {
 			for (const guard of config.canActivate) {
-				const canActivate = await guard(params);
+				const canActivate = await guard(params, internalNavigate); // Pass internalNavigate
 				if (!canActivate) return;
 			}
 		}
@@ -248,7 +263,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		if (entryToPop.config.canDeactivate) {
 			for (const guard of entryToPop.config.canDeactivate) {
-				const canDeactivate = await guard(entryToPop.params);
+				const canDeactivate = await guard(entryToPop.params, internalNavigate); // Pass internalNavigate
 				if (!canDeactivate) return;
 			}
 		}
