@@ -1,6 +1,6 @@
 {
 	"name": "dabi-lib",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"description": "A modern React component library and CLI for fast project generation.",
 	"bin": {
 		"dabi": "./bin/dabi.ts"
