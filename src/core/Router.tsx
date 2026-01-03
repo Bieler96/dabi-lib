@@ -145,18 +145,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		}
 	}, []); // No external dependencies for syncUrl itself
 
-	const [stack, setStack] = useState<NavEntry[]>(() => {
-		const initialPath = getPathFromUrl(routeMap) || startDestination;
-		const initialParams = getParamsFromUrl();
-		return [
-			{
-				id: 'root',
-				path: initialPath,
-				params: initialParams,
-				config: routeMap[initialPath]
-			}
-		];
-	});
+	const [stack, setStack] = useState<NavEntry[]>([]);
 
 	// Internal navigate function that bypasses guards to prevent infinite loops
 	const internalNavigate: ImperativeNavigate = useCallback((targetPath, targetParams) => {
@@ -169,7 +158,38 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			syncUrl(targetPath, targetParams);
 		}
 		setStack(prev => [...prev, { id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig }]);
-	}, [routeMap, syncUrl, setStack]); // Add dependencies here
+	}, [routeMap, syncUrl]);
+
+	useEffect(() => {
+		const initialize = async () => {
+			const initialPath = getPathFromUrl(routeMap) || startDestination;
+			const initialParams = getParamsFromUrl();
+			const config = routeMap[initialPath];
+
+			if (config && config.canActivate) {
+				for (const guard of config.canActivate) {
+					const canActivate = await guard(initialParams, internalNavigate);
+					if (!canActivate) {
+						return; // Guard should have navigated away.
+					}
+				}
+			}
+
+			setStack([{
+				id: 'root',
+				path: initialPath,
+				params: initialParams,
+				config: config
+			}]);
+			if (!getPathFromUrl(routeMap)) {
+				syncUrl(initialPath, initialParams);
+			}
+		};
+
+		if (stack.length === 0) {
+			initialize();
+		}
+	}, [stack.length, routeMap, startDestination, internalNavigate, syncUrl]);
 
 	useEffect(() => {
 		const handlePopState = async () => {
@@ -181,7 +201,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			// Only check if we are actually popping/changing route.
 			// Comparing with new path isn't enough because we might be navigating forward/backward.
 			// However, if the path is DIFFERENT from current top, we are moving.
-			if (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params)) {
+			if (currentEntry && (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params))) {
 				if (currentEntry.config.canDeactivate) {
 					for (const guard of currentEntry.config.canDeactivate) {
 						const canDeactivate = await guard(currentEntry.params, internalNavigate);
@@ -190,6 +210,17 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 							syncUrl(currentEntry.path, currentEntry.params);
 							return;
 						}
+					}
+				}
+			}
+
+			// Check canActivate for the destination route
+			const config = routeMap[path];
+			if (config && config.canActivate) {
+				for (const guard of config.canActivate) {
+					const canActivate = await guard(params, internalNavigate);
+					if (!canActivate) {
+						return; // Guard should have navigated.
 					}
 				}
 			}
