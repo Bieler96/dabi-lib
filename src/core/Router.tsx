@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Card } from "../components/Card";
 import { DataTable, type ColumnDef } from "../components/DataTable";
@@ -129,7 +129,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		return result;
 	};
 
-	const syncUrl = (path: string, params?: any) => {
+	const syncUrl = useCallback((path: string, params?: any) => {
 		const url = new URL(window.location.href);
 		url.pathname = `/${path}`;
 		url.search = '';
@@ -143,7 +143,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		if (window.location.pathname + window.location.search !== url.pathname + url.search) {
 			window.history.pushState({ path, params }, '', url.toString());
 		}
-	};
+	}, []); // No external dependencies for syncUrl itself
 
 	const [stack, setStack] = useState<NavEntry[]>(() => {
 		const initialPath = getPathFromUrl(routeMap) || startDestination;
@@ -159,7 +159,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 	});
 
 	// Internal navigate function that bypasses guards to prevent infinite loops
-	const internalNavigate: ImperativeNavigate = (targetPath, targetParams) => {
+	const internalNavigate: ImperativeNavigate = useCallback((targetPath, targetParams) => {
 		const targetConfig = routeMap[targetPath];
 		if (!targetConfig) {
 			console.warn(`Internal navigate: Route ${targetPath} not found`);
@@ -169,7 +169,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			syncUrl(targetPath, targetParams);
 		}
 		setStack(prev => [...prev, { id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig }]);
-	};
+	}, [routeMap, syncUrl, setStack]); // Add dependencies here
 
 	useEffect(() => {
 		const handlePopState = async () => {
@@ -235,7 +235,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		window.addEventListener('popstate', handlePopState);
 		return () => window.removeEventListener('popstate', handlePopState);
-	}, [routeMap, startDestination, stack]);
+	}, [routeMap, startDestination, stack, internalNavigate, syncUrl]);
 
 	const navigate = async (path: string, params?: any) => {
 		const config = routeMap[path];
