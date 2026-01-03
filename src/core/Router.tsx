@@ -166,7 +166,12 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			const initialParams = getParamsFromUrl();
 			const config = routeMap[initialPath];
 
-			if (config && config.canActivate) {
+			if (!config) {
+				console.error(`Route config for path "${initialPath}" not found. Check NavHost builder.`);
+				return;
+			}
+
+			if (config.canActivate) {
 				for (const guard of config.canActivate) {
 					const canActivate = await guard(initialParams, internalNavigate);
 					if (!canActivate) {
@@ -195,43 +200,41 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		const handlePopState = async () => {
 			const path = getPathFromUrl(routeMap) || startDestination;
 			const params = getParamsFromUrl();
+			const config = routeMap[path];
 
-			// Check canDeactivate for the current top of the stack
+			if (!config) {
+				console.error(`Route config for path "${path}" not found during popstate.`);
+				return;
+			}
+
 			const currentEntry = stack[stack.length - 1];
-			// Only check if we are actually popping/changing route.
-			// Comparing with new path isn't enough because we might be navigating forward/backward.
-			// However, if the path is DIFFERENT from current top, we are moving.
 			if (currentEntry && (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params))) {
 				if (currentEntry.config.canDeactivate) {
 					for (const guard of currentEntry.config.canDeactivate) {
 						const canDeactivate = await guard(currentEntry.params, internalNavigate);
 						if (!canDeactivate) {
-							// If not allowed, push the state back to revert the browser's back navigation
 							syncUrl(currentEntry.path, currentEntry.params);
 							return;
 						}
 					}
 				}
 			}
-
-			// Check canActivate for the destination route
-			const config = routeMap[path];
-			if (config && config.canActivate) {
+			
+			if (config.canActivate) {
 				for (const guard of config.canActivate) {
 					const canActivate = await guard(params, internalNavigate);
 					if (!canActivate) {
-						return; // Guard should have navigated.
+						return;
 					}
 				}
 			}
 
 			setStack(prev => {
 				const last = prev[prev.length - 1];
-				if (last.path === path && JSON.stringify(last.params) === JSON.stringify(params)) {
+				if (last && last.path === path && JSON.stringify(last.params) === JSON.stringify(params)) {
 					return prev;
 				}
 
-				// existingIndex calculation
 				let existingIndex = -1;
 				for (let i = prev.length - 1; i >= 0; i--) {
 					if (prev[i].path === path && JSON.stringify(prev[i].params) === JSON.stringify(params)) {
@@ -259,7 +262,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 					id: Date.now().toString(),
 					path,
 					params,
-					config: routeMap[path]
+					config: config
 				}];
 			});
 		};
@@ -277,7 +280,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		if (config.canActivate) {
 			for (const guard of config.canActivate) {
-				const canActivate = await guard(params, internalNavigate); // Pass internalNavigate
+				const canActivate = await guard(params, internalNavigate);
 				if (!canActivate) return;
 			}
 		}
@@ -294,7 +297,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		if (entryToPop.config.canDeactivate) {
 			for (const guard of entryToPop.config.canDeactivate) {
-				const canDeactivate = await guard(entryToPop.params, internalNavigate); // Pass internalNavigate
+				const canDeactivate = await guard(entryToPop.params, internalNavigate);
 				if (!canDeactivate) return;
 			}
 		}
@@ -302,7 +305,6 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		if (entryToPop.config.type === 'screen' || entryToPop.config.type === 'list') {
 			window.history.back();
 		} else {
-			// Local pop for dialogs/sheets
 			setStack(prev => {
 				const next = [...prev];
 				const index = next.findIndex(e => e.id === entryToPop.id);
@@ -319,7 +321,9 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 	};
 
 	const visibleEntries = useMemo(() => {
-		// Find the index of the primary active screen (topmost non-exiting screen)
+		if (stack.length === 0) {
+			return [];
+		}
 		let primaryScreenIndex = 0;
 		for (let i = stack.length - 1; i >= 0; i--) {
 			if ((stack[i].config.type === 'screen' || stack[i].config.type === 'list') && !stack[i].isExiting) {
@@ -328,7 +332,6 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			}
 		}
 
-		// Find the secondary screen (immediately below primary) to keep visible for transition
 		let secondaryScreenIndex = -1;
 		for (let i = primaryScreenIndex - 1; i >= 0; i--) {
 			if (stack[i].config.type === 'screen' || stack[i].config.type === 'list') {
@@ -343,15 +346,16 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 	const getPageAnimation = (entry: NavEntry) => {
 		if (entry.isExiting) return "animate-page-out";
-		// Don't animate the root screen on initial load
-		if (entry.id === stack[0].id) return "";
+		if (stack.length === 0 || entry.id === stack[0].id) return "";
 		return "animate-page-in";
 	};
 
 	return (
-		<NavigationContext.Provider value={{ navigate, popBackStack, currentRoute: stack[stack.length - 1].path }}>
+		<NavigationContext.Provider value={{ navigate, popBackStack, currentRoute: stack.length > 0 ? stack[stack.length - 1].path : "" }}>
 			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'clip' }}>
 				{visibleEntries.map((entry, index) => {
+					if (!entry.config) return null; // Guard against undefined config
+
 					const Component = entry.config.component;
 
 					if (entry.config.type === 'list' && entry.config.listOptions) {
