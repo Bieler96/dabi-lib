@@ -4,7 +4,9 @@ import {
 	flip,
 	shift,
 	autoUpdate,
+	size,
 	type Placement,
+	FloatingPortal,
 } from "@floating-ui/react";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
@@ -38,7 +40,20 @@ export function Popover({
 
 	const { refs, floatingStyles, update } = useFloating({
 		placement,
-		middleware: [offset(8), flip(), shift()],
+		middleware: [
+			offset(8),
+			flip(),
+			shift(),
+			size({
+				apply({ rects, elements }) {
+					if (fullWidth) {
+						Object.assign(elements.floating.style, {
+							width: `${rects.reference.width}px`,
+						});
+					}
+				},
+			}),
+		],
 		whileElementsMounted: autoUpdate,
 		open,
 		onOpenChange: setOpen,
@@ -92,21 +107,29 @@ export function Popover({
 				{trigger}
 			</div>
 
-			<div
-				ref={refs.setFloating}
-				style={floatingStyles}
-				className={clsx(
-					"z-10 w-64 rounded-lg bg-surface border border-outline p-2 shadow-lg transition-all transform duration-200 ease-out",
-					open
-						? "opacity-100 scale-100 pointer-events-auto"
-						: "opacity-0 scale-95 pointer-events-none",
-					className
+			<FloatingPortal>
+				{open && (
+					<div
+						ref={refs.setFloating}
+						style={{ ...floatingStyles, zIndex: 100 }}
+						className="pointer-events-none"
+					>
+						<div
+							className={clsx(
+								"w-64 rounded-lg bg-surface border border-outline p-2 shadow-lg transition-all duration-200 ease-out transform-gpu origin-top-left",
+								open
+									? "opacity-100 scale-100 pointer-events-auto"
+									: "opacity-0 scale-95",
+								className
+							)}
+							onMouseEnter={onHover ? handleMouseEnter : undefined}
+							onMouseLeave={onHover ? handleMouseLeave : undefined}
+						>
+							{content}
+						</div>
+					</div>
 				)}
-				onMouseEnter={onHover ? handleMouseEnter : undefined}
-				onMouseLeave={onHover ? handleMouseLeave : undefined}
-			>
-				{content}
-			</div>
+			</FloatingPortal>
 		</div>
 	);
 }

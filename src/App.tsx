@@ -9,6 +9,7 @@ import { JiraBoard, JiraTaskDetails } from "./screens/JiraClone";
 import { ButtonGroup, ButtonGroupSeparator } from "./components/ButtonGroup";
 import { GuardDemoScreen, ProtectedPage, DirtyPage, authGuard, confirmExitGuard } from "./screens/GuardDemo";
 import { UserManagement } from "./screens/UserManagement";
+import { FilterDemo } from "./screens/FilterDemo";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -26,6 +27,7 @@ const HomeScreen = () => {
 					<Button variant="tonal" onClick={() => nav.navigate('jira-board')}>Go to Jira Clone</Button>
 				</ButtonGroup>
 				<Button variant="outlined" onClick={() => nav.navigate('guard-demo')}>Go to Guard Demo</Button>
+				<Button variant="tonal" onClick={() => nav.navigate('filter-demo')}>Filter Component Demo</Button>
 				<Button variant="filled" className="bg-tertiary text-on-tertiary" onClick={() => nav.navigate('user-management')}>
 					Manage Users (Fullstack)
 				</Button>
@@ -189,6 +191,7 @@ export default function App() {
 				nav.screen('dirty-page', DirtyPage, { canDeactivate: [confirmExitGuard] });
 
 				nav.screen('user-management', UserManagement);
+				nav.screen('filter-demo', FilterDemo);
 			}}
 		/>
 	);
