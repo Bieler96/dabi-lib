@@ -1,42 +1,22 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Card } from "../components/Card";
-import { DataTable, type ColumnDef } from "../components/DataTable";
-import { Sheet, type SheetSide } from "../components/Sheet";
-
-
-type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet" | "list";
-
-type ImperativeNavigate = (path: string, params?: any) => void;
-
-export type Guard = (params?: any, navigate?: ImperativeNavigate) => boolean | Promise<boolean>;
-
-export interface RouteConfig {
-	path: string;
-	component?: React.ComponentType<any>;
-	type: DestinationType;
-	side?: SheetSide;
-	title?: string;
-	description?: string;
-	className?: string;
-	listOptions?: {
-		columns: ColumnDef<any>[];
-		data: any[];
-	};
-	canActivate?: Guard[];
-	canDeactivate?: Guard[];
-}
+import { DataTable } from "../components/DataTable";
+import { Sheet } from "../components/Sheet";
+import { RouteBuilder, type RouteConfig, type ImperativeNavigate, type RouteParams } from "./RouteBuilder";
+export type { Guard } from "./RouteBuilder";
 
 interface NavEntry {
 	id: string;
 	path: string;
-	params?: any;
+	params?: RouteParams;
 	config: RouteConfig;
 	isExiting?: boolean;
 }
 
 interface NavContextType {
-	navigate: (path: string, params?: any) => void;
+	navigate: (path: string, params?: RouteParams) => void;
 	popBackStack: () => void;
 	currentRoute: string;
 }
@@ -48,51 +28,6 @@ export const useNavigation = () => {
 	if (!context) throw new Error("useNavigation must be used within a NavHost");
 	return context;
 };
-
-export class RouteBuilder {
-	routes: Record<string, RouteConfig> = {};
-
-	screen(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
-		this.routes[path] = { path, component, type: 'screen', ...options };
-	}
-
-	dialog(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
-		this.routes[path] = { path, component, type: 'dialog', ...options };
-	}
-
-	bottomSheet(path: string, component: React.ComponentType<any>, options?: { canActivate?: Guard[], canDeactivate?: Guard[] }) {
-		this.routes[path] = { path, component, type: 'bottomSheet', ...options };
-	}
-
-	sheet(path: string, component: React.ComponentType<any>, options?: { side?: SheetSide; title?: string; description?: string; className?: string, canActivate?: Guard[], canDeactivate?: Guard[] }) {
-		this.routes[path] = {
-			path,
-			component,
-			type: 'sheet',
-			side: options?.side || 'right',
-			title: options?.title,
-			description: options?.description,
-			className: options?.className,
-			canActivate: options?.canActivate,
-			canDeactivate: options?.canDeactivate
-		} as any;
-	}
-
-	list<T>(path: string, options: { title: string; description?: string; columns: ColumnDef<T>[]; data: T[], canActivate?: Guard[], canDeactivate?: Guard[] }) {
-		this.routes[path] = {
-			path,
-			type: 'list',
-			title: options.title,
-			description: options.description,
-			listOptions: {
-				columns: options.columns,
-				data: options.data
-			},
-			canActivate: options.canActivate,
-			canDeactivate: options.canDeactivate
-		};
-	}
-}
 
 interface NavHostProps {
 	startDestination: string;
@@ -114,7 +49,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 	const getParamsFromUrl = () => {
 		const params = new URLSearchParams(window.location.search);
-		const result: Record<string, any> = {};
+		const result: Record<string, unknown> = {};
 		params.forEach((value, key) => {
 			if (value && !isNaN(Number(value)) && !value.startsWith('0')) {
 				result[key] = Number(value);
@@ -129,7 +64,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		return result;
 	};
 
-	const syncUrl = useCallback((path: string, params?: any) => {
+		const syncUrl = useCallback((path: string, params?: RouteParams) => {
 		const url = new URL(window.location.href);
 		url.pathname = `/${path}`;
 		url.search = '';
@@ -271,7 +206,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		return () => window.removeEventListener('popstate', handlePopState);
 	}, [routeMap, startDestination, stack, internalNavigate, syncUrl]);
 
-	const navigate = async (path: string, params?: any) => {
+		const navigate = async (path: string, params?: RouteParams) => {
 		const config = routeMap[path];
 		if (!config) {
 			console.warn(`Route ${path} not found`);
@@ -453,17 +388,19 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 						);
 					}
 
-					if (entry.config.type === 'sheet') {
-						return (
-							<Sheet
-								key={entry.id}
-								isOpen={!entry.isExiting}
-								onClose={popBackStack}
-								side={entry.config.side}
-								title={entry.params?.title || entry.config.title}
-								description={entry.params?.description || entry.config.description}
-								className={index > 0 ? `z-[${index * 10 + 50}] ${entry.config.className || ''}` : entry.config.className}
-							>
+						if (entry.config.type === 'sheet') {
+							const title = typeof entry.params?.title === 'string' ? entry.params.title : undefined;
+							const description = typeof entry.params?.description === 'string' ? entry.params.description : undefined;
+							return (
+								<Sheet
+									key={entry.id}
+									isOpen={!entry.isExiting}
+									onClose={popBackStack}
+									side={entry.config.side}
+									title={title || entry.config.title}
+									description={description || entry.config.description}
+									className={index > 0 ? `z-[${index * 10 + 50}] ${entry.config.className || ''}` : entry.config.className}
+								>
 								<Component {...entry.params} />
 							</Sheet>
 						);

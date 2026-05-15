@@ -10,12 +10,12 @@ export function Skeleton({
 	className,
 	...props
 }: SkeletonProps) {
-	const randomDelay = Math.floor(Math.random() * delay);
+	const animationDelay = delay > 0 ? `${delay}ms` : undefined;
 
 	return (
 		<div
 			className={clsx(`bg-primary animate-pulse rounded-lg`, className)}
-			style={{ animationDelay: `${randomDelay}ms` }}
+			style={animationDelay ? { animationDelay } : undefined}
 			{...props}
 		></div>
 	);

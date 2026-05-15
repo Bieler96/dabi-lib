@@ -1,10 +1,13 @@
 import type { Context, Next } from 'hono';
 import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
+
+type DecodedJWT = JwtPayload | string;
 
 export interface JwtConfig {
 	secret: string;
 	algorithms?: jwt.Algorithm[];
-	verify?: (payload: any) => boolean | Promise<boolean>;
+	verify?: (payload: DecodedJWT) => boolean | Promise<boolean>;
 }
 
 export interface AuthConfig {
@@ -31,7 +34,7 @@ export const apiKeyAuth = (options: { key: string | string[]; header?: string; q
 export const getAuthMiddleware = (config: AuthConfig) => {
 	return async (c: Context, next: Next) => {
 		let authenticated = false;
-		let errors: string[] = [];
+		const errors: string[] = [];
 
 		// Check Bearer
 		if (config.bearer) {
@@ -39,7 +42,9 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 				? [config.bearer]
 				: Array.isArray(config.bearer)
 					? config.bearer
-					: [process.env.DABI_BEARER_TOKEN || 'default-bearer-token'];
+					: process.env.DABI_BEARER_TOKEN
+						? [process.env.DABI_BEARER_TOKEN]
+						: [];
 
 			const authHeader = c.req.header('Authorization');
 			if (authHeader?.startsWith('Bearer ')) {
@@ -59,18 +64,18 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 			const authHeader = c.req.header('Authorization');
 			if (authHeader?.startsWith('Bearer ')) {
 				const token = authHeader.substring(7);
-				try {
-					const decoded = jwt.verify(token, config.jwt.secret, {
-						algorithms: config.jwt.algorithms || ['HS256']
-					});
+			try {
+				const decoded = jwt.verify(token, config.jwt.secret, {
+					algorithms: config.jwt.algorithms || ['HS256']
+				}) as DecodedJWT;
 
-					// Optional custom verification
-					if (config.jwt.verify) {
-						const isValid = await config.jwt.verify(decoded);
-						if (isValid) {
-							authenticated = true;
-							// Store JWT payload in context for use in route handlers
-							c.set('jwtPayload', decoded);
+				// Optional custom verification
+				if (config.jwt.verify) {
+					const isValid = await config.jwt.verify(decoded);
+					if (isValid) {
+						authenticated = true;
+						// Store JWT payload in context for use in route handlers
+						c.set('jwtPayload', decoded);
 						} else {
 							errors.push('JWT verification failed');
 						}
@@ -78,8 +83,9 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 						authenticated = true;
 						c.set('jwtPayload', decoded);
 					}
-				} catch (err: any) {
-					errors.push(`Invalid JWT: ${err.message}`);
+				} catch (err: unknown) {
+					const message = err instanceof Error ? err.message : String(err);
+					errors.push(`Invalid JWT: ${message}`);
 				}
 			} else {
 				errors.push('Missing JWT token');
@@ -92,7 +98,9 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 				? [config.apiKey]
 				: Array.isArray(config.apiKey)
 					? config.apiKey
-					: [process.env.DABI_API_KEY || 'default-api-key'];
+					: process.env.DABI_API_KEY
+						? [process.env.DABI_API_KEY]
+						: [];
 
 			const headerName = 'x-api-key';
 			const queryName = 'apiKey';
@@ -119,7 +127,11 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 };
 
 // Helper function to generate JWT tokens
-export const generateJWT = (payload: any, secret: string, options?: jwt.SignOptions): string => {
+export const generateJWT = (
+	payload: string | Buffer | object,
+	secret: string,
+	options?: jwt.SignOptions
+): string => {
 	return jwt.sign(payload, secret, {
 		algorithm: 'HS256',
 		expiresIn: '24h',
@@ -128,6 +140,6 @@ export const generateJWT = (payload: any, secret: string, options?: jwt.SignOpti
 };
 
 // Helper function to decode JWT without verification (useful for debugging)
-export const decodeJWT = (token: string): any => {
+export const decodeJWT = (token: string): string | JwtPayload | null => {
 	return jwt.decode(token);
 };

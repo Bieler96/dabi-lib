@@ -278,7 +278,7 @@ async function generateDb(name: string) {
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
 });\n`;
 
-    let currentContent = await fs.readFile(schemaPath, 'utf-8');
+    const currentContent = await fs.readFile(schemaPath, 'utf-8');
     if (currentContent.includes(`sqliteTable('${tableName}'`)) {
         console.error(pc.red(`Table ${tableName} already exists in schema.ts`));
         return;

@@ -1,10 +1,11 @@
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
 import { getAuthMiddleware } from '../api.js';
+import type { AuthConfig } from '../api.js';
 
 
 export interface ServerOptions {
@@ -13,6 +14,13 @@ export interface ServerOptions {
     routePrefix?: string;
     distDir?: string;
 }
+
+type RouteHandler = (c: Context) => Response | Promise<Response>;
+
+type RouteModule = Record<string, unknown> & {
+    auth?: AuthConfig;
+    config?: { auth?: AuthConfig };
+};
 
 export async function createServer(options: ServerOptions = {}) {
     const app = new Hono();
@@ -46,54 +54,56 @@ export async function createServer(options: ServerOptions = {}) {
                 console.log(`Loading route: ${routePath} from ${file}`);
 
                 try {
-                    const mod = await import(filePath);
+                    const mod = (await import(filePath)) as RouteModule;
                     const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'] as const;
                     methods.forEach(method => {
-                        if (mod[method]) {
+                        const handler = mod[method];
+                        if (typeof handler === 'function') {
                             const authConfig = mod.auth || mod.config?.auth;
+                            const routeHandler = handler as RouteHandler;
 
                             // Use method-specific functions
                             if (authConfig) {
                                 const authMiddleware = getAuthMiddleware(authConfig);
                                 switch (method) {
                                     case 'GET':
-                                        app.get(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.get(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                     case 'POST':
-                                        app.post(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.post(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                     case 'PUT':
-                                        app.put(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.put(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                     case 'DELETE':
-                                        app.delete(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.delete(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                     case 'PATCH':
-                                        app.patch(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.patch(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                     case 'OPTIONS':
-                                        app.options(routePath, authMiddleware, (c: any) => mod[method](c));
+                                        app.options(routePath, authMiddleware, (c) => routeHandler(c));
                                         break;
                                 }
                             } else {
                                 switch (method) {
                                     case 'GET':
-                                        app.get(routePath, (c: any) => mod[method](c));
+                                        app.get(routePath, (c) => routeHandler(c));
                                         break;
                                     case 'POST':
-                                        app.post(routePath, (c: any) => mod[method](c));
+                                        app.post(routePath, (c) => routeHandler(c));
                                         break;
                                     case 'PUT':
-                                        app.put(routePath, (c: any) => mod[method](c));
+                                        app.put(routePath, (c) => routeHandler(c));
                                         break;
                                     case 'DELETE':
-                                        app.delete(routePath, (c: any) => mod[method](c));
+                                        app.delete(routePath, (c) => routeHandler(c));
                                         break;
                                     case 'PATCH':
-                                        app.patch(routePath, (c: any) => mod[method](c));
+                                        app.patch(routePath, (c) => routeHandler(c));
                                         break;
                                     case 'OPTIONS':
-                                        app.options(routePath, (c: any) => mod[method](c));
+                                        app.options(routePath, (c) => routeHandler(c));
                                         break;
                                 }
                             }

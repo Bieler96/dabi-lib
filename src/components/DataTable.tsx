@@ -34,11 +34,21 @@ function getHeaderGroupsFromColumns<T>(columns: ColumnDef<T>[]): HeaderGroup[] {
     }));
 }
 
-function getValue(obj: any, path: string): unknown {
-    return path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
 }
 
-export function DataTable<TData extends object>({
+function getValue(obj: object, path: string): unknown {
+    const record = obj as Record<string, unknown>;
+    return path.split(".").reduce<unknown>((acc, key) => {
+        if (!isRecord(acc)) {
+            return undefined;
+        }
+        return acc[key];
+    }, record);
+}
+
+export function DataTable<TData>({
     data,
     columns,
     headerAlignment = Alignment.CENTER,
@@ -62,7 +72,7 @@ export function DataTable<TData extends object>({
     }
 
     const renderLegacyTable = () => {
-        const headerGroups = getHeaderGroups(data);
+        const headerGroups = getHeaderGroups(data as Array<Record<string, unknown>>);
         const flatColumns = headerGroups.flatMap((group) =>
             group.children.length > 0
                 ? group.children.map((child) => `${group.parent}.${child}`)
@@ -151,7 +161,7 @@ export function DataTable<TData extends object>({
                     {data.map((row, idx) => (
                         <tr key={idx} className="transition-colors hover:bg-hover">
                             {flatColumns.map((col, colIdx) => {
-                                const value = getValue(row, col);
+                            const value = getValue(row as Record<string, unknown>, col);
                                 const isLastRow = idx === data.length - 1;
                                 const isLastCol = colIdx === flatColumns.length - 1;
                                 const shouldHaveBorderR = !isLastCol;
@@ -266,7 +276,7 @@ export function DataTable<TData extends object>({
                                 const shouldHaveBorderR = !isLastCol;
                                 let cellContent = column?.cell
                                     ? column.cell({ row })
-                                    : getValue(row, col);
+                                : getValue(row as object, col);
 
                                 if (typeof cellContent === 'object' && cellContent !== null && !React.isValidElement(cellContent)) {
                                     cellContent = JSON.stringify(cellContent);

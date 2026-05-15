@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Chip } from './Chip';
 import { Input } from './Input';
 import { Popover } from './Popover';
@@ -39,9 +39,11 @@ export const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder, 
 			setTags(tags.slice(0, -1));
 		} else if (event.key === 'ArrowDown') {
 			event.preventDefault();
+			if (filteredSuggestions.length === 0) return;
 			setActiveIndex((prev) => (prev + 1) % filteredSuggestions.length);
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
+			if (filteredSuggestions.length === 0) return;
 			setActiveIndex((prev) => (prev - 1 + filteredSuggestions.length) % filteredSuggestions.length);
 		}
 	};
@@ -57,11 +59,9 @@ export const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder, 
 		setActiveIndex(0);
 	};
 
-	const filteredSuggestions = useMemo(() => {
-		return suggestions.filter(suggestion =>
-			suggestion.toLowerCase().includes(inputValue.toLowerCase()) && !tags.includes(suggestion)
-		);
-	}, [inputValue, suggestions, tags]);
+	const filteredSuggestions = suggestions.filter(suggestion =>
+		suggestion.toLowerCase().includes(inputValue.toLowerCase()) && !tags.includes(suggestion)
+	);
 
 	useEffect(() => {
 		if (popoverOpen && listRef.current[activeIndex]) {

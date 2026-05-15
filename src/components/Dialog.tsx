@@ -14,8 +14,7 @@ export function Dialog({
 	children,
 	classNameOverlay
 }: DialogProps) {
-	const [isMounted, setIsMounted] = useState(false);
-	const [animateIn, setAnimateIn] = useState(false);
+	const [isRendered, setIsRendered] = useState(open);
 
 	// Body scroll verhindern, wenn Dialog offen ist
 	useEffect(() => {
@@ -46,28 +45,21 @@ export function Dialog({
 		};
 	}, [open, onClose]);
 
-	// Mount/Unmount logic
 	useEffect(() => {
 		if (open) {
-			setIsMounted(true);
-		} else {
-			const timer = setTimeout(() => setIsMounted(false), 200); // Unmount after animation
-			return () => clearTimeout(timer);
-		}
-	}, [open]);
-
-	// Animation logic
-	useEffect(() => {
-		if (isMounted && open) {
-			requestAnimationFrame(() => {
-				setAnimateIn(true);
+			const frame = requestAnimationFrame(() => {
+				setIsRendered(true);
 			});
-		} else if (isMounted && !open) {
-			setAnimateIn(false);
+			return () => cancelAnimationFrame(frame);
 		}
-	}, [isMounted, open]);
+		if (!isRendered) {
+			return;
+		}
+		const timer = window.setTimeout(() => setIsRendered(false), 200);
+		return () => clearTimeout(timer);
+	}, [open, isRendered]);
 
-	if (!isMounted) return null;
+	if (!open && !isRendered) return null;
 
 	return (
 		<>
@@ -75,7 +67,7 @@ export function Dialog({
 			<div
 				className={clsx(
 					"fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-40 transition-opacity duration-200",
-					animateIn ? "opacity-100" : "opacity-0",
+					open ? "opacity-100" : "opacity-0",
 					classNameOverlay
 				)}
 			></div>
@@ -88,7 +80,7 @@ export function Dialog({
 				<div
 					className={clsx(
 						"bg-surface border border-outline rounded-lg shadow-lg max-w-lg w-full p-6 relative transition-all duration-200 ease-out",
-						animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+						open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
 					)}
 					onClick={(e) => e.stopPropagation()}
 				>

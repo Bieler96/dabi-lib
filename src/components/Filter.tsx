@@ -35,7 +35,7 @@ export interface Operator {
     noValue?: boolean;
 }
 
-export const DEFAULT_OPERATORS: Record<FilterFieldType, Operator[]> = {
+const DEFAULT_OPERATORS: Record<FilterFieldType, Operator[]> = {
     select: [
         { value: '=', label: 'ist' },
         { value: '!', label: 'ist nicht' },

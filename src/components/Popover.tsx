@@ -8,7 +8,7 @@ import {
 	type Placement,
 	FloatingPortal,
 } from "@floating-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 
 export interface PopoverProps {
@@ -69,6 +69,14 @@ export function Popover({
 	};
 
 	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				window.clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
+
+	useEffect(() => {
 		if (!onHover && open) {
 			const handleClickOutside = (event: MouseEvent) => {
 				if (
@@ -85,6 +93,14 @@ export function Popover({
 		}
 	}, [open, onHover, refs, setOpen]);
 
+	const setReferenceRef = useCallback((node: HTMLDivElement | null) => {
+		refs.setReference(node);
+	}, [refs]);
+
+	const setFloatingRef = useCallback((node: HTMLDivElement | null) => {
+		refs.setFloating(node);
+	}, [refs]);
+
 	const triggerProps = onHover
 		? {
 			onMouseEnter: handleMouseEnter,
@@ -100,7 +116,7 @@ export function Popover({
 	return (
 		<div className={clsx("relative", fullWidth ? "w-full" : "inline-block")}>
 			<div
-				ref={refs.setReference}
+				ref={setReferenceRef}
 				className={clsx("cursor-pointer", fullWidth ? "w-full" : "inline-block")}
 				{...triggerProps}
 			>
@@ -110,7 +126,7 @@ export function Popover({
 			<FloatingPortal>
 				{open && (
 					<div
-						ref={refs.setFloating}
+						ref={setFloatingRef}
 						style={{ ...floatingStyles, zIndex: 100 }}
 						className="pointer-events-none"
 					>

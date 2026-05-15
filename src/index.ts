@@ -31,6 +31,7 @@ export * from './components/command-menu/CommandMenuItem';
 
 // Core
 export * from './core/Router';
+export * from './core/RouteBuilder';
 
 // Hooks
 export * from './hooks/useAlert';

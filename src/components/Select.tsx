@@ -58,12 +58,20 @@ export function Select<T>({
 	useEffect(() => {
 		if (isOpen) {
 			const handleKeyDown = (e: KeyboardEvent) => {
+				const total = filteredOptions.length;
+				if (total === 0) {
+					if (e.key === "Escape") {
+						setIsOpen(false);
+					}
+					return;
+				}
+
 				if (e.key === "ArrowDown") {
 					e.preventDefault();
-					setActiveIndex((prev) => (prev + 1) % filteredOptions.length);
+					setActiveIndex((prev) => (prev + 1) % total);
 				} else if (e.key === "ArrowUp") {
 					e.preventDefault();
-					setActiveIndex((prev) => (prev - 1 + filteredOptions.length) % filteredOptions.length);
+					setActiveIndex((prev) => (prev - 1 + total) % total);
 				} else if (e.key === "Enter") {
 					e.preventDefault();
 					if (filteredOptions[activeIndex]) {
@@ -90,8 +98,10 @@ export function Select<T>({
 	useEffect(() => {
 		if (isOpen) {
 			const selectedIndex = options.findIndex(option => !multiple && option.value === value);
-			setActiveIndex(selectedIndex !== -1 ? selectedIndex : 0);
-			setSearchTerm("");
+			requestAnimationFrame(() => {
+				setActiveIndex(selectedIndex !== -1 ? selectedIndex : 0);
+				setSearchTerm("");
+			});
 			if (withSearch) {
 				setTimeout(() => searchInputRef.current?.focus(), 0);
 			}
