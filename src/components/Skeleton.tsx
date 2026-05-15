@@ -1,8 +1,8 @@
 import clsx from "clsx";
+import type { HTMLAttributes } from "react";
 
-export interface SkeletonProps {
+export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 	delay?: number;
-	className?: string;
 }
 
 export function Skeleton({
@@ -14,7 +14,7 @@ export function Skeleton({
 
 	return (
 		<div
-			className={clsx(`bg-primary animate-pulse rounded-lg`, className)}
+			className={clsx("animate-pulse rounded-[var(--radius-component)] bg-primary/15", className)}
 			style={animationDelay ? { animationDelay } : undefined}
 			{...props}
 		></div>

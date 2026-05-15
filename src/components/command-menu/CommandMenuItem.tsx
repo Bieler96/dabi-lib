@@ -13,7 +13,7 @@ export const CommandMenuItem = React.forwardRef<HTMLLIElement, CommandMenuItemPr
 			ref={ref}
 			onClick={onSelect}
 			className={clsx(
-				"flex items-center gap-2 p-2 rounded-lg cursor-pointer",
+				"flex items-center gap-[var(--space-2)] p-[var(--space-2)] rounded-[var(--radius-control)] cursor-pointer",
 				{
 					"bg-primary-container text-on-primary-container": isActive,
 					"hover:bg-hover": !isActive,

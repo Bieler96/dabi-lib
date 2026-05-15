@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Clipboard, Check } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export type Size = "sm" | "md";
 
@@ -12,7 +12,10 @@ export interface CopyButtonProps {
 	labelCopied?: string;
 	size?: Size;
 	variant?: Variant;
+	successfulCallback?: () => void;
 	successulCallback?: () => void;
+	className?: string;
+	disabled?: boolean;
 }
 
 export function CopyButton({
@@ -21,9 +24,14 @@ export function CopyButton({
 	labelCopied,
 	variant = "ghost",
 	size = "md",
-	successulCallback
+	successfulCallback,
+	successulCallback,
+	className,
+	disabled = false,
 }: CopyButtonProps) {
 	const [copied, setCopied] = useState(false)
+	const callback = successfulCallback ?? successulCallback;
+	const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
 	const sizes = {
 		sm: "size-4",
@@ -34,8 +42,8 @@ export function CopyButton({
 		md: "size-5"
 	};
 	const rounded = {
-		sm: "rounded-[0.8rem]",
-		md: "rounded-lg"
+		sm: "rounded-[var(--radius-control)]",
+		md: "rounded-[var(--radius-component)]"
 	};
 	const labelSizes = {
 		sm: "text-sm",
@@ -50,17 +58,30 @@ export function CopyButton({
 		try {
 			await navigator.clipboard.writeText(text);
 			setCopied(true);
-			successulCallback?.();
-			setTimeout(() => setCopied(false), 2000);
+			callback?.();
+			if (timeoutId) {
+				window.clearTimeout(timeoutId);
+			}
+			setTimeoutId(window.setTimeout(() => setCopied(false), 2000));
 		} catch (err) {
 			console.error('Copy failed', err);
 		}
 	}
 
+	useEffect(() => {
+		return () => {
+			if (timeoutId) {
+				window.clearTimeout(timeoutId);
+			}
+		};
+	}, [timeoutId]);
+
 	return (
 		<button
+			type="button"
+			disabled={disabled}
 			onClick={handleCopy}
-			className={clsx(rounded[size], "cursor-pointer inline-flex items-center justify-center p-2 transition duration-150", variants[variant])}
+			className={clsx(rounded[size], "cursor-pointer inline-flex items-center justify-center p-2 transition duration-150 disabled:cursor-not-allowed disabled:opacity-50", variants[variant], className)}
 			aria-label="Copy to clipboard"
 		>
 			<span className={clsx(sizes[size], "relative flex items-center justify-center")}>

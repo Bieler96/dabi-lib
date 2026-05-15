@@ -9,7 +9,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	({ label, className, variant = "default", ...props }, ref) => {
 		const base =
-			"w-full rounded-lg transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
+			"w-full rounded-[var(--radius-component)] transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
 		const size = "h-12 md:h-10 px-3 py-1 text-base";
 
 		const variants = {
@@ -37,3 +37,5 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		);
 	}
 );
+
+Input.displayName = "Input";

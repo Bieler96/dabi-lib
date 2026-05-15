@@ -137,15 +137,15 @@ export function CommandMenu({
 				onClick={handleClose}
 			/>
 			<div
-				className="fixed inset-0 flex items-start justify-center z-50 p-4 pt-24"
+				className="fixed inset-0 flex items-start justify-center z-50 p-[var(--space-4)] pt-[6rem]"
 				onClick={handleClose}
 			>
 				<div
-					className={clsx("bg-surface border border-outline rounded-lg shadow-lg max-w-lg w-full relative transition-all duration-200 ease-out", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}
+					className={clsx("bg-surface border border-outline rounded-[var(--radius-component)] shadow-lg max-w-lg w-full relative transition-all duration-200 ease-out", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}
 					onClick={(e) => e.stopPropagation()}
 				>
-					<div className="relative p-4">
-						<Search className="absolute left-7 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface/50" />
+					<div className="relative p-[var(--space-4)]">
+						<Search className="absolute left-[1.75rem] top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface/50" />
 						<Input
 							ref={inputRef}
 							placeholder="Search..."
@@ -154,12 +154,12 @@ export function CommandMenu({
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
 						/>
 					</div>
-					<div className="p-4 pt-0 max-h-[400px] overflow-y-auto">
+					<div className="p-[var(--space-4)] pt-0 max-h-[400px] overflow-y-auto">
 						{flatFilteredItems.length > 0 ? (
 							<ul>
 								{filteredItems.map(group => (
 									<li key={group.id}>
-										{group.heading && <p className="text-sm text-on-surface/75 px-2 pb-2 pt-4">{group.heading}</p>}
+										{group.heading && <p className="text-sm text-on-surface/75 px-[var(--space-2)] pb-[var(--space-2)] pt-[var(--space-4)]">{group.heading}</p>}
 										<ul>
 											{group.items.map(item => {
 												itemIndex++;
@@ -171,7 +171,7 @@ export function CommandMenu({
 														isActive={activeIndex === currentIndex}
 														onSelect={() => handleSelect(item)}
 													>
-														<div className="flex flex-col gap-1">
+															<div className="flex flex-col gap-[var(--space-1)]">
 															<p>{item.title}</p>
 															{item.description && <p className="text-xs opacity-75">{item.description}</p>}
 														</div>
@@ -183,7 +183,7 @@ export function CommandMenu({
 								))}
 							</ul>
 						) : (
-							<p className="text-center text-sm text-on-surface/75 py-4">No results found.</p>
+							<p className="text-center text-sm text-on-surface/75 py-[var(--space-4)]">No results found.</p>
 						)}
 					</div>
 				</div>

@@ -115,7 +115,7 @@ export function Select<T>({
 	const renderValue = () => {
 		if (multiple && Array.isArray(value) && value.length > 0) {
 			return (
-				<div className="h-fit flex flex-wrap gap-1">
+				<div className="h-fit flex flex-wrap gap-[var(--space-1)]">
 					{value && value.map((v) => (
 						<Chip variant="input" key={String(v)} onDelete={(e) => {
 							e.preventDefault();
@@ -142,7 +142,7 @@ export function Select<T>({
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
 			)}
-			<ul className="py-1 max-h-60 overflow-auto">
+			<ul className="py-[var(--space-1)] max-h-60 overflow-auto">
 				{filteredOptions && filteredOptions.map((option, index) => (
 					<CommandMenuItem
 						key={String(option.value)}
@@ -175,13 +175,13 @@ export function Select<T>({
 			onOpenChange={setIsOpen}
 			className={clsx("w-full", className)}
 			placement="bottom-start"
-			trigger={
-				<div
-					className={clsx(
-						"flex items-center justify-between w-full rounded-lg transition duration-150 border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px] px-1 py-1 min-h-10",
-						disabled ? "opacity-50 pointer-events-none" : "cursor-pointer",
-					)}
-				>
+		trigger={
+			<div
+				className={clsx(
+					"flex items-center justify-between w-full rounded-[var(--radius-component)] transition duration-150 border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px] px-[var(--space-1)] py-[var(--space-1)] min-h-10",
+					disabled ? "opacity-50 pointer-events-none" : "cursor-pointer",
+				)}
+			>
 					<div className="grow w-full">{renderValue()}</div>
 					<ChevronDown
 						className={clsx(

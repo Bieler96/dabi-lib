@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { Card } from "../components/Card";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FC, type ReactNode } from "react";
 import { DataTable } from "../components/DataTable";
+import { Dialog } from "../components/Dialog";
 import { Sheet } from "../components/Sheet";
 import { RouteBuilder, type RouteConfig, type ImperativeNavigate, type RouteParams } from "./RouteBuilder";
+
 export type { Guard } from "./RouteBuilder";
 
 interface NavEntry {
@@ -34,40 +34,58 @@ interface NavHostProps {
 	builder: (builder: RouteBuilder) => void;
 }
 
-export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) => {
+const readCurrentPath = (map: Record<string, RouteConfig>, startDestination: string) => {
+	if (typeof window === "undefined") {
+		return startDestination;
+	}
+
+	const path = window.location.pathname.slice(1);
+	return map[path] ? path : startDestination;
+};
+
+const readCurrentParams = () => {
+	if (typeof window === "undefined") {
+		return {};
+	}
+
+	const params = new URLSearchParams(window.location.search);
+	const result: Record<string, unknown> = {};
+
+	params.forEach((value, key) => {
+		if (value && !Number.isNaN(Number(value)) && !value.startsWith("0")) {
+			result[key] = Number(value);
+		} else if (value === "true") {
+			result[key] = true;
+		} else if (value === "false") {
+			result[key] = false;
+		} else {
+			result[key] = value;
+		}
+	});
+
+	return result;
+};
+
+const sameParams = (left?: RouteParams, right?: RouteParams) => JSON.stringify(left ?? {}) === JSON.stringify(right ?? {});
+
+export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 	const routeMap = useMemo(() => {
-		const b = new RouteBuilder();
-		builder(b);
-		return b.routes;
+		const routeBuilder = new RouteBuilder();
+		builder(routeBuilder);
+		return routeBuilder.routes;
 	}, [builder]);
+	const [stack, setStack] = useState<NavEntry[]>([]);
+	const canUseDom = typeof window !== "undefined";
 
-	const getPathFromUrl = (map: Record<string, RouteConfig>) => {
-		const path = window.location.pathname.slice(1);
-		if (map[path]) return path;
-		return null;
-	};
+	const syncUrl = useCallback((path: string, params?: RouteParams) => {
+		if (typeof window === "undefined") {
+			return;
+		}
 
-	const getParamsFromUrl = () => {
-		const params = new URLSearchParams(window.location.search);
-		const result: Record<string, unknown> = {};
-		params.forEach((value, key) => {
-			if (value && !isNaN(Number(value)) && !value.startsWith('0')) {
-				result[key] = Number(value);
-			} else if (value === 'true') {
-				result[key] = true;
-			} else if (value === 'false') {
-				result[key] = false;
-			} else {
-				result[key] = value;
-			}
-		});
-		return result;
-	};
-
-		const syncUrl = useCallback((path: string, params?: RouteParams) => {
 		const url = new URL(window.location.href);
 		url.pathname = `/${path}`;
-		url.search = '';
+		url.search = "";
+
 		if (params) {
 			Object.entries(params).forEach(([key, value]) => {
 				if (value !== undefined && value !== null) {
@@ -75,30 +93,37 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 				}
 			});
 		}
+
 		if (window.location.pathname + window.location.search !== url.pathname + url.search) {
-			window.history.pushState({ path, params }, '', url.toString());
+			window.history.pushState({ path, params }, "", url.toString());
 		}
-	}, []); // No external dependencies for syncUrl itself
+	}, []);
 
-	const [stack, setStack] = useState<NavEntry[]>([]);
-
-	// Internal navigate function that bypasses guards to prevent infinite loops
 	const internalNavigate: ImperativeNavigate = useCallback((targetPath, targetParams) => {
 		const targetConfig = routeMap[targetPath];
 		if (!targetConfig) {
 			console.warn(`Internal navigate: Route ${targetPath} not found`);
 			return;
 		}
-		if (targetConfig.type === 'screen' || targetConfig.type === 'list') {
+
+		if (targetConfig.type === "screen" || targetConfig.type === "list") {
 			syncUrl(targetPath, targetParams);
 		}
-		setStack(prev => [...prev, { id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig }]);
+
+		setStack((prev) => [
+			...prev,
+			{ id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig },
+		]);
 	}, [routeMap, syncUrl]);
 
 	useEffect(() => {
+		if (!canUseDom) {
+			return;
+		}
+
 		const initialize = async () => {
-			const initialPath = getPathFromUrl(routeMap) || startDestination;
-			const initialParams = getParamsFromUrl();
+			const initialPath = readCurrentPath(routeMap, startDestination);
+			const initialParams = readCurrentParams();
 			const config = routeMap[initialPath];
 
 			if (!config) {
@@ -110,31 +135,39 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 				for (const guard of config.canActivate) {
 					const canActivate = await guard(initialParams, internalNavigate);
 					if (!canActivate) {
-						return; // Guard should have navigated away.
+						return;
 					}
 				}
 			}
 
-			setStack([{
-				id: 'root',
-				path: initialPath,
-				params: initialParams,
-				config: config
-			}]);
-			if (!getPathFromUrl(routeMap)) {
+			setStack([
+				{
+					id: "root",
+					path: initialPath,
+					params: initialParams,
+					config,
+				},
+			]);
+
+			const currentPath = window.location.pathname.slice(1);
+			if (!routeMap[currentPath]) {
 				syncUrl(initialPath, initialParams);
 			}
 		};
 
 		if (stack.length === 0) {
-			initialize();
+			void initialize();
 		}
-	}, [stack.length, routeMap, startDestination, internalNavigate, syncUrl]);
+	}, [canUseDom, routeMap, startDestination, stack.length, internalNavigate, syncUrl]);
 
 	useEffect(() => {
+		if (!canUseDom) {
+			return;
+		}
+
 		const handlePopState = async () => {
-			const path = getPathFromUrl(routeMap) || startDestination;
-			const params = getParamsFromUrl();
+			const path = readCurrentPath(routeMap, startDestination);
+			const params = readCurrentParams();
 			const config = routeMap[path];
 
 			if (!config) {
@@ -143,7 +176,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 			}
 
 			const currentEntry = stack[stack.length - 1];
-			if (currentEntry && (currentEntry.path !== path || JSON.stringify(currentEntry.params) !== JSON.stringify(params))) {
+			if (currentEntry && (currentEntry.path !== path || !sameParams(currentEntry.params, params))) {
 				if (currentEntry.config.canDeactivate) {
 					for (const guard of currentEntry.config.canDeactivate) {
 						const canDeactivate = await guard(currentEntry.params, internalNavigate);
@@ -154,7 +187,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 					}
 				}
 			}
-			
+
 			if (config.canActivate) {
 				for (const guard of config.canActivate) {
 					const canActivate = await guard(params, internalNavigate);
@@ -164,15 +197,15 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 				}
 			}
 
-			setStack(prev => {
+			setStack((prev) => {
 				const last = prev[prev.length - 1];
-				if (last && last.path === path && JSON.stringify(last.params) === JSON.stringify(params)) {
+				if (last && last.path === path && sameParams(last.params, params)) {
 					return prev;
 				}
 
 				let existingIndex = -1;
 				for (let i = prev.length - 1; i >= 0; i--) {
-					if (prev[i].path === path && JSON.stringify(prev[i].params) === JSON.stringify(params)) {
+					if (prev[i].path === path && sameParams(prev[i].params, params)) {
 						existingIndex = i;
 						break;
 					}
@@ -185,28 +218,32 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 						newStack[prev.length - 1] = { ...entryToPop, isExiting: true };
 
 						setTimeout(() => {
-							setStack(curr => curr.filter(e => e.id !== entryToPop.id));
+							setStack((curr) => curr.filter((entry) => entry.id !== entryToPop.id));
 						}, 350);
 
 						return newStack;
 					}
+
 					return prev.slice(0, existingIndex + 1);
 				}
 
-				return [...prev, {
-					id: Date.now().toString(),
-					path,
-					params,
-					config: config
-				}];
+				return [
+					...prev,
+					{
+						id: Date.now().toString(),
+						path,
+						params,
+						config,
+					},
+				];
 			});
 		};
 
-		window.addEventListener('popstate', handlePopState);
-		return () => window.removeEventListener('popstate', handlePopState);
-	}, [routeMap, startDestination, stack, internalNavigate, syncUrl]);
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, [canUseDom, routeMap, startDestination, stack, internalNavigate, syncUrl]);
 
-		const navigate = async (path: string, params?: RouteParams) => {
+	const navigate = async (path: string, params?: RouteParams) => {
 		const config = routeMap[path];
 		if (!config) {
 			console.warn(`Route ${path} not found`);
@@ -216,52 +253,61 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		if (config.canActivate) {
 			for (const guard of config.canActivate) {
 				const canActivate = await guard(params, internalNavigate);
-				if (!canActivate) return;
+				if (!canActivate) {
+					return;
+				}
 			}
 		}
 
-		if (config.type === 'screen' || config.type === 'list') {
+		if (config.type === "screen" || config.type === "list") {
 			syncUrl(path, params);
 		}
-		setStack(prev => [...prev, { id: Date.now().toString(), path, params, config }]);
+
+		setStack((prev) => [...prev, { id: Date.now().toString(), path, params, config }]);
 	};
 
 	const popBackStack = async () => {
 		const entryToPop = stack[stack.length - 1];
-		if (!entryToPop || entryToPop.isExiting || stack.length <= 1) return;
+		if (!entryToPop || entryToPop.isExiting || stack.length <= 1) {
+			return;
+		}
 
 		if (entryToPop.config.canDeactivate) {
 			for (const guard of entryToPop.config.canDeactivate) {
 				const canDeactivate = await guard(entryToPop.params, internalNavigate);
-				if (!canDeactivate) return;
+				if (!canDeactivate) {
+					return;
+				}
 			}
 		}
 
-		if (entryToPop.config.type === 'screen' || entryToPop.config.type === 'list') {
+		if (entryToPop.config.type === "screen" || entryToPop.config.type === "list") {
 			window.history.back();
-		} else {
-			setStack(prev => {
-				const next = [...prev];
-				const index = next.findIndex(e => e.id === entryToPop.id);
-				if (index !== -1) {
-					next[index] = { ...next[index], isExiting: true };
-				}
-				return next;
-			});
-
-			setTimeout(() => {
-				setStack(prev => prev.filter(e => e.id !== entryToPop.id));
-			}, 350);
+			return;
 		}
+
+		setStack((prev) => {
+			const next = [...prev];
+			const index = next.findIndex((entry) => entry.id === entryToPop.id);
+			if (index !== -1) {
+				next[index] = { ...next[index], isExiting: true };
+			}
+			return next;
+		});
+
+		setTimeout(() => {
+			setStack((prev) => prev.filter((entry) => entry.id !== entryToPop.id));
+		}, 350);
 	};
 
 	const visibleEntries = useMemo(() => {
 		if (stack.length === 0) {
 			return [];
 		}
+
 		let primaryScreenIndex = 0;
 		for (let i = stack.length - 1; i >= 0; i--) {
-			if ((stack[i].config.type === 'screen' || stack[i].config.type === 'list') && !stack[i].isExiting) {
+			if ((stack[i].config.type === "screen" || stack[i].config.type === "list") && !stack[i].isExiting) {
 				primaryScreenIndex = i;
 				break;
 			}
@@ -269,7 +315,7 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 
 		let secondaryScreenIndex = -1;
 		for (let i = primaryScreenIndex - 1; i >= 0; i--) {
-			if (stack[i].config.type === 'screen' || stack[i].config.type === 'list') {
+			if (stack[i].config.type === "screen" || stack[i].config.type === "list") {
 				secondaryScreenIndex = i;
 				break;
 			}
@@ -285,128 +331,118 @@ export const NavHost: React.FC<NavHostProps> = ({ startDestination, builder }) =
 		return "animate-page-in";
 	};
 
+	if (!canUseDom) {
+		return null;
+	}
+
+	const renderEntry = (entry: NavEntry): ReactNode => {
+		const Component = entry.config.component;
+		if (!entry.config) {
+			return null;
+		}
+
+		if (entry.config.type === "list" && entry.config.listOptions) {
+			return (
+				<div
+					key={entry.id}
+					className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)} ${entry.config.className || ""}`}
+					style={{ position: "absolute", inset: 0, background: "var(--color-surface)", overflowY: "auto" }}
+				>
+					<div className="p-8 max-w-7xl mx-auto space-y-6">
+						<div>
+							<h1 className="text-3xl font-bold text-on-surface">{entry.config.title}</h1>
+							{entry.config.description && (
+								<p className="mt-2 text-on-surface-variant">{entry.config.description}</p>
+							)}
+						</div>
+						<DataTable columns={entry.config.listOptions.columns} data={entry.config.listOptions.data} />
+					</div>
+				</div>
+			);
+		}
+
+		if (!Component) {
+			return null;
+		}
+
+		if (entry.config.type === "screen") {
+			return (
+				<div
+					key={entry.id}
+					className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)} ${entry.config.className || ""}`}
+					style={{ position: "absolute", inset: 0, background: "var(--color-surface)", overflowY: "auto" }}
+				>
+					<Component {...entry.params} />
+				</div>
+			);
+		}
+
+		if (entry.config.type === "dialog") {
+			return (
+				<Dialog
+					key={entry.id}
+					open={!entry.isExiting}
+					onClose={popBackStack}
+					title={entry.config.title}
+					description={entry.config.description}
+					ariaLabel={typeof entry.config.title === "string" ? entry.config.title : undefined}
+					paperClassName={`max-w-2xl ${entry.config.className || ""}`}
+				>
+					<Component {...entry.params} />
+				</Dialog>
+			);
+		}
+
+		if (entry.config.type === "bottomSheet") {
+			return (
+				<Sheet
+					key={entry.id}
+					isOpen={!entry.isExiting}
+					onClose={popBackStack}
+					side="bottom"
+					title={entry.config.title}
+					description={entry.config.description}
+					ariaLabel={typeof entry.config.title === "string" ? entry.config.title : undefined}
+					panelClassName={entry.config.className}
+				>
+					<Component {...entry.params} />
+				</Sheet>
+			);
+		}
+
+		if (entry.config.type === "sheet") {
+			const title = typeof entry.params?.title === "string" ? entry.params.title : undefined;
+			const description = typeof entry.params?.description === "string" ? entry.params.description : undefined;
+
+			return (
+				<Sheet
+					key={entry.id}
+					isOpen={!entry.isExiting}
+					onClose={popBackStack}
+					side={entry.config.side}
+					title={title || entry.config.title}
+					description={description || entry.config.description}
+					ariaLabel={typeof (title || entry.config.title) === "string" ? (title || entry.config.title) as string : undefined}
+					panelClassName={entry.config.className}
+				>
+					<Component {...entry.params} />
+				</Sheet>
+			);
+		}
+
+		return null;
+	};
+
 	return (
-		<NavigationContext.Provider value={{ navigate, popBackStack, currentRoute: stack.length > 0 ? stack[stack.length - 1].path : "" }}>
-			<div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'clip' }}>
-				{visibleEntries.map((entry, index) => {
-					if (!entry.config) return null; // Guard against undefined config
-
-					const Component = entry.config.component;
-
-					if (entry.config.type === 'list' && entry.config.listOptions) {
-						return (
-							<div
-								key={entry.id}
-								className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)}`}
-								style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}
-							>
-								<div className="p-8 max-w-7xl mx-auto space-y-6">
-									<div>
-										<h1 className="text-3xl font-bold text-on-surface">{entry.config.title}</h1>
-										{entry.config.description && (
-											<p className="mt-2 text-on-surface-variant">{entry.config.description}</p>
-										)}
-									</div>
-									<DataTable
-										columns={entry.config.listOptions.columns}
-										data={entry.config.listOptions.data}
-									/>
-								</div>
-							</div>
-						);
-					}
-
-					if (!Component) return null;
-
-					if (entry.config.type === 'screen') {
-						return (
-							<div
-								key={entry.id}
-								className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)}`}
-								style={{ position: 'absolute', inset: 0, background: 'var(--color-surface)', overflowY: 'auto' }}
-							>
-								<Component {...entry.params} />
-							</div>
-						);
-					}
-
-					if (entry.config.type === 'dialog') {
-						return createPortal(
-							<div
-								key={entry.id}
-								style={{
-									position: 'fixed',
-									inset: 0,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									zIndex: 100 + index,
-								}}
-							>
-								<div
-									className={entry.isExiting ? "animate-overlay-out" : "animate-overlay-in"}
-									style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }}
-									onClick={popBackStack}
-								/>
-								<Card
-									className={`max-w-2xl w-full mx-4 shadow-2xl ${entry.isExiting ? "animate-dialog-out" : "animate-dialog-in"
-										}`}
-								>
-									<Component {...entry.params} />
-								</Card>
-							</div>,
-							document.body
-						);
-					}
-
-					if (entry.config.type === 'bottomSheet') {
-						return createPortal(
-							<div key={entry.id} style={{ position: 'fixed', inset: 0, zIndex: 100 + index }}>
-								<div
-									className={entry.isExiting ? "animate-overlay-out" : "animate-overlay-in"}
-									style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }}
-									onClick={popBackStack}
-								/>
-								<div
-									style={{
-										position: 'absolute',
-										bottom: 0,
-										left: 0,
-										right: 0,
-										background: 'var(--color-surface)',
-										padding: 20,
-										borderTopLeftRadius: 16,
-										borderTopRightRadius: 16,
-										boxShadow: '0 -4px 16px rgba(0,0,0,0.1)'
-									}}
-									className={entry.isExiting ? "animate-dialog-out" : "animate-dialog-in"}
-								>
-									<Component {...entry.params} />
-								</div>
-							</div>,
-							document.body
-						);
-					}
-
-						if (entry.config.type === 'sheet') {
-							const title = typeof entry.params?.title === 'string' ? entry.params.title : undefined;
-							const description = typeof entry.params?.description === 'string' ? entry.params.description : undefined;
-							return (
-								<Sheet
-									key={entry.id}
-									isOpen={!entry.isExiting}
-									onClose={popBackStack}
-									side={entry.config.side}
-									title={title || entry.config.title}
-									description={description || entry.config.description}
-									className={index > 0 ? `z-[${index * 10 + 50}] ${entry.config.className || ''}` : entry.config.className}
-								>
-								<Component {...entry.params} />
-							</Sheet>
-						);
-					}
-					return null;
-				})}
+		<NavigationContext.Provider
+			value={{
+				navigate,
+				popBackStack,
+				currentRoute: stack.length > 0 ? stack[stack.length - 1].path : "",
+			}}
+		>
+			<div style={{ position: "relative", width: "100%", height: "100vh", overflow: "clip" }}>
+				{visibleEntries.map((entry) => renderEntry(entry))}
 			</div>
 		</NavigationContext.Provider>
 	);

@@ -7,6 +7,8 @@ export interface FloatingActionButtonProps {
 	extended?: boolean;
 	onClick?: () => void;
 	className?: string;
+	disabled?: boolean;
+	ariaLabel?: string;
 }
 
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
@@ -15,16 +17,21 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 	extended = false,
 	onClick,
 	className,
+	disabled = false,
+	ariaLabel,
 }) => {
 	return (
 		<button
+			type="button"
+			aria-label={ariaLabel || label || "Floating action button"}
+			disabled={disabled}
 			className={clsx(
-				"inline-flex items-center justify-center font-medium transition-all duration-150 ease-in-out cursor-pointer",
+				"inline-flex items-center justify-center font-medium transition-all duration-150 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
 				"h-14",
 				"bg-primary text-on-primary shadow-md hover:shadow-lg",
 				extended
-					? "w-auto px-6 rounded-2xl"
-					: "w-auto px-4 rounded-2xl",
+					? "w-auto px-6 rounded-[var(--radius-component)]"
+					: "w-auto px-4 rounded-[var(--radius-component)]",
 				className
 			)}
 			onClick={onClick}

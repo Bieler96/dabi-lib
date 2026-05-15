@@ -132,7 +132,7 @@ export function Popover({
 					>
 						<div
 							className={clsx(
-								"w-64 rounded-lg bg-surface border border-outline p-2 shadow-lg transition-all duration-200 ease-out transform-gpu origin-top-left",
+								"w-64 rounded-[var(--radius-component)] bg-surface border border-outline p-[var(--space-2)] shadow-lg transition-all duration-200 ease-out transform-gpu origin-top-left",
 								open
 									? "opacity-100 scale-100 pointer-events-auto"
 									: "opacity-0 scale-95",

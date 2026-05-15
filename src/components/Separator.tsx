@@ -1,15 +1,16 @@
 import clsx from "clsx";
+import type { HTMLAttributes } from "react";
 
 export type Orientation = "horizontal" | "vertical";
 
-export interface SeparatorProps {
+export interface SeparatorProps extends HTMLAttributes<HTMLDivElement> {
 	orientation?: Orientation;
-	className?: string;
 }
 
 export function Separator({
 	orientation = "horizontal",
 	className,
+	...props
 }: SeparatorProps) {
 	return (
 		<div
@@ -21,6 +22,7 @@ export function Separator({
 					: "w-px h-full",
 				className
 			)}
+			{...props}
 		/>
 	);
 }

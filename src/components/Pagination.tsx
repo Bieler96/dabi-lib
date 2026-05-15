@@ -14,7 +14,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
             role="navigation"
             aria-label="pagination"
             data-slot="pagination"
-            className={clsx("mx-auto flex w-full justify-center", className)}
+            className={clsx("mx-auto flex w-full justify-center px-[var(--space-4)]", className)}
             {...props}
         />
     )
@@ -27,7 +27,7 @@ function PaginationContent({
     return (
         <ul
             data-slot="pagination-content"
-            className={clsx("flex flex-row items-center gap-1", className)}
+            className={clsx("flex flex-row items-center gap-[var(--space-1)]", className)}
             {...props}
         />
     )
@@ -72,7 +72,7 @@ function PaginationPrevious({
     return (
         <PaginationLink
             aria-label="Go to previous page"
-            className={clsx("gap-1 px-2.5 sm:pl-2.5", className)}
+            className={clsx("gap-[var(--space-1)] px-[var(--space-2)] sm:pl-[var(--space-2)]", className)}
             size={"md"}
             {...props}
         >
@@ -89,7 +89,7 @@ function PaginationNext({
     return (
         <PaginationLink
             aria-label="Go to next page"
-            className={clsx("gap-1 px-2.5 sm:pr-2.5", className)}
+            className={clsx("gap-[var(--space-1)] px-[var(--space-2)] sm:pr-[var(--space-2)]", className)}
             size={"md"}
             {...props}
         >

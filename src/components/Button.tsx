@@ -1,5 +1,6 @@
 import { type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
+import * as React from "react";
 import { buttonVariants } from "./buttonVariants";
 
 export interface ButtonProps
@@ -8,23 +9,21 @@ export interface ButtonProps
 	children: React.ReactNode;
 }
 
-export function Button({
-	variant,
-	size,
-	children,
-	className,
-	...props
-}: ButtonProps) {
-	return (
-		<div className={clsx(buttonVariants({ variant, size }), className)}>
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+	({ variant, size, children, className, type = "button", ...props }, ref) => {
+		return (
 			<button
+				ref={ref}
+				type={type}
 				{...props}
-				className={clsx(
-					"w-full h-full cursor-pointer transition-all duration-150 flex flex-row items-center justify-center focus:outline-none"
-				)}
+				className={clsx(buttonVariants({ variant, size }), className)}
 			>
 				{children}
 			</button>
-		</div>
-	);
-}
+		);
+	}
+);
+
+Button.displayName = "Button";
+
+Button.displayName = "Button";

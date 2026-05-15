@@ -65,7 +65,7 @@ export function DataTable<TData>({
 
     if (!data || data.length === 0) {
         return (
-            <div className="text-center py-8 text-on-surface-variant">
+            <div className="text-center py-[var(--space-8)] text-on-surface-variant">
                 Keine Daten vorhanden.
             </div>
         );
@@ -82,7 +82,7 @@ export function DataTable<TData>({
         const lastIdx = headerGroups.length - 1;
 
         return (
-            <table className="min-w-full border-separate border-spacing-0 rounded-lg">
+            <table className="min-w-full border-separate border-spacing-0 rounded-[var(--radius-component)]">
                 <thead>
                     <tr>
                         {headerGroups.map((group, idx) => {
@@ -100,7 +100,7 @@ export function DataTable<TData>({
                                 <th
                                     key={group.parent}
                                     colSpan={group.children.length}
-                                    className={`font-medium px-4 py-3 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface-variant text-on-surface border-outline ${roundedClass}`}
+                                    className={`font-medium px-[var(--space-4)] py-[var(--space-3)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface-variant text-on-surface border-outline ${roundedClass}`}
                                 >
                                     {(() => {
                                         if (!columns) {
@@ -121,7 +121,7 @@ export function DataTable<TData>({
                                 <th
                                     key={group.parent}
                                     rowSpan={2}
-                                    className={`font-medium px-4 py-3 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} align-middle bg-surface-variant text-on-surface border-outline ${roundedClass}`}
+                                    className={`font-medium px-[var(--space-4)] py-[var(--space-3)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} align-middle bg-surface-variant text-on-surface border-outline ${roundedClass}`}
                                 >
                                     {(() => {
                                         if (!columns) {
@@ -148,7 +148,7 @@ export function DataTable<TData>({
                                     return (
                                         <th
                                             key={`${group.parent}.${child}`}
-                                            className={`font-normal px-4 py-2 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface text-on-surface border-outline-variant`}
+                                            className={`font-normal px-[var(--space-4)] py-[var(--space-2)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface text-on-surface border-outline-variant`}
                                         >
                                             {child}
                                         </th>
@@ -168,7 +168,7 @@ export function DataTable<TData>({
                                 return (
                                     <td
                                         key={col}
-                                        className={`px-4 py-3 ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(cellAlignment)} text-on-surface border-outline-variant ${isLastRow ? "" : "border-b"}`}
+                                        className={`px-[var(--space-4)] py-[var(--space-3)] ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(cellAlignment)} text-on-surface border-outline-variant ${isLastRow ? "" : "border-b"}`}
                                     >
                                         {value != null ? value.toString() : ""}
                                     </td>
@@ -190,7 +190,7 @@ export function DataTable<TData>({
         );
 
         return (
-            <table className="min-w-full border-separate border-spacing-0 rounded-lg">
+            <table className="min-w-full border-separate border-spacing-0 rounded-[var(--radius-component)]">
                 <thead>
                     <tr>
                         {headerGroups.map((group, idx) => {
@@ -211,7 +211,7 @@ export function DataTable<TData>({
                                 <th
                                     key={group.parent}
                                     colSpan={group.children.length}
-                                    className={`font-medium px-4 py-3 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface-variant text-on-surface border-outline ${roundedClass}`}
+                                    className={`font-medium px-[var(--space-4)] py-[var(--space-3)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface-variant text-on-surface border-outline ${roundedClass}`}
                                 >
                                     {(() => {
                                         const header = columns!.find(col => col.accessorKey === group.parent)?.header;
@@ -225,7 +225,7 @@ export function DataTable<TData>({
                                 <th
                                     key={group.parent}
                                     rowSpan={2}
-                                    className={`font-medium px-4 py-3 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} align-middle bg-surface-variant text-on-surface border-outline ${roundedClass}`}
+                                    className={`font-medium px-[var(--space-4)] py-[var(--space-3)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} align-middle bg-surface-variant text-on-surface border-outline ${roundedClass}`}
                                 >
                                     {(() => {
                                         const columnDef = columns!.find(col => col.accessorKey === group.parent);
@@ -251,7 +251,7 @@ export function DataTable<TData>({
                                     return (
                                         <th
                                             key={`${group.parent}.${child}`}
-                                            className={`font-normal px-4 py-2 border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface text-on-surface border-outline-variant`}
+                                            className={`font-normal px-[var(--space-4)] py-[var(--space-2)] border-b ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(headerAlignment)} bg-surface text-on-surface border-outline-variant`}
                                         >
                                             {(() => {
                                                 const header = columns!.find(col => col.accessorKey === `${group.parent}.${child}`)?.header;
@@ -285,7 +285,7 @@ export function DataTable<TData>({
                                 return (
                                     <td
                                         key={col}
-                                        className={`px-4 py-3 ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(cellAlignment)} text-on-surface border-outline-variant ${isLastRow ? "" : "border-b"}`}
+                                        className={`px-[var(--space-4)] py-[var(--space-3)] ${shouldHaveBorderR ? 'border-r' : ''} ${getAlignmentClass(cellAlignment)} text-on-surface border-outline-variant ${isLastRow ? "" : "border-b"}`}
                                     >
                                         {cellContent as React.ReactNode}
                                     </td>
@@ -299,7 +299,7 @@ export function DataTable<TData>({
     };
 
     return (
-        <div className="overflow-x-auto rounded-lg shadow-sm bg-surface">
+        <div className="overflow-x-auto rounded-[var(--radius-component)] shadow-sm bg-surface">
             {columns ? renderGroupedTable() : renderLegacyTable()}
         </div>
     );

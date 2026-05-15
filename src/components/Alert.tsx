@@ -19,10 +19,10 @@ export function Alert({
 }: AlertProps) {
 	return (
 		<Dialog open={open} onClose={onClose}>
-			<div className="text-center">
-				<h2 className="text-xl font-semibold mb-2">{title}</h2>
-				<p className="mb-4 text-on-surface-variant">{message}</p>
-				<div className="flex justify-end gap-2">
+			<div className="space-y-[var(--space-4)] text-center">
+				<h2 className="text-xl font-semibold">{title}</h2>
+				<p className="text-on-surface-variant">{message}</p>
+				<div className="flex justify-end gap-[var(--space-2)]">
 					<Button onClick={onClose}>
 						{confirmText}
 					</Button>

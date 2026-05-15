@@ -131,25 +131,25 @@ export const Filter = ({
     }));
 
     return (
-        <div className="w-full bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden transition-all duration-300">
+        <div className="w-full bg-surface border border-outline-variant rounded-[var(--radius-surface)] shadow-lg overflow-hidden transition-all duration-300">
             {/* Header */}
             <div
                 className={clsx(
-                    "flex items-center justify-between px-5 py-4 cursor-pointer select-none transition-colors",
+                    "flex items-center justify-between px-[var(--space-5)] py-[var(--space-4)] cursor-pointer select-none transition-colors",
                     isExpanded ? 'bg-surface-variant/20 border-b border-outline-variant' : 'hover:bg-surface-variant/10'
                 )}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-[var(--space-3)]">
                     <div className={clsx(
-                        "p-2 rounded-lg transition-colors",
+                        "p-[var(--space-2)] rounded-[var(--radius-control)] transition-colors",
                         activeFilters.length > 0 ? 'bg-primary text-on-primary' : 'bg-surface-variant text-on-surface-variant'
                     )}>
                         <FilterIcon size={18} />
                     </div>
                     <div>
                         <h3 className="font-bold text-on-surface text-sm leading-tight">{title}</h3>
-                        <p className="text-xs text-on-surface-variant mt-0.5">
+                        <p className="text-xs text-on-surface-variant mt-[0.125rem]">
                             {activeFilters.length === 0
                                 ? "Keine aktiven Filter - Zeige alle Einträge"
                                 : `${activeFilters.length} aktive Bedingung(en)`}
@@ -157,7 +157,7 @@ export const Filter = ({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-[var(--space-4)]">
                     {allowAutoUpdate && (
                         <div className="hidden md:block" onClick={e => e.stopPropagation()}>
                             <Checkbox
@@ -175,8 +175,8 @@ export const Filter = ({
 
             {/* Body */}
             {isExpanded && (
-                <div className="p-5">
-                    <div className="space-y-3">
+                <div className="p-[var(--space-5)]">
+                    <div className="space-y-[var(--space-3)]">
                         {activeFilters.map((filter) => {
                             const fieldConfig = fields[filter.field];
                             if (!fieldConfig) return null;
@@ -187,7 +187,7 @@ export const Filter = ({
                             return (
                                 <div
                                     key={filter.id}
-                                    className="flex flex-wrap md:flex-nowrap items-center gap-3 p-3 bg-surface border border-outline-variant rounded-lg hover:border-primary/30 transition-all animate-in fade-in slide-in-from-left-2 duration-200"
+                                    className="flex flex-wrap md:flex-nowrap items-center gap-[var(--space-3)] p-[var(--space-3)] bg-surface border border-outline-variant rounded-[var(--radius-control)] hover:border-primary/30 transition-all animate-in fade-in slide-in-from-left-2 duration-200"
                                 >
                                     {/* Field Selector */}
                                     <div className="shrink-0 w-full md:w-48">
@@ -243,9 +243,9 @@ export const Filter = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-5 border-t border-outline-variant gap-4">
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="w-full sm:w-64">
+                    <div className="flex flex-col sm:flex-row items-center justify-between mt-[var(--space-6)] pt-[var(--space-5)] border-t border-outline-variant gap-[var(--space-4)]">
+                        <div className="flex items-center gap-[var(--space-3)] w-full sm:w-auto">
+                            <div className="w-full sm:w-[16rem]">
                                 <Select
                                     value=""
                                     onChange={(val) => {
@@ -273,18 +273,18 @@ export const Filter = ({
                             )}
                         </div>
 
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-[var(--space-2)] w-full sm:w-auto">
                             {!autoApply && (
                                 <Button
                                     onClick={() => onApply(activeFilters)}
-                                    className="w-full sm:w-auto gap-2"
+                                    className="w-full sm:w-auto gap-[var(--space-2)]"
                                 >
                                     <Search size={16} />
                                     Filter anwenden
                                 </Button>
                             )}
                             {autoApply && (
-                                <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20 animate-pulse">
+                                <div className="flex items-center gap-[var(--space-2)] text-primary bg-primary/10 px-[var(--space-3)] py-[0.375rem] rounded-[var(--radius-control)] border border-primary/20 animate-pulse">
                                     <RefreshCcw size={14} className="animate-spin duration-3000" />
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Live Update</span>
                                 </div>

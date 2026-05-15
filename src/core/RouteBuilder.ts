@@ -30,6 +30,9 @@ export interface RouteConfig {
 interface ScreenOptions {
 	canActivate?: Guard[];
 	canDeactivate?: Guard[];
+	className?: string;
+	title?: string;
+	description?: string;
 }
 
 interface SheetOptions extends ScreenOptions {

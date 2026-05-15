@@ -92,7 +92,7 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(
 			<AccordionContext.Provider value={contextValue}>
 				<div
 					ref={ref}
-					className={clsx('overflow-hidden rounded-lg border border-outline', className)}
+					className={clsx('overflow-hidden rounded-[var(--radius-component)] border border-outline', className)}
 					{...rest}
 				>
 					{children}
@@ -151,7 +151,7 @@ export const AccordionTrigger = forwardRef<
 		<button
 			ref={ref}
 			className={clsx(
-				'flex w-full items-center justify-between p-4 font-medium transition-all hover:bg-surface-variant [&[data-state=open]>svg]:rotate-180',
+				'flex w-full items-center justify-between p-[var(--space-4)] font-medium transition-all hover:bg-surface-variant [&[data-state=open]>svg]:rotate-180',
 				className
 			)}
 			onClick={() => onItemClick(value)}
@@ -190,8 +190,7 @@ export const AccordionContent = forwardRef<
 			)}
 			{...props}
 		>
-			<div className="pb-4 pl-4 pr-4">{children}</div>
+			<div className="pb-[var(--space-4)] pl-[var(--space-4)] pr-[var(--space-4)]">{children}</div>
 		</div>
 	)
 })
-

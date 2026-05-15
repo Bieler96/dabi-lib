@@ -85,15 +85,15 @@ export const TagInput: React.FC<TagInputProps> = ({ tags, setTags, placeholder, 
 	);
 
 	return (
-		<Popover
-			open={popoverOpen && filteredSuggestions.length > 0}
-			onOpenChange={setPopoverOpen}
-			className='max-h-96 overflow-y-auto'
-			trigger={
-				<div
-					className='px-1 flex flex-wrap items-center gap-1 rounded-lg transition duration-150 disabled:opacity-50 disabled:pointer-events-none border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px]'
-				>
-					<div className="h-fit flex flex-wrap gap-1">
+			<Popover
+				open={popoverOpen && filteredSuggestions.length > 0}
+				onOpenChange={setPopoverOpen}
+				className='max-h-96 overflow-y-auto'
+				trigger={
+					<div
+					className='px-[var(--space-1)] flex flex-wrap items-center gap-[var(--space-1)] rounded-[var(--radius-component)] transition duration-150 disabled:opacity-50 disabled:pointer-events-none border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px]'
+					>
+					<div className="h-fit flex flex-wrap gap-[var(--space-1)]">
 						{tags.map(tag => (
 							<Chip key={tag} variant="input" onDelete={(e) => {
 								e.preventDefault();

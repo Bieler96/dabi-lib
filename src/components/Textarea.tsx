@@ -10,7 +10,7 @@ export interface TextareaProps
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 	({ label, className, variant = "default", ...props }, ref) => {
 		const base =
-			"w-full rounded-lg transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
+			"w-full rounded-[var(--radius-component)] transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
 		const size = "p-3 text-base";
 
 		const variants = {
@@ -38,3 +38,5 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 		);
 	}
 );
+
+Textarea.displayName = "Textarea";

@@ -23,18 +23,18 @@ export function Item({
 	variant = "rounded",
 }: ItemProps) {
 	const classes = clsx(
-		`flex items-center gap-4 min-h-12 md:min-h-10 py-2 px-6 w-full`,
+		`flex items-center gap-[var(--space-4)] min-h-12 md:min-h-10 py-[var(--space-2)] px-[var(--space-6)] w-full`,
 		"transition-all duration-150 bg-surface-variant",
 		{
-			"rounded-t-lg": variant === "first",
-			"rounded-b-lg": variant === "last",
+			"rounded-t-[var(--radius-component)]": variant === "first",
+			"rounded-b-[var(--radius-component)]": variant === "last",
 			"rounded-none": variant === "none",
-			"rounded-lg": variant === "rounded",
+			"rounded-[var(--radius-component)]": variant === "rounded",
 			"cursor-pointer active:bg-primary-container sm:hover:bg-primary-container": clickable && !disabled,
-			"hover:rounded-lg": clickable && !disabled && (variant === "none" || variant === "first" || variant === "last"),
-			"hover:mb-1": clickable && !disabled && (variant === "first"),
-			"hover:my-1": clickable && !disabled && (variant === "none"),
-			"hover:mt-1": clickable && !disabled && (variant === "last"),
+			"hover:rounded-[var(--radius-component)]": clickable && !disabled && (variant === "none" || variant === "first" || variant === "last"),
+			"hover:mb-[var(--space-1)]": clickable && !disabled && (variant === "first"),
+			"hover:my-[var(--space-1)]": clickable && !disabled && (variant === "none"),
+			"hover:mt-[var(--space-1)]": clickable && !disabled && (variant === "last"),
 			"opacity-50 cursor-not-allowed": disabled
 		}
 	);
@@ -48,9 +48,9 @@ export function Item({
 				<span className="text-primary">{leadingContent}</span>
 			)}
 			<div className="flex-1">
-				<p className=" text-primary">{label}</p>
+				<p className="text-on-surface">{label}</p>
 				{description && (
-					<p className="text-xs text-primary/75">{description}</p>
+					<p className="text-xs text-on-surface-variant">{description}</p>
 				)}
 			</div>
 			{trailingContent && (
