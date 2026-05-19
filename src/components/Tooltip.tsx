@@ -21,10 +21,7 @@ export function Tooltip({
 			content={content}
 			onHover
 			placement={placement}
-			className={clsx(
-				"px-2 py-1 text-sm pointer-events-none",
-				className
-			)}
+			className={clsx("px-2 py-1 text-sm pointer-events-none", className)}
 		/>
 	);
 }

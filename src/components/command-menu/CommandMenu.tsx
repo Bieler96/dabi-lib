@@ -32,7 +32,8 @@ export function CommandMenu({
 }: CommandMenuProps) {
 	const [internalOpen, setInternalOpen] = useState(false);
 	const isOpen = open !== undefined ? open : internalOpen;
-	const setIsOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
+	const setIsOpen =
+		onOpenChange !== undefined ? onOpenChange : setInternalOpen;
 	const [isMounted, setIsMounted] = useState(false);
 	const [animateIn, setAnimateIn] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -49,15 +50,22 @@ export function CommandMenu({
 	const filteredItems = useMemo(() => {
 		if (!searchQuery) return normalizedGroups;
 
-		return normalizedGroups.map(group => ({
-			...group,
-			items: group.items.filter(item =>
-				item.title.toLowerCase().includes(searchQuery.toLowerCase())
-			)
-		})).filter(group => group.items.length > 0);
+		return normalizedGroups
+			.map((group) => ({
+				...group,
+				items: group.items.filter((item) =>
+					item.title
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase()),
+				),
+			}))
+			.filter((group) => group.items.length > 0);
 	}, [searchQuery, normalizedGroups]);
 
-	const flatFilteredItems = useMemo(() => filteredItems.flatMap(group => group.items), [filteredItems]);
+	const flatFilteredItems = useMemo(
+		() => filteredItems.flatMap((group) => group.items),
+		[filteredItems],
+	);
 
 	const handleClose = useCallback(() => {
 		setAnimateIn(false);
@@ -67,25 +75,35 @@ export function CommandMenu({
 		}, 200);
 	}, [setIsOpen]);
 
-	const handleSelect = useCallback((item: CommandMenuItemType) => {
-		item.onSelect();
-		handleClose();
-	}, [handleClose]);
+	const handleSelect = useCallback(
+		(item: CommandMenuItemType) => {
+			item.onSelect();
+			handleClose();
+		},
+		[handleClose],
+	);
 
 	useEffect(() => {
 		const down = (e: KeyboardEvent) => {
 			if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
 				e.preventDefault();
-				if (!isOpen) setIsOpen(true); else handleClose();
+				if (!isOpen) setIsOpen(true);
+				else handleClose();
 			}
 			if (isOpen) {
 				if (e.key === "Escape") handleClose();
 				else if (e.key === "ArrowDown") {
 					e.preventDefault();
-					setActiveIndex((prev) => (prev + 1) % flatFilteredItems.length);
+					setActiveIndex(
+						(prev) => (prev + 1) % flatFilteredItems.length,
+					);
 				} else if (e.key === "ArrowUp") {
 					e.preventDefault();
-					setActiveIndex((prev) => (prev - 1 + flatFilteredItems.length) % flatFilteredItems.length);
+					setActiveIndex(
+						(prev) =>
+							(prev - 1 + flatFilteredItems.length) %
+							flatFilteredItems.length,
+					);
 				} else if (e.key === "Enter") {
 					e.preventDefault();
 					const selectedItem = flatFilteredItems[activeIndex];
@@ -97,9 +115,18 @@ export function CommandMenu({
 		};
 		document.addEventListener("keydown", down);
 		return () => document.removeEventListener("keydown", down);
-	}, [isOpen, activeIndex, flatFilteredItems, handleClose, handleSelect, setIsOpen]);
+	}, [
+		isOpen,
+		activeIndex,
+		flatFilteredItems,
+		handleClose,
+		handleSelect,
+		setIsOpen,
+	]);
 
-	useEffect(() => { if (isOpen) setIsMounted(true); }, [isOpen]);
+	useEffect(() => {
+		if (isOpen) setIsMounted(true);
+	}, [isOpen]);
 
 	useEffect(() => {
 		if (isMounted) {
@@ -112,12 +139,16 @@ export function CommandMenu({
 		}
 	}, [isMounted]);
 
-	useEffect(() => { setActiveIndex(0); }, [searchQuery]);
+	useEffect(() => {
+		setActiveIndex(0);
+	}, [searchQuery]);
 
 	useEffect(() => {
 		if (isMounted) document.body.style.overflow = "hidden";
 		else document.body.style.overflow = "";
-		return () => { document.body.style.overflow = ""; };
+		return () => {
+			document.body.style.overflow = "";
+		};
 	}, [isMounted]);
 
 	useEffect(() => {
@@ -133,7 +164,10 @@ export function CommandMenu({
 	return (
 		<>
 			<div
-				className={clsx("fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-40 transition-opacity duration-200", animateIn ? "opacity-100" : "opacity-0")}
+				className={clsx(
+					"fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm z-40 transition-opacity duration-200",
+					animateIn ? "opacity-100" : "opacity-0",
+				)}
 				onClick={handleClose}
 			/>
 			<div
@@ -141,7 +175,12 @@ export function CommandMenu({
 				onClick={handleClose}
 			>
 				<div
-					className={clsx("bg-surface border border-outline rounded-[var(--radius-component)] shadow-lg max-w-lg w-full relative transition-all duration-200 ease-out", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}
+					className={clsx(
+						"bg-surface border border-outline rounded-[var(--radius-component)] shadow-lg max-w-lg w-full relative transition-all duration-200 ease-out",
+						animateIn
+							? "opacity-100 translate-y-0"
+							: "opacity-0 translate-y-12",
+					)}
 					onClick={(e) => e.stopPropagation()}
 				>
 					<div className="relative p-[var(--space-4)]">
@@ -151,43 +190,66 @@ export function CommandMenu({
 							placeholder="Search..."
 							className="pl-9 w-full"
 							value={searchQuery}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setSearchQuery(e.target.value)}
 						/>
 					</div>
 					<div className="p-[var(--space-4)] pt-0 max-h-[400px] overflow-y-auto">
 						{flatFilteredItems.length > 0 ? (
 							<ul>
-								{filteredItems.map(group => (
+								{filteredItems.map((group) => (
 									<li key={group.id}>
-										{group.heading && <p className="text-sm text-on-surface/75 px-[var(--space-2)] pb-[var(--space-2)] pt-[var(--space-4)]">{group.heading}</p>}
+										{group.heading && (
+											<p className="text-sm text-on-surface/75 px-[var(--space-2)] pb-[var(--space-2)] pt-[var(--space-4)]">
+												{group.heading}
+											</p>
+										)}
 										<ul>
-											{group.items.map(item => {
+											{group.items.map((item) => {
 												itemIndex++;
 												const currentIndex = itemIndex;
 												return (
 													<CommandMenuItem
 														key={item.id}
-														ref={(el) => { listRef.current[currentIndex] = el; }}
-														isActive={activeIndex === currentIndex}
-														onSelect={() => handleSelect(item)}
+														ref={(el) => {
+															listRef.current[
+																currentIndex
+															] = el;
+														}}
+														isActive={
+															activeIndex ===
+															currentIndex
+														}
+														onSelect={() =>
+															handleSelect(item)
+														}
 													>
-															<div className="flex flex-col gap-[var(--space-1)]">
+														<div className="flex flex-col gap-[var(--space-1)]">
 															<p>{item.title}</p>
-															{item.description && <p className="text-xs opacity-75">{item.description}</p>}
+															{item.description && (
+																<p className="text-xs opacity-75">
+																	{
+																		item.description
+																	}
+																</p>
+															)}
 														</div>
 													</CommandMenuItem>
-												)
+												);
 											})}
 										</ul>
 									</li>
 								))}
 							</ul>
 						) : (
-							<p className="text-center text-sm text-on-surface/75 py-[var(--space-4)]">No results found.</p>
+							<p className="text-center text-sm text-on-surface/75 py-[var(--space-4)]">
+								No results found.
+							</p>
 						)}
 					</div>
 				</div>
 			</div>
 		</>
 	);
-};
+}

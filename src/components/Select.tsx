@@ -39,20 +39,23 @@ export function Select<T>({
 	const [searchTerm, setSearchTerm] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
-	const handleSelect = useCallback((optionValue: T) => {
-		if (multiple && Array.isArray(value)) {
-			const newValue = value.includes(optionValue)
-				? value.filter((v) => v !== optionValue)
-				: [...value, optionValue];
-			onChange(newValue);
-		} else {
-			onChange(optionValue);
-			setIsOpen(false);
-		}
-	}, [multiple, value, onChange, setIsOpen]);
+	const handleSelect = useCallback(
+		(optionValue: T) => {
+			if (multiple && Array.isArray(value)) {
+				const newValue = value.includes(optionValue)
+					? value.filter((v) => v !== optionValue)
+					: [...value, optionValue];
+				onChange(newValue);
+			} else {
+				onChange(optionValue);
+				setIsOpen(false);
+			}
+		},
+		[multiple, value, onChange, setIsOpen],
+	);
 
 	const filteredOptions = options.filter((option) =>
-		option.label.toLowerCase().includes(searchTerm.toLowerCase())
+		option.label.toLowerCase().includes(searchTerm.toLowerCase()),
 	);
 
 	useEffect(() => {
@@ -97,7 +100,9 @@ export function Select<T>({
 
 	useEffect(() => {
 		if (isOpen) {
-			const selectedIndex = options.findIndex(option => !multiple && option.value === value);
+			const selectedIndex = options.findIndex(
+				(option) => !multiple && option.value === value,
+			);
 			requestAnimationFrame(() => {
 				setActiveIndex(selectedIndex !== -1 ? selectedIndex : 0);
 				setSearchTerm("");
@@ -108,21 +113,26 @@ export function Select<T>({
 		}
 	}, [isOpen, withSearch, options, value, multiple]);
 
-
-
-	const getLabel = (val: T) => options.find((o) => o.value === val)?.label || String(val);
+	const getLabel = (val: T) =>
+		options.find((o) => o.value === val)?.label || String(val);
 
 	const renderValue = () => {
 		if (multiple && Array.isArray(value) && value.length > 0) {
 			return (
 				<div className="h-fit flex flex-wrap gap-[var(--space-1)]">
-					{value && value.map((v) => (
-						<Chip variant="input" key={String(v)} onDelete={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							handleSelect(v);
-						}} label={getLabel(v)} />
-					))}
+					{value &&
+						value.map((v) => (
+							<Chip
+								variant="input"
+								key={String(v)}
+								onDelete={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									handleSelect(v);
+								}}
+								label={getLabel(v)}
+							/>
+						))}
 				</div>
 			);
 		}
@@ -143,27 +153,32 @@ export function Select<T>({
 				/>
 			)}
 			<ul className="py-[var(--space-1)] max-h-60 overflow-auto">
-				{filteredOptions && filteredOptions.map((option, index) => (
-					<CommandMenuItem
-						key={String(option.value)}
-						ref={(el) => { listRef.current[index] = el; }}
-						isActive={activeIndex === index}
-						onSelect={() => handleSelect(option.value)}
-					>
-						{multiple && Array.isArray(value) ? (
-							<Checkbox
-								checked={value.includes(option.value)}
-								onChange={() => handleSelect(option.value)}
-								label={option.label}
-							/>
-						) : (
-							<div className="flex items-center justify-between w-full">
-								<span>{option.label}</span>
-								{value === option.value && <Check className="h-4 w-4" />}
-							</div>
-						)}
-					</CommandMenuItem>
-				))}
+				{filteredOptions &&
+					filteredOptions.map((option, index) => (
+						<CommandMenuItem
+							key={String(option.value)}
+							ref={(el) => {
+								listRef.current[index] = el;
+							}}
+							isActive={activeIndex === index}
+							onSelect={() => handleSelect(option.value)}
+						>
+							{multiple && Array.isArray(value) ? (
+								<Checkbox
+									checked={value.includes(option.value)}
+									onChange={() => handleSelect(option.value)}
+									label={option.label}
+								/>
+							) : (
+								<div className="flex items-center justify-between w-full">
+									<span>{option.label}</span>
+									{value === option.value && (
+										<Check className="h-4 w-4" />
+									)}
+								</div>
+							)}
+						</CommandMenuItem>
+					))}
 			</ul>
 		</div>
 	);
@@ -175,18 +190,20 @@ export function Select<T>({
 			onOpenChange={setIsOpen}
 			className={clsx("w-full", className)}
 			placement="bottom-start"
-		trigger={
-			<div
-				className={clsx(
-					"flex items-center justify-between w-full rounded-[var(--radius-component)] transition duration-150 border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px] px-[var(--space-1)] py-[var(--space-1)] min-h-10",
-					disabled ? "opacity-50 pointer-events-none" : "cursor-pointer",
-				)}
-			>
+			trigger={
+				<div
+					className={clsx(
+						"flex items-center justify-between w-full rounded-[var(--radius-component)] transition duration-150 border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px] px-[var(--space-1)] py-[var(--space-1)] min-h-10",
+						disabled
+							? "opacity-50 pointer-events-none"
+							: "cursor-pointer",
+					)}
+				>
 					<div className="grow w-full">{renderValue()}</div>
 					<ChevronDown
 						className={clsx(
 							"w-5 h-5 text-on-surface-variant transition-transform duration-200",
-							isOpen && "rotate-180"
+							isOpen && "rotate-180",
 						)}
 					/>
 				</div>

@@ -9,21 +9,21 @@ Die `dabi-lib` unterstützt jetzt die Absicherung von API-Endpunkten mit Bearer-
 Exportiere eine `auth`-Konfiguration in deiner API-Route:
 
 ```typescript
-import type { Context } from 'hono';
-import type { AuthConfig } from 'dabi-lib';
+import type { Context } from "hono";
+import type { AuthConfig } from "dabi-lib";
 
 // Authentifizierung konfigurieren
 export const auth: AuthConfig = {
-  bearer: ['my-secret-token', 'another-valid-token'],
-  // oder API-Key:
-  // apiKey: ['my-api-key', 'another-key'],
-  // oder beides (OR-Logik):
-  // bearer: ['token1'],
-  // apiKey: ['key1']
+	bearer: ["my-secret-token", "another-valid-token"],
+	// oder API-Key:
+	// apiKey: ['my-api-key', 'another-key'],
+	// oder beides (OR-Logik):
+	// bearer: ['token1'],
+	// apiKey: ['key1']
 };
 
 export const GET = async (c: Context) => {
-  return c.json({ message: 'Protected endpoint!' });
+	return c.json({ message: "Protected endpoint!" });
 };
 ```
 
@@ -40,6 +40,7 @@ export const auth: AuthConfig = {
 ```
 
 **Verwendung:**
+
 ```bash
 curl -H "Authorization: Bearer my-secret-token" http://localhost:3000/api/protected
 ```
@@ -55,6 +56,7 @@ export const auth: AuthConfig = {
 ```
 
 **Verwendung:**
+
 ```bash
 # Als Header
 curl -H "x-api-key: my-api-key" http://localhost:3000/api/protected
@@ -69,57 +71,59 @@ JWT ist die empfohlene Methode für moderne Authentifizierung mit Benutzerinform
 
 ```typescript
 export const auth: AuthConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key',
-    algorithms: ['HS256'],  // Optional, Standard: ['HS256']
-    verify: async (payload: any) => {
-      // Optional: Benutzerdefinierte Verifizierung
-      // z.B. Prüfung der Benutzerrolle oder Datenbankabfrage
-      return payload.role === 'admin';
-    }
-  }
+	jwt: {
+		secret: process.env.JWT_SECRET || "your-secret-key",
+		algorithms: ["HS256"], // Optional, Standard: ['HS256']
+		verify: async (payload: any) => {
+			// Optional: Benutzerdefinierte Verifizierung
+			// z.B. Prüfung der Benutzerrolle oder Datenbankabfrage
+			return payload.role === "admin";
+		},
+	},
 };
 ```
 
 **Token generieren:**
+
 ```typescript
 // In einer Login-Route
-import { generateJWT } from 'dabi-lib';
+import { generateJWT } from "dabi-lib";
 
 export const POST = async (c: Context) => {
-  const { username, password } = await c.req.json();
-  
-  // Authentifizierung prüfen...
-  
-  const token = generateJWT(
-    { 
-      userId: 123, 
-      username: 'john',
-      role: 'admin' 
-    },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '24h' }
-  );
-  
-  return c.json({ token });
+	const { username, password } = await c.req.json();
+
+	// Authentifizierung prüfen...
+
+	const token = generateJWT(
+		{
+			userId: 123,
+			username: "john",
+			role: "admin",
+		},
+		process.env.JWT_SECRET || "your-secret-key",
+		{ expiresIn: "24h" },
+	);
+
+	return c.json({ token });
 };
 ```
 
 **Verwendung:**
+
 ```bash
 # JWT Token im Authorization Header
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." http://localhost:3000/api/jwt-protected
 ```
 
 **Payload im Handler zugreifen:**
+
 ```typescript
 export const GET = async (c: Context) => {
-  const jwtPayload = c.get('jwtPayload');
-  // jwtPayload enthält die dekodierten Token-Daten
-  return c.json({ user: jwtPayload });
+	const jwtPayload = c.get("jwtPayload");
+	// jwtPayload enthält die dekodierten Token-Daten
+	return c.json({ user: jwtPayload });
 };
 ```
-
 
 #### Kombinierte Authentifizierung (OR-Logik)
 
@@ -127,10 +131,10 @@ Wenn mehrere Methoden konfiguriert sind, wird der Zugriff gewährt, wenn **eine*
 
 ```typescript
 export const auth: AuthConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key'
-  },
-  apiKey: ['fallback-key']  // Fallback für Legacy-Systeme
+	jwt: {
+		secret: process.env.JWT_SECRET || "your-secret-key",
+	},
+	apiKey: ["fallback-key"], // Fallback für Legacy-Systeme
 };
 ```
 
@@ -142,8 +146,8 @@ Wenn `bearer: true` oder `apiKey: true` gesetzt wird, werden die Werte aus Umgeb
 
 ```typescript
 export const auth: AuthConfig = {
-  bearer: true,  // Verwendet process.env.DABI_BEARER_TOKEN
-  apiKey: true   // Verwendet process.env.DABI_API_KEY
+	bearer: true, // Verwendet process.env.DABI_BEARER_TOKEN
+	apiKey: true, // Verwendet process.env.DABI_API_KEY
 };
 ```
 
@@ -151,9 +155,9 @@ Für JWT solltest du **immer** Umgebungsvariablen verwenden:
 
 ```typescript
 export const auth: AuthConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET  // WICHTIG: Niemals hardcoden!
-  }
+	jwt: {
+		secret: process.env.JWT_SECRET, // WICHTIG: Niemals hardcoden!
+	},
 };
 ```
 
@@ -163,11 +167,8 @@ Bei fehlgeschlagener Authentifizierung wird ein `401 Unauthorized` Response zur�
 
 ```json
 {
-  "error": "Unauthorized",
-  "details": [
-    "Invalid JWT: jwt expired",
-    "Invalid or missing API Key"
-  ]
+	"error": "Unauthorized",
+	"details": ["Invalid JWT: jwt expired", "Invalid or missing API Key"]
 }
 ```
 
@@ -175,21 +176,21 @@ Bei fehlgeschlagener Authentifizierung wird ein `401 Unauthorized` Response zur�
 
 ```typescript
 // src/api/auth/login.ts - Token generieren
-import { generateJWT } from 'dabi-lib';
+import { generateJWT } from "dabi-lib";
 
 export const POST = async (c: Context) => {
-  const { username, password } = await c.req.json();
-  
-  // Benutzer authentifizieren (z.B. Datenbank-Abfrage)
-  // ...
-  
-  const token = generateJWT(
-    { userId: 123, username, role: 'admin' },
-    process.env.JWT_SECRET!,
-    { expiresIn: '7d' }
-  );
-  
-  return c.json({ token });
+	const { username, password } = await c.req.json();
+
+	// Benutzer authentifizieren (z.B. Datenbank-Abfrage)
+	// ...
+
+	const token = generateJWT(
+		{ userId: 123, username, role: "admin" },
+		process.env.JWT_SECRET!,
+		{ expiresIn: "7d" },
+	);
+
+	return c.json({ token });
 };
 ```
 
@@ -217,7 +218,7 @@ export const GET = async (c: Context) => {
 export const DELETE = async (c: Context) => {
   const id = c.req.param('id');
   const user = c.get('jwtPayload');
-  
+
   // Geschützte DELETE-Operation mit Audit-Log
   console.log(`User ${user.username} deleted user ${id}`);
   return c.json({ success: true });
@@ -246,6 +247,7 @@ export const DELETE = async (c: Context) => {
 ## Sicherheitshinweise
 
 ⚠️ **Wichtig:**
+
 - Die Authentifizierung erfolgt auf Endpunkt-Ebene
 - **JWT ist die empfohlene Methode** für moderne Anwendungen
 - Bearer-Tokens und API-Keys sind für einfache Anwendungsfälle oder Legacy-Systeme

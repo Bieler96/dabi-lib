@@ -6,58 +6,59 @@ Dieses Beispiel zeigt einen kompletten Authentifizierungs-Flow mit JWT.
 
 ```typescript
 // src/api/auth/login.ts
-import type { Context } from 'hono';
-import { generateJWT } from 'dabi-lib';
-import { db } from '../../db';
-import { users } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import type { Context } from "hono";
+import { generateJWT } from "dabi-lib";
+import { db } from "../../db";
+import { users } from "../../db/schema";
+import { eq } from "drizzle-orm";
 
 export const POST = async (c: Context) => {
-  try {
-    const { username, password } = await c.req.json();
+	try {
+		const { username, password } = await c.req.json();
 
-    if (!username || !password) {
-      return c.json({ error: 'Username and password required' }, 400);
-    }
+		if (!username || !password) {
+			return c.json({ error: "Username and password required" }, 400);
+		}
 
-    // Benutzer aus Datenbank laden
-    const user = await db.select()
-      .from(users)
-      .where(eq(users.username, username))
-      .get();
+		// Benutzer aus Datenbank laden
+		const user = await db
+			.select()
+			.from(users)
+			.where(eq(users.username, username))
+			.get();
 
-    if (!user) {
-      return c.json({ error: 'Invalid credentials' }, 401);
-    }
+		if (!user) {
+			return c.json({ error: "Invalid credentials" }, 401);
+		}
 
-    // Passwort prüfen (in Produktion: bcrypt verwenden!)
-    // const isValid = await bcrypt.compare(password, user.passwordHash);
-    // if (!isValid) return c.json({ error: 'Invalid credentials' }, 401);
+		// Passwort prüfen (in Produktion: bcrypt verwenden!)
+		// const isValid = await bcrypt.compare(password, user.passwordHash);
+		// if (!isValid) return c.json({ error: 'Invalid credentials' }, 401);
 
-    // JWT Token generieren
-    const token = generateJWT(
-      {
-        userId: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role || 'user'
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
+		// JWT Token generieren
+		const token = generateJWT(
+			{
+				userId: user.id,
+				username: user.username,
+				email: user.email,
+				role: user.role || "user",
+			},
+			process.env.JWT_SECRET!,
+			{ expiresIn: "7d" },
+		);
 
-    return c.json({
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }
-    });
-  } catch (e: any) {
-    return c.json({ error: e.message }, 500);
-  }
+		return c.json({
+			token,
+			user: {
+				id: user.id,
+				username: user.username,
+				email: user.email,
+				role: user.role,
+			},
+		});
+	} catch (e: any) {
+		return c.json({ error: e.message }, 500);
+	}
 };
 ```
 
@@ -65,41 +66,41 @@ export const POST = async (c: Context) => {
 
 ```typescript
 // src/api/profile.ts
-import type { Context } from 'hono';
-import type { AuthConfig } from 'dabi-lib';
+import type { Context } from "hono";
+import type { AuthConfig } from "dabi-lib";
 
 export const auth: AuthConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET!,
-    verify: async (payload: any) => {
-      // Prüfen ob Token gültig ist
-      return !!payload.userId;
-    }
-  }
+	jwt: {
+		secret: process.env.JWT_SECRET!,
+		verify: async (payload: any) => {
+			// Prüfen ob Token gültig ist
+			return !!payload.userId;
+		},
+	},
 };
 
 export const GET = async (c: Context) => {
-  const user = c.get('jwtPayload');
-  
-  // Benutzer-Profil aus Datenbank laden
-  // const profile = await db.select()...
-  
-  return c.json({
-    userId: user.userId,
-    username: user.username,
-    email: user.email,
-    role: user.role
-  });
+	const user = c.get("jwtPayload");
+
+	// Benutzer-Profil aus Datenbank laden
+	// const profile = await db.select()...
+
+	return c.json({
+		userId: user.userId,
+		username: user.username,
+		email: user.email,
+		role: user.role,
+	});
 };
 
 export const PATCH = async (c: Context) => {
-  const user = c.get('jwtPayload');
-  const updates = await c.req.json();
-  
-  // Profil aktualisieren
-  // await db.update(users)...
-  
-  return c.json({ success: true, updates });
+	const user = c.get("jwtPayload");
+	const updates = await c.req.json();
+
+	// Profil aktualisieren
+	// await db.update(users)...
+
+	return c.json({ success: true, updates });
 };
 ```
 
@@ -107,41 +108,41 @@ export const PATCH = async (c: Context) => {
 
 ```typescript
 // src/api/admin/users.ts
-import type { Context } from 'hono';
-import type { AuthConfig } from 'dabi-lib';
+import type { Context } from "hono";
+import type { AuthConfig } from "dabi-lib";
 
 export const auth: AuthConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET!,
-    verify: async (payload: any) => {
-      // Nur Admins erlauben
-      return payload.role === 'admin';
-    }
-  }
+	jwt: {
+		secret: process.env.JWT_SECRET!,
+		verify: async (payload: any) => {
+			// Nur Admins erlauben
+			return payload.role === "admin";
+		},
+	},
 };
 
 export const GET = async (c: Context) => {
-  const admin = c.get('jwtPayload');
-  
-  // Alle Benutzer laden
-  const allUsers = await db.select().from(users).all();
-  
-  return c.json({
-    users: allUsers,
-    requestedBy: admin.username
-  });
+	const admin = c.get("jwtPayload");
+
+	// Alle Benutzer laden
+	const allUsers = await db.select().from(users).all();
+
+	return c.json({
+		users: allUsers,
+		requestedBy: admin.username,
+	});
 };
 
 export const DELETE = async (c: Context) => {
-  const admin = c.get('jwtPayload');
-  const userId = c.req.param('id');
-  
-  // Audit-Log
-  console.log(`Admin ${admin.username} deleting user ${userId}`);
-  
-  await db.delete(users).where(eq(users.id, Number(userId)));
-  
-  return c.json({ success: true });
+	const admin = c.get("jwtPayload");
+	const userId = c.req.param("id");
+
+	// Audit-Log
+	console.log(`Admin ${admin.username} deleting user ${userId}`);
+
+	await db.delete(users).where(eq(users.id, Number(userId)));
+
+	return c.json({ success: true });
 };
 ```
 
@@ -150,47 +151,47 @@ export const DELETE = async (c: Context) => {
 ```typescript
 // Frontend: Login
 async function login(username: string, password: string) {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
-  
-  const data = await response.json();
-  
-  if (data.token) {
-    // Token speichern
-    localStorage.setItem('jwt_token', data.token);
-    return data.user;
-  }
-  
-  throw new Error(data.error);
+	const response = await fetch("/api/auth/login", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ username, password }),
+	});
+
+	const data = await response.json();
+
+	if (data.token) {
+		// Token speichern
+		localStorage.setItem("jwt_token", data.token);
+		return data.user;
+	}
+
+	throw new Error(data.error);
 }
 
 // Frontend: Geschützte API-Aufrufe
 async function fetchProfile() {
-  const token = localStorage.getItem('jwt_token');
-  
-  const response = await fetch('/api/profile', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-  
-  if (response.status === 401) {
-    // Token abgelaufen - Benutzer ausloggen
-    localStorage.removeItem('jwt_token');
-    window.location.href = '/login';
-    return;
-  }
-  
-  return await response.json();
+	const token = localStorage.getItem("jwt_token");
+
+	const response = await fetch("/api/profile", {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	if (response.status === 401) {
+		// Token abgelaufen - Benutzer ausloggen
+		localStorage.removeItem("jwt_token");
+		window.location.href = "/login";
+		return;
+	}
+
+	return await response.json();
 }
 
 // Frontend: Logout
 function logout() {
-  localStorage.removeItem('jwt_token');
-  window.location.href = '/login';
+	localStorage.removeItem("jwt_token");
+	window.location.href = "/login";
 }
 ```
 
@@ -209,31 +210,31 @@ Für längere Sessions kannst du Refresh-Tokens implementieren:
 
 ```typescript
 // src/api/auth/refresh.ts
-import type { Context } from 'hono';
-import { generateJWT, decodeJWT } from 'dabi-lib';
+import type { Context } from "hono";
+import { generateJWT, decodeJWT } from "dabi-lib";
 
 export const POST = async (c: Context) => {
-  const { refreshToken } = await c.req.json();
-  
-  try {
-    // Refresh-Token verifizieren
-    const payload = decodeJWT(refreshToken);
-    
-    // Neuen Access-Token generieren
-    const newToken = generateJWT(
-      {
-        userId: payload.userId,
-        username: payload.username,
-        role: payload.role
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: '15m' }  // Kurze Lebensdauer für Access-Token
-    );
-    
-    return c.json({ token: newToken });
-  } catch (e) {
-    return c.json({ error: 'Invalid refresh token' }, 401);
-  }
+	const { refreshToken } = await c.req.json();
+
+	try {
+		// Refresh-Token verifizieren
+		const payload = decodeJWT(refreshToken);
+
+		// Neuen Access-Token generieren
+		const newToken = generateJWT(
+			{
+				userId: payload.userId,
+				username: payload.username,
+				role: payload.role,
+			},
+			process.env.JWT_SECRET!,
+			{ expiresIn: "15m" }, // Kurze Lebensdauer für Access-Token
+		);
+
+		return c.json({ token: newToken });
+	} catch (e) {
+		return c.json({ error: "Invalid refresh token" }, 401);
+	}
 };
 ```
 

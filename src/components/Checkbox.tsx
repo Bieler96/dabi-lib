@@ -34,9 +34,7 @@ export function Checkbox({
 			<div
 				className={clsx(
 					"w-5 h-5 border-2 rounded-[0.35rem] flex items-center justify-center transition-colors duration-150",
-					checked
-						? "bg-primary border-primary"
-						: "border-outline",
+					checked ? "bg-primary border-primary" : "border-outline",
 				)}
 			>
 				{checked && (
@@ -54,7 +52,11 @@ export function Checkbox({
 				)}
 			</div>
 
-			{label && <span className="select-none text-base font-medium">{label}</span>}
+			{label && (
+				<span className="select-none text-base font-medium">
+					{label}
+				</span>
+			)}
 		</label>
 	);
 }

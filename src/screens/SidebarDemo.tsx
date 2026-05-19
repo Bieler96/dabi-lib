@@ -1,5 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { LayoutGrid, BarChart3, Sparkles, Users, FolderKanban, ShieldCheck } from "lucide-react";
+import {
+	LayoutGrid,
+	BarChart3,
+	Sparkles,
+	Users,
+	FolderKanban,
+	ShieldCheck,
+} from "lucide-react";
 import { Button } from "../components/Button";
 import {
 	Sidebar,
@@ -46,7 +53,8 @@ const sections: DemoSection[] = [
 	{
 		id: "analytics",
 		title: "Analytics",
-		description: "Usage, trends, and the kind of data people actually ask about.",
+		description:
+			"Usage, trends, and the kind of data people actually ask about.",
 		icon: <BarChart3 className="h-4 w-4" />,
 	},
 	{
@@ -111,15 +119,25 @@ export const SidebarDemo = () => {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 
 	const active = useMemo(
-		() => sections.find((section) => section.id === activeSection) ?? sections[0],
-		[activeSection]
+		() =>
+			sections.find((section) => section.id === activeSection) ??
+			sections[0],
+		[activeSection],
 	);
 
-	const projectLeafItems = sections.filter((section) => section.parent === "projects");
-	const securityLeafItems = sections.filter((section) => section.parent === "security");
+	const projectLeafItems = sections.filter(
+		(section) => section.parent === "projects",
+	);
+	const securityLeafItems = sections.filter(
+		(section) => section.parent === "security",
+	);
 
 	return (
-		<SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen} side="left">
+		<SidebarProvider
+			open={sidebarOpen}
+			onOpenChange={setSidebarOpen}
+			side="left"
+		>
 			<div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary/5 text-on-surface">
 				<Sidebar>
 					<SidebarHeader className="gap-3">
@@ -127,8 +145,12 @@ export const SidebarDemo = () => {
 							<Sparkles className="h-5 w-5" />
 						</div>
 						<div className="min-w-0 flex-1">
-							<p className="truncate text-sm font-semibold">Dabi Studio</p>
-							<p className="truncate text-xs text-on-surface-variant">Navigation shell demo</p>
+							<p className="truncate text-sm font-semibold">
+								Dabi Studio
+							</p>
+							<p className="truncate text-xs text-on-surface-variant">
+								Navigation shell demo
+							</p>
 						</div>
 						<SidebarTrigger className="md:hidden" />
 					</SidebarHeader>
@@ -149,25 +171,44 @@ export const SidebarDemo = () => {
 												</SidebarMenuCollapsibleTrigger>
 												<SidebarMenuCollapsibleContent>
 													<SidebarMenuSub>
-														{projectLeafItems.map((item) => (
-															<SidebarMenuSubItem key={item.id}>
-																<SidebarMenuSubButton
-																	active={activeSection === item.id}
-																	onClick={() => setActiveSection(item.id)}
+														{projectLeafItems.map(
+															(item) => (
+																<SidebarMenuSubItem
+																	key={
+																		item.id
+																	}
 																>
-																	{item.title}
-																</SidebarMenuSubButton>
-															</SidebarMenuSubItem>
-														))}
+																	<SidebarMenuSubButton
+																		active={
+																			activeSection ===
+																			item.id
+																		}
+																		onClick={() =>
+																			setActiveSection(
+																				item.id,
+																			)
+																		}
+																	>
+																		{
+																			item.title
+																		}
+																	</SidebarMenuSubButton>
+																</SidebarMenuSubItem>
+															),
+														)}
 													</SidebarMenuSub>
 												</SidebarMenuCollapsibleContent>
 											</SidebarMenuCollapsible>
 										) : (
 											<SidebarMenuButton
-												active={activeSection === section.id}
+												active={
+													activeSection === section.id
+												}
 												leading={section.icon}
 												badge={section.badge}
-												onClick={() => setActiveSection(section.id)}
+												onClick={() =>
+													setActiveSection(section.id)
+												}
 											>
 												{section.title}
 											</SidebarMenuButton>
@@ -180,99 +221,140 @@ export const SidebarDemo = () => {
 						<Separator className="my-[var(--space-4)]" />
 
 						<SidebarGroup>
-							<SidebarGroupLabel>Administration</SidebarGroupLabel>
+							<SidebarGroupLabel>
+								Administration
+							</SidebarGroupLabel>
 							<SidebarMenu>
 								<SidebarMenuItem>
 									<SidebarMenuButton
 										active={activeSection === "members"}
 										leading={<Users className="h-4 w-4" />}
-										onClick={() => setActiveSection("members")}
+										onClick={() =>
+											setActiveSection("members")
+										}
 									>
 										Members
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 
-							<SidebarMenuItem>
-								<SidebarMenuCollapsible defaultOpen={false}>
-									<SidebarMenuCollapsibleTrigger leading={<ShieldCheck className="h-4 w-4" />}>
-										Security
+								<SidebarMenuItem>
+									<SidebarMenuCollapsible defaultOpen={false}>
+										<SidebarMenuCollapsibleTrigger
+											leading={
+												<ShieldCheck className="h-4 w-4" />
+											}
+										>
+											Security
 										</SidebarMenuCollapsibleTrigger>
 										<SidebarMenuCollapsibleContent>
 											<SidebarMenuSub>
-												{securityLeafItems.map((item) => (
-													<SidebarMenuSubItem key={item.id}>
-														<SidebarMenuSubButton
-															active={activeSection === item.id}
-															onClick={() => setActiveSection(item.id)}
+												{securityLeafItems.map(
+													(item) => (
+														<SidebarMenuSubItem
+															key={item.id}
 														>
-															{item.title}
-														</SidebarMenuSubButton>
-													</SidebarMenuSubItem>
-												))}
+															<SidebarMenuSubButton
+																active={
+																	activeSection ===
+																	item.id
+																}
+																onClick={() =>
+																	setActiveSection(
+																		item.id,
+																	)
+																}
+															>
+																{item.title}
+															</SidebarMenuSubButton>
+														</SidebarMenuSubItem>
+													),
+												)}
 											</SidebarMenuSub>
 										</SidebarMenuCollapsibleContent>
 									</SidebarMenuCollapsible>
 								</SidebarMenuItem>
-								</SidebarMenu>
-							</SidebarGroup>
+							</SidebarMenu>
+						</SidebarGroup>
 
-							<Card variant="filled" className="mt-2 space-y-4 rounded-[var(--radius-component)] p-4">
-								<div className="flex items-start justify-between gap-3">
-									<div>
-										<p className="text-xs uppercase tracking-[0.12em] text-on-surface-variant">
-											Now viewing
-										</p>
-										<p className="mt-1 text-base font-semibold text-on-surface">{active.title}</p>
-									</div>
-									<div className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
-										Live
-									</div>
-								</div>
-								<p className="text-sm leading-6 text-on-surface-variant">
-									{active.description}
-								</p>
-								<div className="flex flex-wrap gap-2">
-									<span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
-										Desktop collapse
-									</span>
-									<span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
-										Mobile overlay
-									</span>
-								</div>
-							</Card>
-						</SidebarContent>
-
-						<SidebarFooter>
-							<div className="flex items-center justify-between gap-3">
-								<div className="min-w-0">
-									<p className="text-sm font-medium text-on-surface">Dabi Studio</p>
-									<p className="truncate text-xs text-on-surface-variant">
-										Use the rail to collapse, the menu to navigate.
+						<Card
+							variant="filled"
+							className="mt-2 space-y-4 rounded-[var(--radius-component)] p-4"
+						>
+							<div className="flex items-start justify-between gap-3">
+								<div>
+									<p className="text-xs uppercase tracking-[0.12em] text-on-surface-variant">
+										Now viewing
+									</p>
+									<p className="mt-1 text-base font-semibold text-on-surface">
+										{active.title}
 									</p>
 								</div>
-								<Button variant="ghost" size="sm" onClick={() => nav.popBackStack()}>
-									Home
-								</Button>
+								<div className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
+									Live
+								</div>
 							</div>
-						</SidebarFooter>
+							<p className="text-sm leading-6 text-on-surface-variant">
+								{active.description}
+							</p>
+							<div className="flex flex-wrap gap-2">
+								<span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
+									Desktop collapse
+								</span>
+								<span className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
+									Mobile overlay
+								</span>
+							</div>
+						</Card>
+					</SidebarContent>
+
+					<SidebarFooter>
+						<div className="flex items-center justify-between gap-3">
+							<div className="min-w-0">
+								<p className="text-sm font-medium text-on-surface">
+									Dabi Studio
+								</p>
+								<p className="truncate text-xs text-on-surface-variant">
+									Use the rail to collapse, the menu to
+									navigate.
+								</p>
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => nav.popBackStack()}
+							>
+								Home
+							</Button>
+						</div>
+					</SidebarFooter>
 					<SidebarRail />
 				</Sidebar>
 
 				<SidebarInset
-					className={sidebarOpen ? "md:ml-[17rem]" : "md:ml-[4.75rem] md:[transition-property:margin-left] md:duration-300"}
+					className={
+						sidebarOpen
+							? "md:ml-[17rem]"
+							: "md:ml-[4.75rem] md:[transition-property:margin-left] md:duration-300"
+					}
 				>
 					<header className="sticky top-0 z-20 border-b border-outline-variant bg-surface/85 backdrop-blur-md">
 						<div className="flex items-center justify-between gap-4 px-4 py-4 md:px-8">
 							<div className="flex items-center gap-3">
 								<SidebarTrigger className="md:hidden" />
 								<div>
-									<h1 className="text-2xl font-semibold">{active.title}</h1>
+									<h1 className="text-2xl font-semibold">
+										{active.title}
+									</h1>
 									<p className="text-sm text-on-surface-variant">
-										A small page to show how the sidebar feels in the app.
+										A small page to show how the sidebar
+										feels in the app.
 									</p>
 								</div>
 							</div>
-							<Button variant="ghost" onClick={() => nav.popBackStack()}>
+							<Button
+								variant="ghost"
+								onClick={() => nav.popBackStack()}
+							>
 								Back
 							</Button>
 						</div>
@@ -287,7 +369,8 @@ export const SidebarDemo = () => {
 											Interactive Demo
 										</p>
 										<h2 className="mt-1 text-xl font-semibold">
-											Tap a menu item and watch the content update.
+											Tap a menu item and watch the
+											content update.
 										</h2>
 									</div>
 									<div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -299,7 +382,9 @@ export const SidebarDemo = () => {
 									<p className="text-sm text-on-surface-variant">
 										Current section
 									</p>
-									<p className="mt-2 text-3xl font-semibold">{active.title}</p>
+									<p className="mt-2 text-3xl font-semibold">
+										{active.title}
+									</p>
 									<p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
 										{active.description}
 									</p>
@@ -310,19 +395,25 @@ export const SidebarDemo = () => {
 										<p className="text-xs uppercase tracking-[0.12em] text-on-surface-variant">
 											Layout
 										</p>
-										<p className="mt-2 text-lg font-semibold">Desktop + Mobile</p>
+										<p className="mt-2 text-lg font-semibold">
+											Desktop + Mobile
+										</p>
 									</div>
 									<div className="rounded-[var(--radius-component)] bg-surface-variant p-4">
 										<p className="text-xs uppercase tracking-[0.12em] text-on-surface-variant">
 											Mode
 										</p>
-										<p className="mt-2 text-lg font-semibold">Collapsed rail</p>
+										<p className="mt-2 text-lg font-semibold">
+											Collapsed rail
+										</p>
 									</div>
 									<div className="rounded-[var(--radius-component)] bg-surface-variant p-4">
 										<p className="text-xs uppercase tracking-[0.12em] text-on-surface-variant">
 											Pattern
 										</p>
-										<p className="mt-2 text-lg font-semibold">App shell</p>
+										<p className="mt-2 text-lg font-semibold">
+											App shell
+										</p>
 									</div>
 								</div>
 							</Card>
@@ -337,11 +428,27 @@ export const SidebarDemo = () => {
 									</h3>
 								</div>
 								<ul className="space-y-3 text-sm text-on-surface-variant">
-									<li>- The sidebar opens as a clean app shell, not a generic drawer.</li>
-									<li>- On mobile it overlays the page and closes on backdrop tap.</li>
-									<li>- On desktop it can collapse into a compact rail.</li>
-									<li>- Collapse it fully to see the icon-only mode with hidden labels.</li>
-									<li>- It uses the same surface, outline, and primary tokens as the rest of the library.</li>
+									<li>
+										- The sidebar opens as a clean app
+										shell, not a generic drawer.
+									</li>
+									<li>
+										- On mobile it overlays the page and
+										closes on backdrop tap.
+									</li>
+									<li>
+										- On desktop it can collapse into a
+										compact rail.
+									</li>
+									<li>
+										- Collapse it fully to see the icon-only
+										mode with hidden labels.
+									</li>
+									<li>
+										- It uses the same surface, outline, and
+										primary tokens as the rest of the
+										library.
+									</li>
 								</ul>
 							</Card>
 						</div>

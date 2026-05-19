@@ -1,9 +1,23 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type FC, type ReactNode } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+	type FC,
+	type ReactNode,
+} from "react";
 import { DataTable } from "../components/DataTable";
 import { Dialog } from "../components/Dialog";
 import { Sheet } from "../components/Sheet";
-import { RouteBuilder, type RouteConfig, type ImperativeNavigate, type RouteParams } from "./RouteBuilder";
+import {
+	RouteBuilder,
+	type RouteConfig,
+	type ImperativeNavigate,
+	type RouteParams,
+} from "./RouteBuilder";
 
 export type { Guard } from "./RouteBuilder";
 
@@ -25,7 +39,8 @@ const NavigationContext = createContext<NavContextType | null>(null);
 
 export const useNavigation = () => {
 	const context = useContext(NavigationContext);
-	if (!context) throw new Error("useNavigation must be used within a NavHost");
+	if (!context)
+		throw new Error("useNavigation must be used within a NavHost");
 	return context;
 };
 
@@ -34,7 +49,10 @@ interface NavHostProps {
 	builder: (builder: RouteBuilder) => void;
 }
 
-const readCurrentPath = (map: Record<string, RouteConfig>, startDestination: string) => {
+const readCurrentPath = (
+	map: Record<string, RouteConfig>,
+	startDestination: string,
+) => {
 	if (typeof window === "undefined") {
 		return startDestination;
 	}
@@ -66,7 +84,8 @@ const readCurrentParams = () => {
 	return result;
 };
 
-const sameParams = (left?: RouteParams, right?: RouteParams) => JSON.stringify(left ?? {}) === JSON.stringify(right ?? {});
+const sameParams = (left?: RouteParams, right?: RouteParams) =>
+	JSON.stringify(left ?? {}) === JSON.stringify(right ?? {});
 
 export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 	const routeMap = useMemo(() => {
@@ -94,27 +113,43 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			});
 		}
 
-		if (window.location.pathname + window.location.search !== url.pathname + url.search) {
+		if (
+			window.location.pathname + window.location.search !==
+			url.pathname + url.search
+		) {
 			window.history.pushState({ path, params }, "", url.toString());
 		}
 	}, []);
 
-	const internalNavigate: ImperativeNavigate = useCallback((targetPath, targetParams) => {
-		const targetConfig = routeMap[targetPath];
-		if (!targetConfig) {
-			console.warn(`Internal navigate: Route ${targetPath} not found`);
-			return;
-		}
+	const internalNavigate: ImperativeNavigate = useCallback(
+		(targetPath, targetParams) => {
+			const targetConfig = routeMap[targetPath];
+			if (!targetConfig) {
+				console.warn(
+					`Internal navigate: Route ${targetPath} not found`,
+				);
+				return;
+			}
 
-		if (targetConfig.type === "screen" || targetConfig.type === "list") {
-			syncUrl(targetPath, targetParams);
-		}
+			if (
+				targetConfig.type === "screen" ||
+				targetConfig.type === "list"
+			) {
+				syncUrl(targetPath, targetParams);
+			}
 
-		setStack((prev) => [
-			...prev,
-			{ id: Date.now().toString(), path: targetPath, params: targetParams, config: targetConfig },
-		]);
-	}, [routeMap, syncUrl]);
+			setStack((prev) => [
+				...prev,
+				{
+					id: Date.now().toString(),
+					path: targetPath,
+					params: targetParams,
+					config: targetConfig,
+				},
+			]);
+		},
+		[routeMap, syncUrl],
+	);
 
 	useEffect(() => {
 		if (!canUseDom) {
@@ -127,13 +162,18 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			const config = routeMap[initialPath];
 
 			if (!config) {
-				console.error(`Route config for path "${initialPath}" not found. Check NavHost builder.`);
+				console.error(
+					`Route config for path "${initialPath}" not found. Check NavHost builder.`,
+				);
 				return;
 			}
 
 			if (config.canActivate) {
 				for (const guard of config.canActivate) {
-					const canActivate = await guard(initialParams, internalNavigate);
+					const canActivate = await guard(
+						initialParams,
+						internalNavigate,
+					);
 					if (!canActivate) {
 						return;
 					}
@@ -158,7 +198,14 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 		if (stack.length === 0) {
 			void initialize();
 		}
-	}, [canUseDom, routeMap, startDestination, stack.length, internalNavigate, syncUrl]);
+	}, [
+		canUseDom,
+		routeMap,
+		startDestination,
+		stack.length,
+		internalNavigate,
+		syncUrl,
+	]);
 
 	useEffect(() => {
 		if (!canUseDom) {
@@ -171,15 +218,24 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			const config = routeMap[path];
 
 			if (!config) {
-				console.error(`Route config for path "${path}" not found during popstate.`);
+				console.error(
+					`Route config for path "${path}" not found during popstate.`,
+				);
 				return;
 			}
 
 			const currentEntry = stack[stack.length - 1];
-			if (currentEntry && (currentEntry.path !== path || !sameParams(currentEntry.params, params))) {
+			if (
+				currentEntry &&
+				(currentEntry.path !== path ||
+					!sameParams(currentEntry.params, params))
+			) {
 				if (currentEntry.config.canDeactivate) {
 					for (const guard of currentEntry.config.canDeactivate) {
-						const canDeactivate = await guard(currentEntry.params, internalNavigate);
+						const canDeactivate = await guard(
+							currentEntry.params,
+							internalNavigate,
+						);
 						if (!canDeactivate) {
 							syncUrl(currentEntry.path, currentEntry.params);
 							return;
@@ -199,13 +255,20 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 
 			setStack((prev) => {
 				const last = prev[prev.length - 1];
-				if (last && last.path === path && sameParams(last.params, params)) {
+				if (
+					last &&
+					last.path === path &&
+					sameParams(last.params, params)
+				) {
 					return prev;
 				}
 
 				let existingIndex = -1;
 				for (let i = prev.length - 1; i >= 0; i--) {
-					if (prev[i].path === path && sameParams(prev[i].params, params)) {
+					if (
+						prev[i].path === path &&
+						sameParams(prev[i].params, params)
+					) {
 						existingIndex = i;
 						break;
 					}
@@ -215,10 +278,17 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 					if (existingIndex === prev.length - 2) {
 						const entryToPop = prev[prev.length - 1];
 						const newStack = [...prev];
-						newStack[prev.length - 1] = { ...entryToPop, isExiting: true };
+						newStack[prev.length - 1] = {
+							...entryToPop,
+							isExiting: true,
+						};
 
 						setTimeout(() => {
-							setStack((curr) => curr.filter((entry) => entry.id !== entryToPop.id));
+							setStack((curr) =>
+								curr.filter(
+									(entry) => entry.id !== entryToPop.id,
+								),
+							);
 						}, 350);
 
 						return newStack;
@@ -241,7 +311,14 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 
 		window.addEventListener("popstate", handlePopState);
 		return () => window.removeEventListener("popstate", handlePopState);
-	}, [canUseDom, routeMap, startDestination, stack, internalNavigate, syncUrl]);
+	}, [
+		canUseDom,
+		routeMap,
+		startDestination,
+		stack,
+		internalNavigate,
+		syncUrl,
+	]);
 
 	const navigate = async (path: string, params?: RouteParams) => {
 		const config = routeMap[path];
@@ -263,7 +340,10 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			syncUrl(path, params);
 		}
 
-		setStack((prev) => [...prev, { id: Date.now().toString(), path, params, config }]);
+		setStack((prev) => [
+			...prev,
+			{ id: Date.now().toString(), path, params, config },
+		]);
 	};
 
 	const popBackStack = async () => {
@@ -274,14 +354,20 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 
 		if (entryToPop.config.canDeactivate) {
 			for (const guard of entryToPop.config.canDeactivate) {
-				const canDeactivate = await guard(entryToPop.params, internalNavigate);
+				const canDeactivate = await guard(
+					entryToPop.params,
+					internalNavigate,
+				);
 				if (!canDeactivate) {
 					return;
 				}
 			}
 		}
 
-		if (entryToPop.config.type === "screen" || entryToPop.config.type === "list") {
+		if (
+			entryToPop.config.type === "screen" ||
+			entryToPop.config.type === "list"
+		) {
 			window.history.back();
 			return;
 		}
@@ -296,7 +382,9 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 		});
 
 		setTimeout(() => {
-			setStack((prev) => prev.filter((entry) => entry.id !== entryToPop.id));
+			setStack((prev) =>
+				prev.filter((entry) => entry.id !== entryToPop.id),
+			);
 		}, 350);
 	};
 
@@ -307,7 +395,11 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 
 		let primaryScreenIndex = 0;
 		for (let i = stack.length - 1; i >= 0; i--) {
-			if ((stack[i].config.type === "screen" || stack[i].config.type === "list") && !stack[i].isExiting) {
+			if (
+				(stack[i].config.type === "screen" ||
+					stack[i].config.type === "list") &&
+				!stack[i].isExiting
+			) {
 				primaryScreenIndex = i;
 				break;
 			}
@@ -315,13 +407,19 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 
 		let secondaryScreenIndex = -1;
 		for (let i = primaryScreenIndex - 1; i >= 0; i--) {
-			if (stack[i].config.type === "screen" || stack[i].config.type === "list") {
+			if (
+				stack[i].config.type === "screen" ||
+				stack[i].config.type === "list"
+			) {
 				secondaryScreenIndex = i;
 				break;
 			}
 		}
 
-		const startIndex = secondaryScreenIndex !== -1 ? secondaryScreenIndex : primaryScreenIndex;
+		const startIndex =
+			secondaryScreenIndex !== -1
+				? secondaryScreenIndex
+				: primaryScreenIndex;
 		return stack.slice(Math.max(0, startIndex));
 	}, [stack]);
 
@@ -346,16 +444,28 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 				<div
 					key={entry.id}
 					className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)} ${entry.config.className || ""}`}
-					style={{ position: "absolute", inset: 0, background: "var(--color-surface)", overflowY: "auto" }}
+					style={{
+						position: "absolute",
+						inset: 0,
+						background: "var(--color-surface)",
+						overflowY: "auto",
+					}}
 				>
 					<div className="p-8 max-w-7xl mx-auto space-y-6">
 						<div>
-							<h1 className="text-3xl font-bold text-on-surface">{entry.config.title}</h1>
+							<h1 className="text-3xl font-bold text-on-surface">
+								{entry.config.title}
+							</h1>
 							{entry.config.description && (
-								<p className="mt-2 text-on-surface-variant">{entry.config.description}</p>
+								<p className="mt-2 text-on-surface-variant">
+									{entry.config.description}
+								</p>
 							)}
 						</div>
-						<DataTable columns={entry.config.listOptions.columns} data={entry.config.listOptions.data} />
+						<DataTable
+							columns={entry.config.listOptions.columns}
+							data={entry.config.listOptions.data}
+						/>
 					</div>
 				</div>
 			);
@@ -370,7 +480,12 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 				<div
 					key={entry.id}
 					className={`screen-wrapper shadow-2xl ${getPageAnimation(entry)} ${entry.config.className || ""}`}
-					style={{ position: "absolute", inset: 0, background: "var(--color-surface)", overflowY: "auto" }}
+					style={{
+						position: "absolute",
+						inset: 0,
+						background: "var(--color-surface)",
+						overflowY: "auto",
+					}}
 				>
 					<Component {...entry.params} />
 				</div>
@@ -385,7 +500,11 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 					onClose={popBackStack}
 					title={entry.config.title}
 					description={entry.config.description}
-					ariaLabel={typeof entry.config.title === "string" ? entry.config.title : undefined}
+					ariaLabel={
+						typeof entry.config.title === "string"
+							? entry.config.title
+							: undefined
+					}
 					paperClassName={`max-w-2xl ${entry.config.className || ""}`}
 				>
 					<Component {...entry.params} />
@@ -402,7 +521,11 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 					side="bottom"
 					title={entry.config.title}
 					description={entry.config.description}
-					ariaLabel={typeof entry.config.title === "string" ? entry.config.title : undefined}
+					ariaLabel={
+						typeof entry.config.title === "string"
+							? entry.config.title
+							: undefined
+					}
 					panelClassName={entry.config.className}
 				>
 					<Component {...entry.params} />
@@ -411,8 +534,14 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 		}
 
 		if (entry.config.type === "sheet") {
-			const title = typeof entry.params?.title === "string" ? entry.params.title : undefined;
-			const description = typeof entry.params?.description === "string" ? entry.params.description : undefined;
+			const title =
+				typeof entry.params?.title === "string"
+					? entry.params.title
+					: undefined;
+			const description =
+				typeof entry.params?.description === "string"
+					? entry.params.description
+					: undefined;
 
 			return (
 				<Sheet
@@ -422,7 +551,11 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 					side={entry.config.side}
 					title={title || entry.config.title}
 					description={description || entry.config.description}
-					ariaLabel={typeof (title || entry.config.title) === "string" ? (title || entry.config.title) as string : undefined}
+					ariaLabel={
+						typeof (title || entry.config.title) === "string"
+							? ((title || entry.config.title) as string)
+							: undefined
+					}
 					panelClassName={entry.config.className}
 				>
 					<Component {...entry.params} />
@@ -438,10 +571,18 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			value={{
 				navigate,
 				popBackStack,
-				currentRoute: stack.length > 0 ? stack[stack.length - 1].path : "",
+				currentRoute:
+					stack.length > 0 ? stack[stack.length - 1].path : "",
 			}}
 		>
-			<div style={{ position: "relative", width: "100%", height: "100vh", overflow: "clip" }}>
+			<div
+				style={{
+					position: "relative",
+					width: "100%",
+					height: "100vh",
+					overflow: "clip",
+				}}
+			>
 				{visibleEntries.map((entry) => renderEntry(entry))}
 			</div>
 		</NavigationContext.Provider>

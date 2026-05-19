@@ -30,13 +30,22 @@ export function Item({
 			"rounded-b-[var(--radius-component)]": variant === "last",
 			"rounded-none": variant === "none",
 			"rounded-[var(--radius-component)]": variant === "rounded",
-			"cursor-pointer active:bg-primary-container sm:hover:bg-primary-container": clickable && !disabled,
-			"hover:rounded-[var(--radius-component)]": clickable && !disabled && (variant === "none" || variant === "first" || variant === "last"),
-			"hover:mb-[var(--space-1)]": clickable && !disabled && (variant === "first"),
-			"hover:my-[var(--space-1)]": clickable && !disabled && (variant === "none"),
-			"hover:mt-[var(--space-1)]": clickable && !disabled && (variant === "last"),
-			"opacity-50 cursor-not-allowed": disabled
-		}
+			"cursor-pointer active:bg-primary-container sm:hover:bg-primary-container":
+				clickable && !disabled,
+			"hover:rounded-[var(--radius-component)]":
+				clickable &&
+				!disabled &&
+				(variant === "none" ||
+					variant === "first" ||
+					variant === "last"),
+			"hover:mb-[var(--space-1)]":
+				clickable && !disabled && variant === "first",
+			"hover:my-[var(--space-1)]":
+				clickable && !disabled && variant === "none",
+			"hover:mt-[var(--space-1)]":
+				clickable && !disabled && variant === "last",
+			"opacity-50 cursor-not-allowed": disabled,
+		},
 	);
 
 	return (
@@ -50,7 +59,9 @@ export function Item({
 			<div className="flex-1">
 				<p className="text-on-surface">{label}</p>
 				{description && (
-					<p className="text-xs text-on-surface-variant">{description}</p>
+					<p className="text-xs text-on-surface-variant">
+						{description}
+					</p>
 				)}
 			</div>
 			{trailingContent && (

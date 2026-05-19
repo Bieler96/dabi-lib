@@ -7,7 +7,10 @@ export interface CommandMenuItemProps {
 	isActive?: boolean;
 }
 
-export const CommandMenuItem = React.forwardRef<HTMLLIElement, CommandMenuItemProps>(({ children, onSelect, isActive }, ref) => {
+export const CommandMenuItem = React.forwardRef<
+	HTMLLIElement,
+	CommandMenuItemProps
+>(({ children, onSelect, isActive }, ref) => {
 	return (
 		<li
 			ref={ref}
@@ -17,7 +20,7 @@ export const CommandMenuItem = React.forwardRef<HTMLLIElement, CommandMenuItemPr
 				{
 					"bg-primary-container text-on-primary-container": isActive,
 					"hover:bg-hover": !isActive,
-				}
+				},
 			)}
 		>
 			{children}

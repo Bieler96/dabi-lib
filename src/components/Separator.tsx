@@ -17,10 +17,8 @@ export function Separator({
 			role="separator"
 			className={clsx(
 				"shrink-0 bg-outline",
-				orientation === "horizontal"
-					? "h-px w-full"
-					: "w-px h-full",
-				className
+				orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
+				className,
 			)}
 			{...props}
 		/>

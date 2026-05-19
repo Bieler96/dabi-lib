@@ -6,7 +6,8 @@ export const buttonVariants = cva(
 		variants: {
 			variant: {
 				filled: "bg-primary text-on-primary hover:bg-primary-dark",
-				outlined: "border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary/20",
+				outlined:
+					"border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary/20",
 				tonal: "bg-primary/20 text-primary hover:bg-primary/30 dark:hover:bg-primary/40",
 				ghost: "bg-transparent text-primary hover:bg-primary/10 dark:hover:bg-primary/20",
 				link: "text-primary underline-offset-4 hover:underline !bg-transparent !p-0 !h-auto",
@@ -22,5 +23,5 @@ export const buttonVariants = cva(
 			variant: "filled",
 			size: "md",
 		},
-	}
+	},
 );

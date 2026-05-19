@@ -61,7 +61,8 @@ export function Sheet({
 		}
 
 		if (isOpen) {
-			previouslyFocusedElement.current = document.activeElement as HTMLElement | null;
+			previouslyFocusedElement.current =
+				document.activeElement as HTMLElement | null;
 			previousBodyOverflow.current = document.body.style.overflow;
 			document.body.style.overflow = "hidden";
 		} else {
@@ -126,7 +127,7 @@ export function Sheet({
 				className={clsx(
 					"absolute inset-0 bg-black/40 transition-opacity",
 					isOpen ? "animate-overlay-in" : "animate-overlay-out",
-					overlayClassName
+					overlayClassName,
 				)}
 				onClick={closeOnBackdropClick ? onClose : undefined}
 				aria-hidden="true"
@@ -145,7 +146,7 @@ export function Sheet({
 				className={clsx(
 					"rounded-[var(--radius-component)] absolute bg-surface p-6 shadow-2xl transition ease-in-out outline-none",
 					sideStyles[currentSide],
-					panelClassName
+					panelClassName,
 				)}
 				onClick={(event) => event.stopPropagation()}
 			>
@@ -153,12 +154,18 @@ export function Sheet({
 					<div className="flex items-center justify-between mb-4 gap-4">
 						<div className="grow min-w-0">
 							{title && (
-								<h2 id={titleId} className="text-lg font-semibold text-on-surface leading-none mb-1">
+								<h2
+									id={titleId}
+									className="text-lg font-semibold text-on-surface leading-none mb-1"
+								>
 									{title}
 								</h2>
 							)}
 							{description && (
-								<p id={descriptionId} className="text-sm text-on-surface-variant font-normal">
+								<p
+									id={descriptionId}
+									className="text-sm text-on-surface-variant font-normal"
+								>
 									{description}
 								</p>
 							)}
@@ -176,23 +183,70 @@ export function Sheet({
 				</div>
 			</div>
 		</div>,
-		document.body
+		document.body,
 	);
 }
 
 // Optional sub-components for consistent layout
-export function SheetHeader({ children, className }: { children: React.ReactNode, className?: string }) {
-    return <div className={clsx("flex flex-col space-y-2 mb-4", className)}>{children}</div>;
+export function SheetHeader({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<div className={clsx("flex flex-col space-y-2 mb-4", className)}>
+			{children}
+		</div>
+	);
 }
 
-export function SheetFooter({ children, className }: { children: React.ReactNode, className?: string }) {
-    return <div className={clsx("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4", className)}>{children}</div>;
+export function SheetFooter({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<div
+			className={clsx(
+				"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	);
 }
 
-export function SheetTitle({ children, className }: { children: React.ReactNode, className?: string }) {
-    return <h2 className={clsx("text-lg font-semibold text-on-surface", className)}>{children}</h2>;
+export function SheetTitle({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<h2
+			className={clsx("text-lg font-semibold text-on-surface", className)}
+		>
+			{children}
+		</h2>
+	);
 }
 
-export function SheetDescription({ children, className }: { children: React.ReactNode, className?: string }) {
-    return <p className={clsx("text-sm text-on-surface-variant", className)}>{children}</p>;
+export function SheetDescription({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<p className={clsx("text-sm text-on-surface-variant", className)}>
+			{children}
+		</p>
+	);
 }

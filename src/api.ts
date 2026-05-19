@@ -1,6 +1,6 @@
-import type { Context, Next } from 'hono';
-import jwt from 'jsonwebtoken';
-import type { JwtPayload } from 'jsonwebtoken';
+import type { Context, Next } from "hono";
+import jwt from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 
 type DecodedJWT = JwtPayload | string;
 
@@ -16,16 +16,20 @@ export interface AuthConfig {
 	jwt?: JwtConfig;
 }
 
-export const apiKeyAuth = (options: { key: string | string[]; header?: string; query?: string }) => {
+export const apiKeyAuth = (options: {
+	key: string | string[];
+	header?: string;
+	query?: string;
+}) => {
 	return async (c: Context, next: Next) => {
-		const headerName = options.header || 'x-api-key';
-		const queryName = options.query || 'apiKey';
+		const headerName = options.header || "x-api-key";
+		const queryName = options.query || "apiKey";
 
 		const apiKey = c.req.header(headerName) || c.req.query(queryName);
 		const keys = Array.isArray(options.key) ? options.key : [options.key];
 
 		if (!apiKey || !keys.includes(apiKey)) {
-			return c.json({ error: 'Unauthorized: Invalid API Key' }, 401);
+			return c.json({ error: "Unauthorized: Invalid API Key" }, 401);
 		}
 		await next();
 	};
@@ -38,78 +42,81 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 
 		// Check Bearer
 		if (config.bearer) {
-			const tokens = typeof config.bearer === 'string'
-				? [config.bearer]
-				: Array.isArray(config.bearer)
-					? config.bearer
-					: process.env.DABI_BEARER_TOKEN
-						? [process.env.DABI_BEARER_TOKEN]
-						: [];
+			const tokens =
+				typeof config.bearer === "string"
+					? [config.bearer]
+					: Array.isArray(config.bearer)
+						? config.bearer
+						: process.env.DABI_BEARER_TOKEN
+							? [process.env.DABI_BEARER_TOKEN]
+							: [];
 
-			const authHeader = c.req.header('Authorization');
-			if (authHeader?.startsWith('Bearer ')) {
+			const authHeader = c.req.header("Authorization");
+			if (authHeader?.startsWith("Bearer ")) {
 				const token = authHeader.substring(7);
 				if (tokens.includes(token)) {
 					authenticated = true;
 				} else {
-					errors.push('Invalid Bearer token');
+					errors.push("Invalid Bearer token");
 				}
 			} else {
-				errors.push('Missing Bearer token');
+				errors.push("Missing Bearer token");
 			}
 		}
 
 		// Check JWT if not already authenticated
 		if (!authenticated && config.jwt) {
-			const authHeader = c.req.header('Authorization');
-			if (authHeader?.startsWith('Bearer ')) {
+			const authHeader = c.req.header("Authorization");
+			if (authHeader?.startsWith("Bearer ")) {
 				const token = authHeader.substring(7);
-			try {
-				const decoded = jwt.verify(token, config.jwt.secret, {
-					algorithms: config.jwt.algorithms || ['HS256']
-				}) as DecodedJWT;
+				try {
+					const decoded = jwt.verify(token, config.jwt.secret, {
+						algorithms: config.jwt.algorithms || ["HS256"],
+					}) as DecodedJWT;
 
-				// Optional custom verification
-				if (config.jwt.verify) {
-					const isValid = await config.jwt.verify(decoded);
-					if (isValid) {
-						authenticated = true;
-						// Store JWT payload in context for use in route handlers
-						c.set('jwtPayload', decoded);
+					// Optional custom verification
+					if (config.jwt.verify) {
+						const isValid = await config.jwt.verify(decoded);
+						if (isValid) {
+							authenticated = true;
+							// Store JWT payload in context for use in route handlers
+							c.set("jwtPayload", decoded);
 						} else {
-							errors.push('JWT verification failed');
+							errors.push("JWT verification failed");
 						}
 					} else {
 						authenticated = true;
-						c.set('jwtPayload', decoded);
+						c.set("jwtPayload", decoded);
 					}
 				} catch (err: unknown) {
-					const message = err instanceof Error ? err.message : String(err);
+					const message =
+						err instanceof Error ? err.message : String(err);
 					errors.push(`Invalid JWT: ${message}`);
 				}
 			} else {
-				errors.push('Missing JWT token');
+				errors.push("Missing JWT token");
 			}
 		}
 
 		// Check API Key if not already authenticated
 		if (!authenticated && config.apiKey) {
-			const keys = typeof config.apiKey === 'string'
-				? [config.apiKey]
-				: Array.isArray(config.apiKey)
-					? config.apiKey
-					: process.env.DABI_API_KEY
-						? [process.env.DABI_API_KEY]
-						: [];
+			const keys =
+				typeof config.apiKey === "string"
+					? [config.apiKey]
+					: Array.isArray(config.apiKey)
+						? config.apiKey
+						: process.env.DABI_API_KEY
+							? [process.env.DABI_API_KEY]
+							: [];
 
-			const headerName = 'x-api-key';
-			const queryName = 'apiKey';
+			const headerName = "x-api-key";
+			const queryName = "apiKey";
 			const apiKey = c.req.header(headerName) || c.req.query(queryName);
 
 			if (apiKey && keys.includes(apiKey)) {
 				authenticated = true;
 			} else {
-				errors.push('Invalid or missing API Key');
+				errors.push("Invalid or missing API Key");
 			}
 		}
 
@@ -122,7 +129,7 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 			return await next();
 		}
 
-		return c.json({ error: 'Unauthorized', details: errors }, 401);
+		return c.json({ error: "Unauthorized", details: errors }, 401);
 	};
 };
 
@@ -130,12 +137,12 @@ export const getAuthMiddleware = (config: AuthConfig) => {
 export const generateJWT = (
 	payload: string | Buffer | object,
 	secret: string,
-	options?: jwt.SignOptions
+	options?: jwt.SignOptions,
 ): string => {
 	return jwt.sign(payload, secret, {
-		algorithm: 'HS256',
-		expiresIn: '24h',
-		...options
+		algorithm: "HS256",
+		expiresIn: "24h",
+		...options,
 	});
 };
 

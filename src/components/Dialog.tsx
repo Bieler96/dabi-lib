@@ -43,7 +43,8 @@ export function Dialog({
 		}
 
 		if (open) {
-			previouslyFocusedElement.current = document.activeElement as HTMLElement | null;
+			previouslyFocusedElement.current =
+				document.activeElement as HTMLElement | null;
 			previousBodyOverflow.current = document.body.style.overflow;
 			document.body.style.overflow = "hidden";
 		} else {
@@ -106,15 +107,13 @@ export function Dialog({
 				className={clsx(
 					"absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200",
 					open ? "opacity-100" : "opacity-0",
-					overlayClassName
+					overlayClassName,
 				)}
 				onClick={closeOnBackdropClick ? onClose : undefined}
 				aria-hidden="true"
 			/>
 
-			<div
-				className="fixed inset-0 flex items-center justify-center p-4"
-			>
+			<div className="fixed inset-0 flex items-center justify-center p-4">
 				<div
 					ref={panelRef}
 					role="dialog"
@@ -125,21 +124,37 @@ export function Dialog({
 					tabIndex={-1}
 					className={clsx(
 						"w-full max-w-lg rounded-[var(--radius-component)] border border-outline bg-surface p-6 shadow-lg outline-none transition-all duration-200 ease-out",
-						open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12",
-						paperClassName
+						open
+							? "opacity-100 translate-y-0"
+							: "opacity-0 translate-y-12",
+						paperClassName,
 					)}
 					onClick={(event) => event.stopPropagation()}
 				>
 					{(title || description) && (
 						<div className="mb-4 space-y-1">
-							{title && <div id={titleId} className="text-xl font-semibold text-on-surface">{title}</div>}
-							{description && <div id={descriptionId} className="text-sm text-on-surface-variant">{description}</div>}
+							{title && (
+								<div
+									id={titleId}
+									className="text-xl font-semibold text-on-surface"
+								>
+									{title}
+								</div>
+							)}
+							{description && (
+								<div
+									id={descriptionId}
+									className="text-sm text-on-surface-variant"
+								>
+									{description}
+								</div>
+							)}
 						</div>
 					)}
 					{children}
 				</div>
 			</div>
 		</div>,
-		document.body
+		document.body,
 	);
 }

@@ -1,8 +1,7 @@
 import clsx from "clsx";
 import React, { type TextareaHTMLAttributes } from "react";
 
-export interface TextareaProps
-	extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 	label?: string;
 	variant?: "default" | "ghost";
 }
@@ -36,7 +35,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 				/>
 			</div>
 		);
-	}
+	},
 );
 
 Textarea.displayName = "Textarea";

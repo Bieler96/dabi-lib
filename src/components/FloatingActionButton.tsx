@@ -32,7 +32,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 				extended
 					? "w-auto px-6 rounded-[var(--radius-component)]"
 					: "w-auto px-4 rounded-[var(--radius-component)]",
-				className
+				className,
 			)}
 			onClick={onClick}
 		>
@@ -41,7 +41,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 					<span
 						className={clsx(
 							"flex items-center justify-center w-6 h-6 transition-all duration-150 ease-in-out",
-							label && "mr-3"
+							label && "mr-3",
 						)}
 					>
 						{icon}
@@ -49,7 +49,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 					<span
 						className={clsx(
 							"whitespace-nowrap transition-all duration-150 ease-in-out",
-							"opacity-100 translate-x-0"
+							"opacity-100 translate-x-0",
 						)}
 					>
 						{label}
@@ -58,7 +58,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 			) : (
 				<span
 					className={clsx(
-						"flex items-center justify-center w-6 h-6 transition-all duration-150 ease-in-out"
+						"flex items-center justify-center w-6 h-6 transition-all duration-150 ease-in-out",
 					)}
 				>
 					{icon}

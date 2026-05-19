@@ -1,7 +1,7 @@
-import { useState, useCallback, type JSX } from 'react';
-import { Confirm, type ConfirmProps } from '../components/Confirm';
+import { useState, useCallback, type JSX } from "react";
+import { Confirm, type ConfirmProps } from "../components/Confirm";
 
-type ConfirmOptions = Omit<ConfirmProps, 'open' | 'onClose' | 'onConfirm'>;
+type ConfirmOptions = Omit<ConfirmProps, "open" | "onClose" | "onConfirm">;
 
 type UseConfirmReturn = {
 	confirm: (options: ConfirmOptions) => Promise<boolean>;
@@ -11,7 +11,7 @@ type UseConfirmReturn = {
 export const useConfirm = (): UseConfirmReturn => {
 	const [options, setOptions] = useState<ConfirmOptions | null>(null);
 	const [resolve, setResolve] = useState<((value: boolean) => void) | null>(
-		null
+		null,
 	);
 	const [open, setOpen] = useState(false);
 

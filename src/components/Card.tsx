@@ -1,23 +1,32 @@
-import React from 'react';
+import React from "react";
 import clsx from "clsx";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-    variant?: 'elevated' | 'filled' | 'outlined';
+	variant?: "elevated" | "filled" | "outlined";
 }
 
-export const Card = React.forwardRef<HTMLDivElement, CardProps>((
-    { variant = 'filled', children, className, ...props }, ref) => {
-    const baseClasses = 'rounded-[var(--radius-component)] p-4';
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+	({ variant = "filled", children, className, ...props }, ref) => {
+		const baseClasses = "rounded-[var(--radius-component)] p-4";
 
-    const variantClasses = {
-        elevated: 'shadow shadow-md',
-        filled: 'bg-surface-variant',
-        outlined: 'border border-outline',
-    };
+		const variantClasses = {
+			elevated: "shadow shadow-md",
+			filled: "bg-surface-variant",
+			outlined: "border border-outline",
+		};
 
-    const cardClasses = clsx(baseClasses, variantClasses[variant], className);
+		const cardClasses = clsx(
+			baseClasses,
+			variantClasses[variant],
+			className,
+		);
 
-    return <div ref={ref} className={cardClasses} {...props}>{children}</div>;
-});
+		return (
+			<div ref={ref} className={cardClasses} {...props}>
+				{children}
+			</div>
+		);
+	},
+);
 
 Card.displayName = "Card";
