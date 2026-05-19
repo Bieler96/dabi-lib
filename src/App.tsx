@@ -10,6 +10,7 @@ import { ButtonGroup, ButtonGroupSeparator } from "./components/ButtonGroup";
 import { GuardDemoScreen, ProtectedPage, DirtyPage, authGuard, confirmExitGuard } from "./screens/GuardDemo";
 import { UserManagement } from "./screens/UserManagement";
 import { FilterDemo } from "./screens/FilterDemo";
+import { SidebarDemo } from "./screens/SidebarDemo";
 
 // Screens.tsx
 const HomeScreen = () => {
@@ -26,6 +27,7 @@ const HomeScreen = () => {
 					<ButtonGroupSeparator />
 					<Button variant="tonal" onClick={() => nav.navigate('jira-board')}>Go to Jira Clone</Button>
 				</ButtonGroup>
+				<Button variant="outlined" onClick={() => nav.navigate('sidebar-demo')}>Go to Side Menu Demo</Button>
 				<Button variant="outlined" onClick={() => nav.navigate('guard-demo')}>Go to Guard Demo</Button>
 				<Button variant="tonal" onClick={() => nav.navigate('filter-demo')}>Filter Component Demo</Button>
 				<Button variant="filled" className="bg-tertiary text-on-tertiary" onClick={() => nav.navigate('user-management')}>
@@ -187,6 +189,7 @@ export default function App() {
 				nav.dialog('block-user', BlockUserDialog);
 
 				nav.screen('guard-demo', GuardDemoScreen);
+				nav.screen('sidebar-demo', SidebarDemo);
 				nav.screen('protected-page', ProtectedPage, { canActivate: [authGuard] });
 				nav.screen('dirty-page', DirtyPage, { canDeactivate: [confirmExitGuard] });
 

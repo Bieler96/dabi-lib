@@ -18,6 +18,7 @@ export * from './components/Pagination';
 export * from './components/Popover';
 export * from './components/Select';
 export * from './components/Separator';
+export * from './components/Sidebar';
 export * from './components/Sheet';
 export * from './components/Skeleton';
 export * from './components/Spinner';
