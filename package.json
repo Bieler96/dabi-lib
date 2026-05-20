@@ -51,6 +51,8 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build --config vite.config.lib.ts && vite build --config vite.config.node.ts",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build",
 		"start": "tsx src/server.ts",
 		"lint": "eslint .",
 		"format": "prettier . --write",
@@ -66,6 +68,7 @@
 		"major": "npm version major && npm run update-package"
 	},
 	"dependencies": {
+		"@base-ui/react": "^1.5.0",
 		"@floating-ui/react": "^0.27.14",
 		"@hono/node-server": "^1.19.7",
 		"@tailwindcss/vite": "^4.1.18",
@@ -88,6 +91,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
+		"@storybook/addon-docs": "^10.4.0",
+		"@storybook/react-vite": "^10.4.0",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/fs-extra": "^11.0.4",
 		"@types/inquirer": "^9.0.9",
@@ -103,6 +108,7 @@
 		"prettier": "^3.8.3",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0",
+		"storybook": "^10.4.0",
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.46.4",
 		"vite": "^7.2.4",
