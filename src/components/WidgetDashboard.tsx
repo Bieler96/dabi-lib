@@ -1,7 +1,16 @@
 import * as React from "react";
-import { Ellipsis, Plus, X } from "lucide-react";
+import {
+	CircleMinus,
+	Copy,
+	Ellipsis,
+	Eye,
+	MoreHorizontal,
+	Plus,
+	Trash2,
+	X,
+} from "lucide-react";
 
-import { Button } from "./Button";
+import { Button, buttonVariants } from "./Button";
 import {
 	Card,
 	CardContent,
@@ -11,6 +20,12 @@ import {
 } from "./Card";
 import { Popover } from "./Popover";
 import { cn } from "../utils/cn";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "./DropdownMenu";
 
 export interface DashboardWidgetDefinition {
 	id: string;
@@ -48,8 +63,10 @@ export interface WidgetDashboardColumn<TDashboardContext = unknown> {
 	widgets: DashboardWidget<TDashboardContext>[];
 }
 
-export interface WidgetDashboardProps<TDashboardContext = unknown>
-	extends Omit<React.ComponentProps<"div">, "onChange"> {
+export interface WidgetDashboardProps<TDashboardContext = unknown> extends Omit<
+	React.ComponentProps<"div">,
+	"onChange"
+> {
 	columns?: WidgetDashboardColumn<TDashboardContext>[];
 	defaultColumns?: WidgetDashboardColumn<TDashboardContext>[];
 	availableWidgets?: DashboardWidget<TDashboardContext>[];
@@ -171,34 +188,27 @@ function WidgetDashboard<TDashboardContext = unknown>({
 	);
 
 	const addColumnMenu = (
-		<div className="flex min-w-56 flex-col gap-1">
+		<div>
 			{availableWidgets.length > 0 ? (
 				availableWidgets.map((widget) => (
-					<button
+					<DropdownMenuItem
 						key={widget.id}
-						type="button"
-						data-slot="widget-dashboard-option"
-						data-widget-id={widget.id}
-						aria-label={`Add ${widget.id} column`}
-						className="rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						onClick={() => addColumn(widget)}
 					>
-						<span className="block font-medium">{widget.title}</span>
-						{widget.description && (
-							<span className="block text-xs text-muted-foreground">
-								{widget.description}
-							</span>
-						)}
-					</button>
+						<div className="flex flex-col">
+							{widget.title}
+							{widget.description && (
+								<p className="text-xs text-muted-foreground">
+									{widget.description}
+								</p>
+							)}
+						</div>
+					</DropdownMenuItem>
 				))
 			) : (
-				<button
-					type="button"
-					className="rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-					onClick={() => addColumn()}
-				>
-					Empty column
-				</button>
+				<p className="text-muted-foreground px-2 py-1">
+					No available widgets
+				</p>
 			)}
 		</div>
 	);
@@ -229,7 +239,8 @@ function WidgetDashboard<TDashboardContext = unknown>({
 							<div className="flex min-h-11 shrink-0 items-start justify-between gap-3 px-4 py-2.5">
 								<div className="min-w-0">
 									<h2 className="truncate text-base font-semibold leading-tight">
-										{column.title ?? `Column ${columnIndex + 1}`}
+										{column.title ??
+											`Column ${columnIndex + 1}`}
 									</h2>
 									{column.description && (
 										<p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -237,60 +248,71 @@ function WidgetDashboard<TDashboardContext = unknown>({
 										</p>
 									)}
 								</div>
-								<Popover
-									trigger={
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon-xs"
-											aria-label="Column options"
+								<DropdownMenu>
+									<DropdownMenuTrigger
+										render={
+											<Button
+												variant="outline"
+												size="icon"
+											/>
+										}
+									>
+										<MoreHorizontal />
+									</DropdownMenuTrigger>
+									<DropdownMenuContent
+										align="end"
+										className="w-48"
+									>
+										<DropdownMenuItem
+											className="justify-between"
+											variant="destructive"
+											onClick={() =>
+												removeColumn(column.id)
+											}
 										>
-											<Ellipsis />
-										</Button>
-									}
-									content={
-										<button
-											type="button"
-											className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-											onClick={() => removeColumn(column.id)}
-										>
-											<X className="size-3.5" />
 											Remove column
-										</button>
-									}
-									placement="bottom-end"
-									className="w-44 border border-border bg-popover p-2 text-popover-foreground shadow-md"
-								/>
+											<CircleMinus />
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 							<div className="flex min-h-0 flex-1 flex-col border-t border-border">
 								{column.widgets.length > 0 ? (
-									column.widgets.map((widget, widgetIndex) => (
-										<Card
-											key={widget.id}
-											size="sm"
-											style={{ maxHeight: widgetMaxHeight }}
-											className="min-h-0 flex-1 rounded-none border-0 bg-transparent py-3 shadow-none ring-0 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-border"
-										>
-											{showWidgetHeaders && (
-												<CardHeader>
-													<CardTitle>{widget.title}</CardTitle>
-													{widget.description && (
-														<CardDescription>
-															{widget.description}
-														</CardDescription>
-													)}
-												</CardHeader>
-											)}
-											<CardContent className="min-h-0 flex-1 overflow-y-auto">
-												{widget.render({
-													columnId: column.id,
-													columnIndex,
-													widgetIndex,
-													dashboardContext,
-												})}
-											</CardContent>
-										</Card>
-									))
+									column.widgets.map(
+										(widget, widgetIndex) => (
+											<Card
+												key={widget.id}
+												size="sm"
+												style={{
+													maxHeight: widgetMaxHeight,
+												}}
+												className="min-h-0 flex-1 rounded-none border-0 bg-transparent py-3 shadow-none ring-0 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-border"
+											>
+												{showWidgetHeaders && (
+													<CardHeader>
+														<CardTitle>
+															{widget.title}
+														</CardTitle>
+														{widget.description && (
+															<CardDescription>
+																{
+																	widget.description
+																}
+															</CardDescription>
+														)}
+													</CardHeader>
+												)}
+												<CardContent className="min-h-0 flex-1 overflow-y-auto">
+													{widget.render({
+														columnId: column.id,
+														columnIndex,
+														widgetIndex,
+														dashboardContext,
+													})}
+												</CardContent>
+											</Card>
+										),
+									)
 								) : (
 									<div className="m-4 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
 										Empty column
@@ -300,14 +322,18 @@ function WidgetDashboard<TDashboardContext = unknown>({
 						</section>
 					))}
 					<div className="flex w-20 shrink-0 items-center justify-center">
-						<Popover
-							trigger={addColumnTrigger}
-							content={addColumnMenu}
-							open={addMenuOpen}
-							onOpenChange={setAddMenuOpen}
-							placement="left"
-							className="w-auto border border-border bg-popover p-2 text-popover-foreground shadow-md"
-						/>
+						<DropdownMenu>
+							<DropdownMenuTrigger
+								render={
+									<Button variant="outline" size="icon" />
+								}
+							>
+								<MoreHorizontal />
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-48">
+								{addColumnMenu}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 				</div>
 			) : (

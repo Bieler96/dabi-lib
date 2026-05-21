@@ -7,6 +7,7 @@ import {
 	type WidgetDashboardColumn,
 } from "../components/WidgetDashboard";
 import { Input } from "../components/Input";
+import { Button } from "../components/Button";
 
 interface ThreadsDashboardContext {
 	accountName: string;
@@ -66,7 +67,8 @@ class ForYouWidget extends DashboardWidget<ThreadsDashboardContext> {
 				<div className="flex items-center gap-3">
 					<Avatar label="DU" />
 					<div className="flex-1 rounded-xl border border-border px-3 py-2 text-muted-foreground">
-						Was gibt's Neues, {context.dashboardContext?.accountName}?
+						Was gibt's Neues,{" "}
+						{context.dashboardContext?.accountName}?
 					</div>
 				</div>
 				<ThreadPost name="cormistic" time="1 Tag" avatar="CO">
@@ -100,7 +102,8 @@ class AiWidget extends DashboardWidget<ThreadsDashboardContext> {
 			<div className="space-y-5">
 				<ThreadPost name="levelboss" time="7 Std." avatar="LB">
 					Claude Code ist manchmal lustig. Da hat wohl jemand
-					entschieden, ihn in echten Entwicklertagen rechnen zu lassen.
+					entschieden, ihn in echten Entwicklertagen rechnen zu
+					lassen.
 				</ThreadPost>
 				<ThreadPost name="goooglegemini" time="9 Std." avatar="GG">
 					Create an ultra-realistic indoor fashion collage using the
@@ -155,12 +158,7 @@ class SearchWidget extends DashboardWidget<ThreadsDashboardContext> {
 									{followers}
 								</p>
 							</div>
-							<button
-								type="button"
-								className="rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background"
-							>
-								Folgen
-							</button>
+							<Button>Follow</Button>
 						</div>
 					))}
 				</div>

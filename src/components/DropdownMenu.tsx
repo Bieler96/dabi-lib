@@ -111,7 +111,7 @@ function DropdownMenuItem({
 			data-inset={inset}
 			data-variant={variant}
 			className={cn(
-				"group/dropdown-menu-item relative flex min-h-10 min-w-0 cursor-default touch-manipulation items-center gap-2 rounded-md px-2 py-2 text-sm outline-hidden select-none sm:min-h-0 sm:gap-1.5 sm:px-1.5 sm:py-1 focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-8 sm:data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive",
+				"group/dropdown-menu-item relative flex min-h-10 min-w-0 cursor-default touch-manipulation items-center gap-2 rounded-md px-2 py-2 text-sm outline-hidden select-none sm:min-h-0 sm:gap-1.5 sm:px-1.5 sm:py-1 focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-8 sm:data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive cursor-pointer",
 				className,
 			)}
 			{...props}
