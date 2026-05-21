@@ -195,3 +195,77 @@
 .grow-active {
 	@apply transition-transform duration-150 active:scale-105 will-change-transform sm:active:scale-105;
 }
+
+@keyframes dropdown-menu-in {
+	from {
+		opacity: 0;
+		transform: translate3d(
+				var(--dropdown-menu-slide-x, 0),
+				var(--dropdown-menu-slide-y, 0),
+				0
+			)
+			scale(0.96);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+@keyframes dropdown-menu-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+
+	to {
+		opacity: 0;
+		transform: translate3d(
+				var(--dropdown-menu-slide-x, 0),
+				var(--dropdown-menu-slide-y, 0),
+				0
+			)
+			scale(0.96);
+	}
+}
+
+[data-slot="dropdown-menu-content"],
+[data-slot="dropdown-menu-sub-content"] {
+	will-change: opacity, transform;
+}
+
+[data-slot="dropdown-menu-content"][data-side="top"],
+[data-slot="dropdown-menu-sub-content"][data-side="top"] {
+	--dropdown-menu-slide-y: 0.25rem;
+}
+
+[data-slot="dropdown-menu-content"][data-side="bottom"],
+[data-slot="dropdown-menu-sub-content"][data-side="bottom"] {
+	--dropdown-menu-slide-y: -0.25rem;
+}
+
+[data-slot="dropdown-menu-content"][data-side="left"],
+[data-slot="dropdown-menu-content"][data-side="inline-start"],
+[data-slot="dropdown-menu-sub-content"][data-side="left"],
+[data-slot="dropdown-menu-sub-content"][data-side="inline-start"] {
+	--dropdown-menu-slide-x: 0.25rem;
+}
+
+[data-slot="dropdown-menu-content"][data-side="right"],
+[data-slot="dropdown-menu-content"][data-side="inline-end"],
+[data-slot="dropdown-menu-sub-content"][data-side="right"],
+[data-slot="dropdown-menu-sub-content"][data-side="inline-end"] {
+	--dropdown-menu-slide-x: -0.25rem;
+}
+
+[data-slot="dropdown-menu-content"][data-open],
+[data-slot="dropdown-menu-sub-content"][data-open] {
+	animation: dropdown-menu-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="dropdown-menu-content"][data-closed],
+[data-slot="dropdown-menu-sub-content"][data-closed] {
+	animation: dropdown-menu-out 110ms cubic-bezier(0.4, 0, 1, 1) both;
+	overflow: hidden;
+}
