@@ -489,7 +489,7 @@ function FormBuilder<TValues extends FormBuilderValues = FormBuilderValues>({
 			</FieldGroup>
 
 			{actions !== null && (
-				<div className="flex w-full flex-col-reverse items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end [&>[data-slot=button]]:w-full sm:[&>[data-slot=button]]:w-auto">
+				<div className="flex w-full flex-col-reverse items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end *:data-[slot=button]:w-full sm:*:data-[slot=button]:w-auto">
 					{showReset && (
 						<Button
 							type="button"

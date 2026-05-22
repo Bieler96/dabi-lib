@@ -1,16 +1,7 @@
 import * as React from "react";
-import {
-	CircleMinus,
-	Copy,
-	Ellipsis,
-	Eye,
-	MoreHorizontal,
-	Plus,
-	Trash2,
-	X,
-} from "lucide-react";
+import { CircleMinus, MoreHorizontal, Plus } from "lucide-react";
 
-import { Button, buttonVariants } from "./Button";
+import { Button } from "./Button";
 import {
 	Card,
 	CardContent,
@@ -286,7 +277,7 @@ function WidgetDashboard<TDashboardContext = unknown>({
 												style={{
 													maxHeight: widgetMaxHeight,
 												}}
-												className="min-h-0 flex-1 rounded-none border-0 bg-transparent py-3 shadow-none ring-0 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-border"
+												className="min-h-0 flex-1 rounded-none border-0 bg-transparent py-3 shadow-none ring-0 not-last:border-b not-last:border-border"
 											>
 												{showWidgetHeaders && (
 													<CardHeader>
