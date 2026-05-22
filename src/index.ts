@@ -12,6 +12,7 @@ export * from "./components/CopyButton";
 export * from "./components/DataTable";
 export * from "./components/Dialog";
 export * from "./components/FloatingActionButton";
+export * from "./components/FormBuilder";
 export * from "./components/Input";
 export * from "./components/Item";
 export * from "./components/Pagination";
