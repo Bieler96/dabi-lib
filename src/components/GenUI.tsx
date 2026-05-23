@@ -70,6 +70,7 @@ export interface GenUIDataTableDefinition<
 	type: "data-table";
 	columns?: GenUITableColumn<TRow>[];
 	emptyMessage?: React.ReactNode;
+	maxHeight?: React.CSSProperties["maxHeight"];
 }
 
 export interface GenUIChartSeries {
@@ -102,11 +103,16 @@ type GenUIWidgetInput<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIWidgetDefinition<TRow>
 	| GenUIWidget<TRow>;
 
+type GenUIResponsiveSpan = number;
+
 export interface GenUIGridColumn<TRow extends GenUIRecord = GenUIRecord> {
 	id: string;
 	title?: React.ReactNode;
 	description?: React.ReactNode;
-	span?: number;
+	span?: GenUIResponsiveSpan;
+	smSpan?: GenUIResponsiveSpan;
+	mdSpan?: GenUIResponsiveSpan;
+	lgSpan?: GenUIResponsiveSpan;
 	widgets: GenUIWidgetInput<TRow>[];
 	className?: string;
 }
@@ -279,6 +285,17 @@ function GenUIDataTable<TRow extends GenUIRecord>({
 		return (
 			<div className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
 				{definition.emptyMessage}
+			</div>
+		);
+	}
+
+	if (definition.maxHeight) {
+		return (
+			<div
+				className="overflow-auto"
+				style={{ maxHeight: definition.maxHeight }}
+			>
+				<DataTable columns={columns} data={data} />
 			</div>
 		);
 	}
@@ -492,10 +509,13 @@ function GenUIGrid<TRow extends GenUIRecord = GenUIRecord>({
 					key={row.id}
 					data-slot="gen-ui-grid-row"
 					className={cn("grid min-w-0", row.className)}
-					style={{
-						gap,
-						gridTemplateColumns: `repeat(${row.gridColumns ?? gridColumns}, minmax(0, 1fr))`,
-					}}
+					style={
+						{
+							"--gen-ui-grid-columns":
+								row.gridColumns ?? gridColumns,
+							"--gen-ui-grid-gap": gap,
+						} as React.CSSProperties
+					}
 				>
 					{row.columns.map((column) => (
 						<section
@@ -505,11 +525,27 @@ function GenUIGrid<TRow extends GenUIRecord = GenUIRecord>({
 								"min-w-0 space-y-3",
 								column.className,
 							)}
-							style={{
-								gridColumn: column.span
-									? `span ${column.span} / span ${column.span}`
-									: undefined,
-							}}
+							style={
+								{
+									"--gen-ui-column-span-base":
+										row.gridColumns ?? gridColumns,
+									"--gen-ui-column-span-sm":
+										column.smSpan ??
+										row.gridColumns ??
+										gridColumns,
+									"--gen-ui-column-span-md":
+										column.mdSpan ??
+										column.span ??
+										row.gridColumns ??
+										gridColumns,
+									"--gen-ui-column-span-lg":
+										column.lgSpan ??
+										column.mdSpan ??
+										column.span ??
+										row.gridColumns ??
+										gridColumns,
+								} as React.CSSProperties
+							}
 						>
 							{showColumnHeaders &&
 								(column.title || column.description) && (

@@ -10,6 +10,18 @@ type RevenueRow = {
 	customers: number;
 };
 
+type DummyUser = {
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	age: number;
+	role: string;
+	company?: {
+		name?: string;
+	};
+};
+
 const revenueData: RevenueRow[] = [
 	{ month: "Jan", revenue: 18600, expenses: 9800, customers: 120 },
 	{ month: "Feb", revenue: 22400, expenses: 11100, customers: 142 },
@@ -106,6 +118,35 @@ const liveStat = new GenUIWidget<RevenueRow>({
 	}),
 });
 
+const usersTable = new GenUIWidget<DummyUser>({
+	id: "dummy-users",
+	type: "data-table",
+	title: "DummyJSON users",
+	description: "Fetched from https://dummyjson.com/users",
+	fetchUrl: "https://dummyjson.com/users?limit=30",
+	selectData: (response) =>
+		(Array.isArray((response as { users?: unknown }).users)
+			? (response as { users: DummyUser[] }).users
+			: []) satisfies DummyUser[],
+	maxHeight: 360,
+	columns: [
+		{ key: "id", header: "ID" },
+		{
+			key: "firstName",
+			header: "Name",
+			cell: (_value, row) => `${row.firstName} ${row.lastName}`,
+		},
+		{ key: "email", header: "Email" },
+		{ key: "age", header: "Age" },
+		{ key: "role", header: "Role" },
+		{
+			key: "company",
+			header: "Company",
+			cell: (_value, row) => row.company?.name ?? "-",
+		},
+	],
+});
+
 const rows: GenUIGridRow<RevenueRow>[] = [
 	{
 		id: "overview",
@@ -113,16 +154,19 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 			{
 				id: "revenue-stat",
 				span: 4,
+				smSpan: 6,
 				widgets: [revenueStat],
 			},
 			{
 				id: "customer-stat",
 				span: 4,
+				smSpan: 6,
 				widgets: [customerStat],
 			},
 			{
 				id: "live-stat",
 				span: 4,
+				smSpan: 12,
 				widgets: [liveStat],
 			},
 		],
@@ -146,6 +190,19 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 	},
 ];
 
+const fetchedRows: GenUIGridRow<DummyUser>[] = [
+	{
+		id: "users",
+		columns: [
+			{
+				id: "users-table",
+				span: 12,
+				widgets: [usersTable],
+			},
+		],
+	},
+];
+
 const meta = {
 	title: "Components/GenUI",
 	component: GenUIExample,
@@ -157,13 +214,11 @@ const meta = {
 
 function GenUIExample() {
 	return (
-		<div className="min-h-screen bg-background p-6">
-			<GenUIGrid
-				rows={rows}
-				className="mx-auto max-w-7xl"
-				showColumnHeaders
-				showWidgetHeaders
-			/>
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<div className="mx-auto flex max-w-7xl flex-col gap-4">
+				<GenUIGrid rows={rows} showColumnHeaders showWidgetHeaders />
+				<GenUIGrid rows={fetchedRows} showWidgetHeaders />
+			</div>
 		</div>
 	);
 }
@@ -172,3 +227,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Dashboard: Story = {};
+
+export const FetchedUsersTable: Story = {
+	render: () => (
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<GenUIGrid
+				rows={fetchedRows}
+				className="mx-auto max-w-5xl"
+				showWidgetHeaders
+			/>
+		</div>
+	),
+};
