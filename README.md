@@ -153,6 +153,53 @@ function App() {
 }
 ```
 
+### Gen UI Widgets
+
+Für widgetbasierte Oberflächen kannst du deklarative Gen-UI-Widgets in einem flexiblen Row-/Column-Grid nutzen. Unterstützt werden `stat-card`, `data-table` und `chart`; Daten können direkt übergeben oder per `fetchUrl`/`fetcher` geladen werden.
+
+```tsx
+import { GenUIGrid, GenUIWidget } from "dabi-lib";
+
+const revenueWidget = new GenUIWidget({
+	id: "revenue",
+	type: "stat-card",
+	title: "Revenue",
+	data: {
+		label: "Revenue",
+		value: "35.400 EUR",
+		trend: { value: "+8.6%", direction: "up" },
+	},
+});
+
+const liveTableWidget = new GenUIWidget({
+	id: "orders",
+	type: "data-table",
+	title: "Orders",
+	fetchUrl: "/api/orders",
+	columns: [
+		{ key: "id", header: "ID" },
+		{ key: "customer", header: "Customer" },
+		{ key: "total", header: "Total" },
+	],
+});
+
+function Dashboard() {
+	return (
+		<GenUIGrid
+			rows={[
+				{
+					id: "overview",
+					columns: [
+						{ id: "stats", span: 4, widgets: [revenueWidget] },
+						{ id: "orders", span: 8, widgets: [liveTableWidget] },
+					],
+				},
+			]}
+		/>
+	);
+}
+```
+
 ## Projekt-CLI
 
 `dabi-lib` kommt mit einem CLI-Tool, um Projekte schnell zu initialisieren oder Komponenten zu generieren.
