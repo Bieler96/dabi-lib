@@ -23,12 +23,25 @@ import {
 	type ChartConfig,
 } from "./Chart";
 import { DataTable } from "./DataTable";
+import {
+	Map as MapView,
+	MapClusterLayer,
+	MapControls,
+	MapMarker,
+	MarkerContent,
+	MarkerPopup,
+	type MapClusterMarker,
+	type MapProps,
+} from "./Map";
 import { Skeleton } from "./Skeleton";
 import { StatCard, type StatCardProps } from "./StatCard";
 import { cn } from "../utils/cn";
 
 type GenUIRecord = Record<string, unknown>;
-type GenUIWidgetData<TRow extends GenUIRecord> = StatCardProps | TRow[];
+type GenUIWidgetData<TRow extends GenUIRecord> =
+	| StatCardProps
+	| TRow[]
+	| GenUIMapMarker[];
 type GenUITableCell<TRow extends GenUIRecord> = {
 	bivarianceHack(value: TRow[keyof TRow], row: TRow): React.ReactNode;
 }["bivarianceHack"];
@@ -91,10 +104,31 @@ export interface GenUIChartDefinition<
 	showLegend?: boolean;
 }
 
+export type GenUIMapMarker = MapClusterMarker;
+
+export interface GenUIMapDefinition
+	extends GenUIBaseWidgetDefinition<GenUIMapMarker[]> {
+	type: "map";
+	center?: [number, number];
+	zoom?: number;
+	height?: React.CSSProperties["height"];
+	showControls?: boolean;
+	cluster?:
+		| boolean
+		| {
+				radius?: number;
+				maxZoom?: number;
+		  };
+	onMarkerClick?: (marker: GenUIMapMarker) => void;
+	onClusterClick?: (clusterId: number) => void;
+	mapProps?: Omit<MapProps, "children" | "className" | "center" | "zoom">;
+}
+
 export type GenUIWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIStatCardDefinition
 	| GenUIDataTableDefinition<TRow>
-	| GenUIChartDefinition<TRow>;
+	| GenUIChartDefinition<TRow>
+	| GenUIMapDefinition;
 
 interface GenUIWidgetRendererProps<TRow extends GenUIRecord = GenUIRecord> {
 	definition: GenUIWidgetDefinition<TRow>;
@@ -425,6 +459,74 @@ function GenUIChart<TRow extends GenUIRecord>({
 	);
 }
 
+function GenUIMap({
+	definition,
+	data,
+}: {
+	definition: GenUIMapDefinition;
+	data: GenUIMapMarker[];
+}) {
+	const firstMarker = data[0];
+	const center =
+		definition.center ??
+		(firstMarker
+			? ([firstMarker.longitude, firstMarker.latitude] as [number, number])
+			: ([0, 0] as [number, number]));
+	const clusterOptions =
+		typeof definition.cluster === "object" ? definition.cluster : {};
+	const shouldCluster = definition.cluster !== false;
+
+	return (
+		<div
+			className="min-h-[280px] overflow-hidden rounded-lg"
+			style={{ height: definition.height ?? 360 }}
+		>
+			<MapView
+				center={center}
+				zoom={definition.zoom ?? (firstMarker ? 10 : 1)}
+				{...definition.mapProps}
+			>
+				{definition.showControls !== false && <MapControls />}
+				{shouldCluster ? (
+					<MapClusterLayer
+						markers={data}
+						clusterRadius={clusterOptions.radius}
+						clusterMaxZoom={clusterOptions.maxZoom}
+						onMarkerClick={definition.onMarkerClick}
+						onClusterClick={definition.onClusterClick}
+					/>
+				) : (
+					data.map((marker, index) => (
+						<MapMarker
+							key={marker.id ?? index}
+							longitude={marker.longitude}
+							latitude={marker.latitude}
+						>
+							<MarkerContent />
+							{(marker.title || marker.description) && (
+								<MarkerPopup>
+									<div className="space-y-1">
+										{marker.title && (
+											<div className="font-medium">
+												{marker.title}
+											</div>
+										)}
+										{marker.description && (
+											<div className="text-muted-foreground">
+												{marker.description}
+											</div>
+										)}
+									</div>
+								</MarkerPopup>
+							)}
+						</MapMarker>
+					))
+				)}
+			</MapView>
+		</div>
+	);
+}
+
 function resolveWidgetDefinition<TRow extends GenUIRecord>(
 	widget: GenUIWidgetInput<TRow>,
 ) {
@@ -460,6 +562,15 @@ function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 			<GenUIDataTable
 				definition={definition}
 				data={(data ?? definition.data ?? []) as TRow[]}
+			/>
+		);
+	}
+
+	if (definition.type === "map") {
+		return (
+			<GenUIMap
+				definition={definition}
+				data={(data ?? definition.data ?? []) as GenUIMapMarker[]}
 			/>
 		);
 	}

@@ -31,6 +31,51 @@ const revenueData: RevenueRow[] = [
 	{ month: "Jun", revenue: 35400, expenses: 17100, customers: 229 },
 ];
 
+const berlinMarkers = [
+	{
+		id: "alexanderplatz",
+		longitude: 13.4132,
+		latitude: 52.5219,
+		title: "Alexanderplatz",
+		description: "High-traffic city center location",
+	},
+	{
+		id: "hackescher-markt",
+		longitude: 13.4024,
+		latitude: 52.5222,
+		title: "Hackescher Markt",
+		description: "Retail and transit cluster",
+	},
+	{
+		id: "potsdamer-platz",
+		longitude: 13.3769,
+		latitude: 52.5096,
+		title: "Potsdamer Platz",
+		description: "Office and shopping area",
+	},
+	{
+		id: "kreuzberg",
+		longitude: 13.4314,
+		latitude: 52.4991,
+		title: "Kreuzberg",
+		description: "Dense neighborhood demand",
+	},
+	{
+		id: "charlottenburg",
+		longitude: 13.3041,
+		latitude: 52.5166,
+		title: "Charlottenburg",
+		description: "Western Berlin coverage",
+	},
+	{
+		id: "neukoelln",
+		longitude: 13.4499,
+		latitude: 52.4811,
+		title: "Neukoelln",
+		description: "Growing delivery zone",
+	},
+];
+
 const revenueStat = new GenUIWidget<RevenueRow>({
 	id: "revenue-stat",
 	type: "stat-card",
@@ -99,6 +144,21 @@ const revenueTable = new GenUIWidget<RevenueRow>({
 		},
 		{ key: "customers", header: "Customers" },
 	],
+});
+
+const locationsMap = new GenUIWidget<RevenueRow>({
+	id: "locations-map",
+	type: "map",
+	title: "Locations map",
+	description: "Markers with clustering",
+	center: [13.405, 52.52],
+	zoom: 10,
+	height: 420,
+	cluster: {
+		radius: 56,
+		maxZoom: 13,
+	},
+	data: berlinMarkers,
 });
 
 const liveStat = new GenUIWidget<RevenueRow>({
@@ -185,6 +245,17 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 				title: "Table",
 				span: 5,
 				widgets: [revenueTable],
+			},
+		],
+	},
+	{
+		id: "locations",
+		columns: [
+			{
+				id: "map",
+				title: "Map",
+				span: 12,
+				widgets: [locationsMap],
 			},
 		],
 	},
