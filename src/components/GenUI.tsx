@@ -414,11 +414,7 @@ function GenUIChart<TRow extends GenUIRecord>({
 	const style = definition.height ? { height: definition.height } : undefined;
 
 	return (
-		<ChartContainer
-			className="min-h-[260px]"
-			config={chartConfig}
-			style={style}
-		>
+		<ChartContainer className="min-h-65" config={chartConfig} style={style}>
 			{chartType === "bar" ? (
 				<BarChart {...chartProps}>
 					{axes}
@@ -552,7 +548,7 @@ function GenUIMap({
 
 	return (
 		<div
-			className="min-h-[280px] overflow-hidden rounded-lg"
+			className="min-h-70 overflow-hidden rounded-lg"
 			style={{ height: definition.height ?? 360 }}
 		>
 			<MapView
