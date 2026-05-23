@@ -76,6 +76,40 @@ const berlinMarkers = [
 	},
 ];
 
+const berlinGeoJson = {
+	type: "FeatureCollection",
+	features: [
+		{
+			type: "Feature",
+			properties: { name: "Central service area" },
+			geometry: {
+				type: "Polygon",
+				coordinates: [
+					[
+						[13.36, 52.532],
+						[13.448, 52.532],
+						[13.448, 52.486],
+						[13.36, 52.486],
+						[13.36, 52.532],
+					],
+				],
+			},
+		},
+		{
+			type: "Feature",
+			properties: { name: "High-demand corridor" },
+			geometry: {
+				type: "LineString",
+				coordinates: [
+					[13.3769, 52.5096],
+					[13.405, 52.52],
+					[13.4314, 52.4991],
+				],
+			},
+		},
+	],
+} satisfies GeoJSON.FeatureCollection;
+
 const revenueStat = new GenUIWidget<RevenueRow>({
 	id: "revenue-stat",
 	type: "stat-card",
@@ -159,6 +193,22 @@ const locationsMap = new GenUIWidget<RevenueRow>({
 		maxZoom: 13,
 	},
 	data: berlinMarkers,
+});
+
+const geoJsonMap = new GenUIWidget<RevenueRow>({
+	id: "geojson-map",
+	type: "map",
+	title: "GeoJSON map",
+	description: "Polygon and line features",
+	center: [13.405, 52.51],
+	zoom: 11,
+	height: 420,
+	data: berlinGeoJson,
+	geoJsonLayer: {
+		fillColor: "#0ea5e9",
+		lineColor: "#0369a1",
+		pointColor: "#0f766e",
+	},
 });
 
 const liveStat = new GenUIWidget<RevenueRow>({
@@ -256,6 +306,17 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 				title: "Map",
 				span: 12,
 				widgets: [locationsMap],
+			},
+		],
+	},
+	{
+		id: "geojson",
+		columns: [
+			{
+				id: "geojson-map",
+				title: "GeoJSON",
+				span: 12,
+				widgets: [geoJsonMap],
 			},
 		],
 	},

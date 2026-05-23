@@ -23,11 +23,15 @@ import {
 	RotateCcw,
 } from "lucide-react";
 import MapLibreGL, {
+	type FitBoundsOptions,
 	type GeoJSONSource,
+	type GeoJSONSourceSpecification,
+	type LayerSpecification,
 	type MapOptions,
 	type MarkerOptions,
 	type PopupOptions,
 } from "maplibre-gl";
+import type { Geometry, GeoJSON as GeoJSONData } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { cn } from "../utils/cn";
@@ -48,6 +52,7 @@ type MapViewport = {
 
 type MapStyleOption = string | MapLibreGL.StyleSpecification;
 type MapRef = MapLibreGL.Map;
+type MapGeoJSONData = GeoJSONData | string;
 
 type MapContextValue = {
 	map: MapLibreGL.Map | null;
@@ -478,6 +483,25 @@ type MapClusterLayerProps = {
 	) => void;
 };
 
+type MapGeoJSONLayerProps = {
+	id?: string;
+	data: MapGeoJSONData;
+	layers?: LayerSpecification[];
+	sourceOptions?: Omit<GeoJSONSourceSpecification, "type" | "data">;
+	fitBounds?: boolean;
+	fitBoundsOptions?: FitBoundsOptions;
+	fillColor?: string;
+	fillOpacity?: number;
+	lineColor?: string;
+	lineWidth?: number;
+	pointColor?: string;
+	pointRadius?: number;
+	onFeatureClick?: (
+		feature: MapLibreGL.MapGeoJSONFeature,
+		event: MapLibreGL.MapLayerMouseEvent,
+	) => void;
+};
+
 function MapMarker({
 	longitude,
 	latitude,
@@ -597,6 +621,270 @@ function MarkerPopup({
 		</div>,
 		container,
 	);
+}
+
+function isPosition(value: unknown): value is [number, number, ...number[]] {
+	return (
+		Array.isArray(value) &&
+		typeof value[0] === "number" &&
+		typeof value[1] === "number"
+	);
+}
+
+function extendBoundsWithGeometry(
+	bounds: MapLibreGL.LngLatBounds,
+	geometry: Geometry | null,
+) {
+	if (!geometry) return;
+
+	const visitCoordinates = (coordinates: unknown) => {
+		if (isPosition(coordinates)) {
+			bounds.extend([coordinates[0], coordinates[1]]);
+			return;
+		}
+
+		if (Array.isArray(coordinates)) {
+			coordinates.forEach(visitCoordinates);
+		}
+	};
+
+	if (geometry.type === "GeometryCollection") {
+		geometry.geometries.forEach((item) =>
+			extendBoundsWithGeometry(bounds, item),
+		);
+		return;
+	}
+
+	visitCoordinates(geometry.coordinates);
+}
+
+function getGeoJSONBounds(data: MapGeoJSONData) {
+	if (typeof data === "string") return null;
+
+	const bounds = new MapLibreGL.LngLatBounds();
+
+	if (data.type === "FeatureCollection") {
+		data.features.forEach((feature) =>
+			extendBoundsWithGeometry(bounds, feature.geometry),
+		);
+	} else if (data.type === "Feature") {
+		extendBoundsWithGeometry(bounds, data.geometry);
+	} else {
+		extendBoundsWithGeometry(bounds, data);
+	}
+
+	return bounds.isEmpty() ? null : bounds;
+}
+
+function defaultGeoJSONLayers({
+	sourceId,
+	fillLayerId,
+	lineLayerId,
+	pointLayerId,
+	fillColor,
+	fillOpacity,
+	lineColor,
+	lineWidth,
+	pointColor,
+	pointRadius,
+}: {
+	sourceId: string;
+	fillLayerId: string;
+	lineLayerId: string;
+	pointLayerId: string;
+	fillColor: string;
+	fillOpacity: number;
+	lineColor: string;
+	lineWidth: number;
+	pointColor: string;
+	pointRadius: number;
+}): LayerSpecification[] {
+	return [
+		{
+			id: fillLayerId,
+			type: "fill",
+			source: sourceId,
+			filter: [
+				"any",
+				["==", ["geometry-type"], "Polygon"],
+				["==", ["geometry-type"], "MultiPolygon"],
+			],
+			paint: {
+				"fill-color": fillColor,
+				"fill-opacity": fillOpacity,
+			},
+		},
+		{
+			id: lineLayerId,
+			type: "line",
+			source: sourceId,
+			filter: [
+				"any",
+				["==", ["geometry-type"], "LineString"],
+				["==", ["geometry-type"], "MultiLineString"],
+				["==", ["geometry-type"], "Polygon"],
+				["==", ["geometry-type"], "MultiPolygon"],
+			],
+			paint: {
+				"line-color": lineColor,
+				"line-width": lineWidth,
+			},
+		},
+		{
+			id: pointLayerId,
+			type: "circle",
+			source: sourceId,
+			filter: [
+				"any",
+				["==", ["geometry-type"], "Point"],
+				["==", ["geometry-type"], "MultiPoint"],
+			],
+			paint: {
+				"circle-color": pointColor,
+				"circle-radius": pointRadius,
+				"circle-stroke-color": "#ffffff",
+				"circle-stroke-width": 2,
+			},
+		},
+	];
+}
+
+function MapGeoJSONLayer({
+	id: providedId,
+	data,
+	layers,
+	sourceOptions,
+	fitBounds = false,
+	fitBoundsOptions,
+	fillColor = "#10b981",
+	fillOpacity = 0.24,
+	lineColor = "#047857",
+	lineWidth = 2,
+	pointColor = "#10b981",
+	pointRadius = 6,
+	onFeatureClick,
+}: MapGeoJSONLayerProps) {
+	const reactId = useId().replace(/:/g, "");
+	const sourceId = providedId ?? `map-geojson-${reactId}`;
+	const fillLayerId = `${sourceId}-fill`;
+	const lineLayerId = `${sourceId}-line`;
+	const pointLayerId = `${sourceId}-point`;
+	const { map, isLoaded } = useMap();
+	const resolvedLayers = useMemo(
+		() =>
+			layers ??
+			defaultGeoJSONLayers({
+				sourceId,
+				fillLayerId,
+				lineLayerId,
+				pointLayerId,
+				fillColor,
+				fillOpacity,
+				lineColor,
+				lineWidth,
+				pointColor,
+				pointRadius,
+			}),
+		[
+			fillColor,
+			fillLayerId,
+			fillOpacity,
+			layers,
+			lineColor,
+			lineLayerId,
+			lineWidth,
+			pointColor,
+			pointLayerId,
+			pointRadius,
+			sourceId,
+		],
+	);
+	const layerIds = useMemo(
+		() => resolvedLayers.map((layer) => layer.id),
+		[resolvedLayers],
+	);
+
+	useEffect(() => {
+		if (!map || !isLoaded) return;
+
+		if (!map.getSource(sourceId)) {
+			map.addSource(sourceId, {
+				...sourceOptions,
+				type: "geojson",
+				data,
+			});
+		}
+
+		for (const layer of resolvedLayers) {
+			if (!map.getLayer(layer.id)) {
+				map.addLayer(layer);
+			}
+		}
+
+		return () => {
+			for (const layerId of [...layerIds].reverse()) {
+				if (map.getLayer(layerId)) map.removeLayer(layerId);
+			}
+			if (map.getSource(sourceId)) map.removeSource(sourceId);
+		};
+	}, [
+		data,
+		isLoaded,
+		layerIds,
+		map,
+		resolvedLayers,
+		sourceId,
+		sourceOptions,
+	]);
+
+	useEffect(() => {
+		if (!map || !isLoaded) return;
+		const source = map.getSource(sourceId) as GeoJSONSource | undefined;
+		source?.setData(data);
+	}, [data, isLoaded, map, sourceId]);
+
+	useEffect(() => {
+		if (!map || !isLoaded || !fitBounds) return;
+		const bounds = getGeoJSONBounds(data);
+		if (!bounds) return;
+
+		map.fitBounds(bounds, {
+			padding: 32,
+			duration: 0,
+			...fitBoundsOptions,
+		});
+	}, [data, fitBounds, fitBoundsOptions, isLoaded, map]);
+
+	useEffect(() => {
+		if (!map || !isLoaded || !onFeatureClick) return;
+
+		const handleClick = (event: MapLibreGL.MapLayerMouseEvent) => {
+			const feature = event.features?.[0];
+			if (feature) onFeatureClick(feature, event);
+		};
+		const setPointer = () => {
+			map.getCanvas().style.cursor = "pointer";
+		};
+		const resetPointer = () => {
+			map.getCanvas().style.cursor = "";
+		};
+
+		for (const layerId of layerIds) {
+			map.on("click", layerId, handleClick);
+			map.on("mouseenter", layerId, setPointer);
+			map.on("mouseleave", layerId, resetPointer);
+		}
+
+		return () => {
+			for (const layerId of layerIds) {
+				map.off("click", layerId, handleClick);
+				map.off("mouseenter", layerId, setPointer);
+				map.off("mouseleave", layerId, resetPointer);
+			}
+		};
+	}, [isLoaded, layerIds, map, onFeatureClick]);
+
+	return null;
 }
 
 function MapClusterLayer({
@@ -815,15 +1103,19 @@ export {
 	Map,
 	MapClusterLayer,
 	MapControls,
+	MapGeoJSONLayer,
 	MapMarker,
 	MarkerContent,
 	MarkerPopup,
+	// eslint-disable-next-line react-refresh/only-export-components
 	useMap,
 };
 
 export type {
 	MapClusterLayerProps,
 	MapClusterMarker,
+	MapGeoJSONData,
+	MapGeoJSONLayerProps,
 	MapProps,
 	MapRef,
 	MapViewport,

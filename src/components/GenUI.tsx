@@ -27,10 +27,13 @@ import {
 	Map as MapView,
 	MapClusterLayer,
 	MapControls,
+	MapGeoJSONLayer,
 	MapMarker,
 	MarkerContent,
 	MarkerPopup,
 	type MapClusterMarker,
+	type MapGeoJSONData,
+	type MapGeoJSONLayerProps,
 	type MapProps,
 } from "./Map";
 import { Skeleton } from "./Skeleton";
@@ -41,7 +44,7 @@ type GenUIRecord = Record<string, unknown>;
 type GenUIWidgetData<TRow extends GenUIRecord> =
 	| StatCardProps
 	| TRow[]
-	| GenUIMapMarker[];
+	| GenUIMapData;
 type GenUITableCell<TRow extends GenUIRecord> = {
 	bivarianceHack(value: TRow[keyof TRow], row: TRow): React.ReactNode;
 }["bivarianceHack"];
@@ -105,13 +108,15 @@ export interface GenUIChartDefinition<
 }
 
 export type GenUIMapMarker = MapClusterMarker;
+export type GenUIMapData = GenUIMapMarker[] | MapGeoJSONData;
 
-export interface GenUIMapDefinition
-	extends GenUIBaseWidgetDefinition<GenUIMapMarker[]> {
+export interface GenUIMapDefinition extends GenUIBaseWidgetDefinition<GenUIMapData> {
 	type: "map";
 	center?: [number, number];
 	zoom?: number;
 	height?: React.CSSProperties["height"];
+	geoJson?: MapGeoJSONData;
+	geoJsonLayer?: Omit<MapGeoJSONLayerProps, "data">;
 	showControls?: boolean;
 	cluster?:
 		| boolean
@@ -459,22 +464,91 @@ function GenUIChart<TRow extends GenUIRecord>({
 	);
 }
 
+function isGeoJSONData(data: unknown): data is MapGeoJSONData {
+	return (
+		typeof data === "string" ||
+		(data !== null &&
+			data !== undefined &&
+			typeof data === "object" &&
+			"type" in data &&
+			typeof (data as { type?: unknown }).type === "string")
+	);
+}
+
+function isLngLatPosition(
+	value: unknown,
+): value is [number, number, ...number[]] {
+	return (
+		Array.isArray(value) &&
+		typeof value[0] === "number" &&
+		typeof value[1] === "number"
+	);
+}
+
+function findFirstLngLat(value: unknown): [number, number] | null {
+	if (isLngLatPosition(value)) {
+		return [value[0], value[1]];
+	}
+
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			const position = findFirstLngLat(item);
+			if (position) return position;
+		}
+	}
+
+	if (value && typeof value === "object") {
+		const geoValue = value as {
+			type?: string;
+			coordinates?: unknown;
+			geometry?: unknown;
+			geometries?: unknown[];
+			features?: unknown[];
+		};
+
+		if (geoValue.type === "FeatureCollection") {
+			return findFirstLngLat(geoValue.features);
+		}
+
+		if (geoValue.type === "Feature") {
+			return findFirstLngLat(geoValue.geometry);
+		}
+
+		if (geoValue.type === "GeometryCollection") {
+			return findFirstLngLat(geoValue.geometries);
+		}
+
+		return findFirstLngLat(geoValue.coordinates);
+	}
+
+	return null;
+}
+
 function GenUIMap({
 	definition,
 	data,
 }: {
 	definition: GenUIMapDefinition;
-	data: GenUIMapMarker[];
+	data: GenUIMapData;
 }) {
-	const firstMarker = data[0];
+	const geoJson =
+		definition.geoJson ?? (isGeoJSONData(data) ? data : undefined);
+	const markers = Array.isArray(data) ? data : [];
+	const firstMarker = markers[0];
+	const firstGeoJsonPosition = geoJson ? findFirstLngLat(geoJson) : null;
 	const center =
 		definition.center ??
 		(firstMarker
-			? ([firstMarker.longitude, firstMarker.latitude] as [number, number])
-			: ([0, 0] as [number, number]));
+			? ([firstMarker.longitude, firstMarker.latitude] as [
+					number,
+					number,
+				])
+			: firstGeoJsonPosition
+				? firstGeoJsonPosition
+				: ([0, 0] as [number, number]));
 	const clusterOptions =
 		typeof definition.cluster === "object" ? definition.cluster : {};
-	const shouldCluster = definition.cluster !== false;
+	const shouldCluster = definition.cluster !== false && markers.length > 0;
 
 	return (
 		<div
@@ -487,16 +561,22 @@ function GenUIMap({
 				{...definition.mapProps}
 			>
 				{definition.showControls !== false && <MapControls />}
-				{shouldCluster ? (
+				{geoJson ? (
+					<MapGeoJSONLayer
+						fitBounds={definition.center === undefined}
+						{...definition.geoJsonLayer}
+						data={geoJson}
+					/>
+				) : shouldCluster ? (
 					<MapClusterLayer
-						markers={data}
+						markers={markers}
 						clusterRadius={clusterOptions.radius}
 						clusterMaxZoom={clusterOptions.maxZoom}
 						onMarkerClick={definition.onMarkerClick}
 						onClusterClick={definition.onClusterClick}
 					/>
 				) : (
-					data.map((marker, index) => (
+					markers.map((marker, index) => (
 						<MapMarker
 							key={marker.id ?? index}
 							longitude={marker.longitude}
@@ -570,7 +650,7 @@ function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 		return (
 			<GenUIMap
 				definition={definition}
-				data={(data ?? definition.data ?? []) as GenUIMapMarker[]}
+				data={(data ?? definition.data ?? []) as GenUIMapData}
 			/>
 		);
 	}
