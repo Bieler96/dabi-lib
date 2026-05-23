@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@layer base {
+	.maplibregl-popup-content {
+		@apply rounded-none! bg-transparent! p-0! shadow-none!;
+	}
+
+	.maplibregl-popup-tip {
+		@apply hidden!;
+	}
+}
+
 :root {
 	--background: oklch(0.99 0 0);
 	--foreground: oklch(0.35 0.02 165.48);

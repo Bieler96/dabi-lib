@@ -16,6 +16,7 @@ export * from "./components/FormBuilder";
 export * from "./components/GenUI";
 export * from "./components/Input";
 export * from "./components/Item";
+export * from "./components/Map";
 export * from "./components/Pagination";
 export * from "./components/Popover";
 export * from "./components/Select";
