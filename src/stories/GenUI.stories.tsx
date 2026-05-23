@@ -203,6 +203,139 @@ const fetchedRows: GenUIGridRow<DummyUser>[] = [
 	},
 ];
 
+const llmJsonRows: GenUIGridRow[] = [
+	{
+		id: "llm-overview",
+		columns: [
+			{
+				id: "llm-confidence",
+				span: 4,
+				smSpan: 6,
+				widgets: [
+					{
+						id: "llm-confidence-card",
+						type: "stat-card",
+						title: "LLM confidence",
+						data: {
+							label: "Confidence",
+							value: "92%",
+							description: "Generated from JSON",
+							trend: {
+								value: "+6%",
+								direction: "up",
+								label: "vs. previous run",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "llm-cost",
+				span: 4,
+				smSpan: 6,
+				widgets: [
+					{
+						id: "llm-cost-card",
+						type: "stat-card",
+						title: "Token cost",
+						data: {
+							label: "Token cost",
+							value: "0.42 EUR",
+							trend: {
+								value: "-12%",
+								direction: "down",
+								label: "this hour",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "llm-latency",
+				span: 4,
+				smSpan: 12,
+				widgets: [
+					{
+						id: "llm-latency-card",
+						type: "stat-card",
+						title: "Latency",
+						data: {
+							label: "Latency",
+							value: "680 ms",
+							trend: {
+								value: "stable",
+								direction: "neutral",
+							},
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "llm-details",
+		columns: [
+			{
+				id: "llm-chart",
+				span: 6,
+				title: "Generated chart",
+				widgets: [
+					{
+						id: "llm-usage-chart",
+						type: "chart",
+						title: "Model usage",
+						description: "Inline chart data from JSON",
+						chartType: "bar",
+						xKey: "day",
+						data: [
+							{ day: "Mon", input: 12000, output: 4200 },
+							{ day: "Tue", input: 18400, output: 6100 },
+							{ day: "Wed", input: 14200, output: 5300 },
+							{ day: "Thu", input: 22000, output: 7800 },
+							{ day: "Fri", input: 19500, output: 6900 },
+						],
+						series: [
+							{
+								key: "input",
+								label: "Input tokens",
+								color: "var(--chart-1)",
+							},
+							{
+								key: "output",
+								label: "Output tokens",
+								color: "var(--chart-2)",
+							},
+						],
+					},
+				],
+			},
+			{
+				id: "llm-table",
+				span: 6,
+				title: "Fetched JSON",
+				widgets: [
+					{
+						id: "llm-users-table",
+						type: "data-table",
+						title: "Users from API JSON",
+						description: "fetchUrl + dataPath from JSON config",
+						fetchUrl: "https://dummyjson.com/users?limit=12",
+						dataPath: "users",
+						maxHeight: 320,
+						columns: [
+							{ key: "id", header: "ID" },
+							{ key: "firstName", header: "First name" },
+							{ key: "lastName", header: "Last name" },
+							{ key: "email", header: "Email" },
+							{ key: "age", header: "Age" },
+						],
+					},
+				],
+			},
+		],
+	},
+];
+
 const meta = {
 	title: "Components/GenUI",
 	component: GenUIExample,
@@ -234,6 +367,19 @@ export const FetchedUsersTable: Story = {
 			<GenUIGrid
 				rows={fetchedRows}
 				className="mx-auto max-w-5xl"
+				showWidgetHeaders
+			/>
+		</div>
+	),
+};
+
+export const JsonGeneratedDashboard: Story = {
+	render: () => (
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<GenUIGrid
+				rows={llmJsonRows}
+				className="mx-auto max-w-7xl"
+				showColumnHeaders
 				showWidgetHeaders
 			/>
 		</div>

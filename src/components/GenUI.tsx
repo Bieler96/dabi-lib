@@ -44,6 +44,7 @@ export interface GenUIDataSource<TData> {
 	fetchUrl?: string;
 	fetchOptions?: RequestInit;
 	fetcher?: () => TData | Promise<TData>;
+	dataPath?: string;
 	selectData?: (response: unknown) => TData;
 }
 
@@ -138,11 +139,35 @@ function toError(error: unknown) {
 	return error instanceof Error ? error : new Error(String(error));
 }
 
+function getValueAtPath(value: unknown, path?: string) {
+	if (!path) {
+		return value;
+	}
+
+	return path.split(".").reduce<unknown>((currentValue, key) => {
+		if (currentValue === null || currentValue === undefined) {
+			return undefined;
+		}
+
+		if (Array.isArray(currentValue)) {
+			const index = Number(key);
+			return Number.isInteger(index) ? currentValue[index] : undefined;
+		}
+
+		if (typeof currentValue === "object") {
+			return (currentValue as Record<string, unknown>)[key];
+		}
+
+		return undefined;
+	}, value);
+}
+
 function useGenUIData<TData>({
 	data,
 	fetchUrl,
 	fetchOptions,
 	fetcher,
+	dataPath,
 	selectData,
 }: GenUIDataSource<TData>) {
 	const [remoteData, setRemoteData] = React.useState<TData | undefined>();
@@ -182,7 +207,7 @@ function useGenUIData<TData>({
 
 				const nextData = selectData
 					? selectData(result)
-					: (result as TData);
+					: (getValueAtPath(result, dataPath) as TData);
 
 				if (!ignore) {
 					setRemoteData(nextData);
@@ -204,7 +229,7 @@ function useGenUIData<TData>({
 			ignore = true;
 			controller.abort();
 		};
-	}, [data, fetchUrl, fetchOptions, fetcher, selectData]);
+	}, [data, fetchUrl, fetchOptions, fetcher, dataPath, selectData]);
 
 	return {
 		data: data ?? remoteData,
