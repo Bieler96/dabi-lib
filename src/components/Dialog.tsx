@@ -1,160 +1,158 @@
-import { createPortal } from "react-dom";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import clsx from "clsx";
+"use client";
 
-export interface DialogProps {
-	open: boolean;
-	onClose: () => void;
-	children: ReactNode;
-	title?: ReactNode;
-	description?: ReactNode;
-	className?: string;
-	overlayClassName?: string;
-	paperClassName?: string;
-	ariaLabel?: string;
-	closeOnBackdropClick?: boolean;
-	closeOnEscape?: boolean;
+import * as React from "react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { XIcon } from "lucide-react";
+import { cn } from "../utils/cn";
+import { Button } from "./Button";
+
+function Dialog({ ...props }: DialogPrimitive.Root.Props) {
+	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-export function Dialog({
-	open,
-	onClose,
-	children,
-	title,
-	description,
+function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
+	return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+}
+
+function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
+	return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+}
+
+function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
+	return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
+}
+
+function DialogOverlay({
 	className,
-	overlayClassName,
-	paperClassName,
-	ariaLabel,
-	closeOnBackdropClick = true,
-	closeOnEscape = true,
-}: DialogProps) {
-	const [isRendered, setIsRendered] = useState(open);
-	const panelRef = useRef<HTMLDivElement>(null);
-	const previouslyFocusedElement = useRef<HTMLElement | null>(null);
-	const previousBodyOverflow = useRef<string | null>(null);
-	const titleId = useId();
-	const descriptionId = useId();
-	const canUseDom = typeof document !== "undefined";
-
-	useEffect(() => {
-		if (!canUseDom) {
-			return;
-		}
-
-		if (open) {
-			previouslyFocusedElement.current =
-				document.activeElement as HTMLElement | null;
-			previousBodyOverflow.current = document.body.style.overflow;
-			document.body.style.overflow = "hidden";
-		} else {
-			document.body.style.overflow = previousBodyOverflow.current ?? "";
-		}
-
-		return () => {
-			document.body.style.overflow = previousBodyOverflow.current ?? "";
-		};
-	}, [open, canUseDom]);
-
-	useEffect(() => {
-		if (!canUseDom || !open) {
-			return;
-		}
-
-		if (closeOnEscape) {
-			const handleKeyDown = (event: KeyboardEvent) => {
-				if (event.key === "Escape") {
-					onClose();
-				}
-			};
-
-			document.addEventListener("keydown", handleKeyDown);
-			return () => document.removeEventListener("keydown", handleKeyDown);
-		}
-		return;
-	}, [open, onClose, closeOnEscape, canUseDom]);
-
-	useEffect(() => {
-		if (!canUseDom) {
-			return;
-		}
-
-		if (open) {
-			const frame = requestAnimationFrame(() => {
-				setIsRendered(true);
-				panelRef.current?.focus();
-			});
-			return () => cancelAnimationFrame(frame);
-		}
-
-		if (!isRendered) {
-			return;
-		}
-
-		const timer = window.setTimeout(() => {
-			setIsRendered(false);
-			previouslyFocusedElement.current?.focus?.();
-		}, 200);
-
-		return () => window.clearTimeout(timer);
-	}, [open, isRendered, canUseDom]);
-
-	if ((!open && !isRendered) || !canUseDom) return null;
-
-	return createPortal(
-		<div className={clsx("fixed inset-0 z-50", className)}>
-			<div
-				className={clsx(
-					"absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200",
-					open ? "opacity-100" : "opacity-0",
-					overlayClassName,
-				)}
-				onClick={closeOnBackdropClick ? onClose : undefined}
-				aria-hidden="true"
-			/>
-
-			<div className="fixed inset-0 flex items-center justify-center p-4">
-				<div
-					ref={panelRef}
-					role="dialog"
-					aria-modal="true"
-					aria-label={ariaLabel}
-					aria-labelledby={title ? titleId : undefined}
-					aria-describedby={description ? descriptionId : undefined}
-					tabIndex={-1}
-					className={clsx(
-						"w-full max-w-lg rounded-[var(--radius-component)] border border-outline bg-surface p-6 shadow-lg outline-none transition-all duration-200 ease-out",
-						open
-							? "opacity-100 translate-y-0"
-							: "opacity-0 translate-y-12",
-						paperClassName,
-					)}
-					onClick={(event) => event.stopPropagation()}
-				>
-					{(title || description) && (
-						<div className="mb-4 space-y-1">
-							{title && (
-								<div
-									id={titleId}
-									className="text-xl font-semibold text-on-surface"
-								>
-									{title}
-								</div>
-							)}
-							{description && (
-								<div
-									id={descriptionId}
-									className="text-sm text-on-surface-variant"
-								>
-									{description}
-								</div>
-							)}
-						</div>
-					)}
-					{children}
-				</div>
-			</div>
-		</div>,
-		document.body,
+	...props
+}: DialogPrimitive.Backdrop.Props) {
+	return (
+		<DialogPrimitive.Backdrop
+			data-slot="dialog-overlay"
+			className={cn(
+				"fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+				className,
+			)}
+			{...props}
+		/>
 	);
 }
+
+function DialogContent({
+	className,
+	children,
+	showCloseButton = true,
+	...props
+}: DialogPrimitive.Popup.Props & {
+	showCloseButton?: boolean;
+}) {
+	return (
+		<DialogPortal>
+			<DialogOverlay />
+			<DialogPrimitive.Popup
+				data-slot="dialog-content"
+				className={cn(
+					"fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					className,
+				)}
+				{...props}
+			>
+				{children}
+				{showCloseButton && (
+					<DialogPrimitive.Close
+						data-slot="dialog-close"
+						render={
+							<Button
+								variant="ghost"
+								className="absolute top-2 right-2"
+								size="icon-sm"
+							>
+								<XIcon />
+								<span className="sr-only">Close</span>
+							</Button>
+						}
+					/>
+				)}
+			</DialogPrimitive.Popup>
+		</DialogPortal>
+	);
+}
+
+function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="dialog-header"
+			className={cn("flex flex-col gap-2", className)}
+			{...props}
+		/>
+	);
+}
+
+function DialogFooter({
+	className,
+	showCloseButton = false,
+	children,
+	...props
+}: React.ComponentProps<"div"> & {
+	showCloseButton?: boolean;
+}) {
+	return (
+		<div
+			data-slot="dialog-footer"
+			className={cn(
+				"-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+				className,
+			)}
+			{...props}
+		>
+			{children}
+			{showCloseButton && (
+				<DialogPrimitive.Close
+					render={<Button variant="outline">Close</Button>}
+				/>
+			)}
+		</div>
+	);
+}
+
+function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
+	return (
+		<DialogPrimitive.Title
+			data-slot="dialog-title"
+			className={cn(
+				"cn-font-heading text-base leading-none font-medium",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
+function DialogDescription({
+	className,
+	...props
+}: DialogPrimitive.Description.Props) {
+	return (
+		<DialogPrimitive.Description
+			data-slot="dialog-description"
+			className={cn(
+				"text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
+export {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+	DialogTrigger,
+};
