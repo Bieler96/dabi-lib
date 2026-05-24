@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Container } from "./Primitives";
-import { Button, buttonVariants } from "../Button";
+import { buttonVariants } from "../Button";
 
 export interface FooterLink {
 	label: string;
