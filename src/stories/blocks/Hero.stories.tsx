@@ -1,6 +1,5 @@
 import type { Meta } from "@storybook/react-vite";
-import { Hero, type HeroProps } from "../../components/blocks/Hero";
-import type { JSX } from "react/jsx-runtime";
+import { Hero } from "../../components/blocks/Hero";
 
 const meta = {
 	title: "Blocks/Hero",
