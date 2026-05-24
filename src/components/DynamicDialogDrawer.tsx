@@ -60,7 +60,10 @@ type DynamicDialogDrawerContentProps = DialogContentProps &
 		scrollAreaClassName?: string;
 	};
 
-const DynamicDialogDrawerContext = React.createContext(false);
+const DynamicDialogDrawerContext = React.createContext({
+	isMobile: false,
+	hasSnapPoints: false,
+});
 
 function useDynamicDialogDrawer() {
 	return React.useContext(DynamicDialogDrawerContext);
@@ -98,6 +101,13 @@ function DynamicDialogDrawer({
 	...dialogProps
 }: DynamicDialogDrawerProps) {
 	const isMobile = useIsMobile();
+	const contextValue = React.useMemo(
+		() => ({
+			isMobile,
+			hasSnapPoints: Boolean(snapPoints?.length),
+		}),
+		[isMobile, snapPoints],
+	);
 
 	if (isMobile) {
 		const drawerProps = {
@@ -133,14 +143,14 @@ function DynamicDialogDrawer({
 		} as DrawerProps;
 
 		return (
-			<DynamicDialogDrawerContext.Provider value={isMobile}>
+			<DynamicDialogDrawerContext.Provider value={contextValue}>
 				<Drawer {...drawerProps} />
 			</DynamicDialogDrawerContext.Provider>
 		);
 	}
 
 	return (
-		<DynamicDialogDrawerContext.Provider value={isMobile}>
+		<DynamicDialogDrawerContext.Provider value={contextValue}>
 			<Dialog
 				{...dialogProps}
 				defaultOpen={defaultOpen}
@@ -161,7 +171,7 @@ function DynamicDialogDrawerTrigger({
 	children,
 	...props
 }: DynamicDialogDrawerTriggerProps) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 
 	if (isMobile) {
 		if (React.isValidElement(render)) {
@@ -210,7 +220,7 @@ function DynamicDialogDrawerClose({
 	children,
 	...props
 }: DynamicDialogDrawerCloseProps) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 
 	if (isMobile) {
 		if (React.isValidElement(render)) {
@@ -262,17 +272,22 @@ function DynamicDialogDrawerContent({
 	children,
 	...props
 }: DynamicDialogDrawerContentProps) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile, hasSnapPoints } = useDynamicDialogDrawer();
 
 	if (isMobile) {
 		return (
 			<DrawerContent
-				className={cn("h-dvh max-h-dvh", className, drawerClassName)}
+				className={cn(
+					hasSnapPoints && "h-dvh max-h-dvh",
+					className,
+					drawerClassName,
+				)}
 				{...(props as React.ComponentProps<typeof DrawerContent>)}
 			>
 				<div
 					className={cn(
-						"min-h-0 flex-1 overflow-y-auto overscroll-contain",
+						"min-h-0 overflow-y-auto overscroll-contain",
+						hasSnapPoints && "flex-1",
 						scrollAreaClassName,
 					)}
 				>
@@ -294,7 +309,7 @@ function DynamicDialogDrawerContent({
 }
 
 function DynamicDialogDrawerHeader(props: React.ComponentProps<"div">) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 	return isMobile ? <DrawerHeader {...props} /> : <DialogHeader {...props} />;
 }
 
@@ -303,7 +318,7 @@ function DynamicDialogDrawerFooter({
 	children,
 	...props
 }: React.ComponentProps<"div"> & Pick<DialogFooterProps, "showCloseButton">) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 
 	if (isMobile) {
 		return (
@@ -329,7 +344,7 @@ function DynamicDialogDrawerTitle(
 	props: React.ComponentProps<typeof DialogTitle> &
 		React.ComponentProps<typeof DrawerTitle>,
 ) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 	return isMobile ? <DrawerTitle {...props} /> : <DialogTitle {...props} />;
 }
 
@@ -337,7 +352,7 @@ function DynamicDialogDrawerDescription(
 	props: React.ComponentProps<typeof DialogDescription> &
 		React.ComponentProps<typeof DrawerDescription>,
 ) {
-	const isMobile = useDynamicDialogDrawer();
+	const { isMobile } = useDynamicDialogDrawer();
 
 	return isMobile ? (
 		<DrawerDescription {...props} />
