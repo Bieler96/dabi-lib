@@ -715,3 +715,298 @@ export const JsonGeneratedDashboard: Story = {
 		</div>
 	),
 };
+
+const redmineJson: GenUIGridRow[] = [
+	{
+		id: "redmine-stats-row",
+		columns: [
+			{
+				id: "col-total-issues",
+				span: 4,
+				widgets: [
+					{
+						id: "stat-total",
+						type: "stat-card",
+						title: "Total Issues",
+						data: {
+							label: "Total Issues",
+							value: "1,248",
+							description: "All active projects",
+							trend: {
+								value: "+12",
+								direction: "up",
+								label: "this week",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "col-open-issues",
+				span: 4,
+				widgets: [
+					{
+						id: "stat-open",
+						type: "stat-card",
+						title: "Open Issues",
+						data: {
+							label: "Open Issues",
+							value: "342",
+							description: "Requires action",
+							trend: {
+								value: "-5%",
+								direction: "down",
+								label: "vs. last week",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "col-overdue-issues",
+				span: 4,
+				widgets: [
+					{
+						id: "stat-overdue",
+						type: "stat-card",
+						title: "Overdue",
+						data: {
+							label: "Overdue Issues",
+							value: "18",
+							description: "Past target date",
+							trend: {
+								value: "+3",
+								direction: "up",
+								label: "this week",
+							},
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "redmine-main-row",
+		columns: [
+			{
+				id: "col-assigned",
+				span: 8,
+				widgets: [
+					{
+						id: "table-assigned",
+						type: "data-table",
+						title: "My Assigned Issues",
+						data: [
+							{
+								id: "#4012",
+								project: "Frontend Rework",
+								tracker: "Bug",
+								status: "In Progress",
+								priority: "High",
+								subject: "Fix navigation rendering on mobile",
+							},
+							{
+								id: "#4008",
+								project: "Backend API",
+								tracker: "Feature",
+								status: "New",
+								priority: "Normal",
+								subject: "Add endpoint for user preferences",
+							},
+							{
+								id: "#3995",
+								project: "Mobile App",
+								tracker: "Task",
+								status: "Feedback",
+								priority: "Normal",
+								subject: "Update splash screen assets",
+							},
+							{
+								id: "#3980",
+								project: "Frontend Rework",
+								tracker: "Bug",
+								status: "New",
+								priority: "Urgent",
+								subject: "Login button unresponsive on Safari",
+							},
+						],
+						columns: [
+							{
+								key: "id",
+								header: "ID",
+							},
+							{
+								key: "project",
+								header: "Project",
+							},
+							{
+								key: "tracker",
+								header: "Tracker",
+							},
+							{
+								key: "status",
+								header: "Status",
+							},
+							{
+								key: "priority",
+								header: "Priority",
+							},
+							{
+								key: "subject",
+								header: "Subject",
+							},
+						],
+					},
+				],
+			},
+			{
+				id: "col-activity",
+				span: 4,
+				widgets: [
+					{
+						id: "list-activity",
+						type: "list",
+						title: "Recent Activity",
+						itemKey: "id",
+						titleKey: "action",
+						descriptionKey: "project",
+						metaKey: "time",
+						dialogDrawer: {
+							title: (row) => String(row.action ?? ""),
+							description: (row) => String(row.project ?? ""),
+							children: (row) => (
+								<div className="space-y-3 px-4 pb-4 text-sm md:px-0">
+									<div className="flex justify-between gap-4">
+										<span className="text-muted-foreground">
+											Activity ID
+										</span>
+										<span className="font-medium">
+											{String(row.id ?? "")}
+										</span>
+									</div>
+									<div className="flex justify-between gap-4">
+										<span className="text-muted-foreground">
+											Time
+										</span>
+										<span className="font-medium">
+											{String(row.time ?? "")}
+										</span>
+									</div>
+									<p className="text-muted-foreground">
+										{String(row.details ?? "")}
+									</p>
+								</div>
+							),
+						},
+						data: [
+							{
+								id: "act-1",
+								action: "Issue #4012 Updated",
+								project: "Frontend Rework",
+								time: "10:32",
+								details:
+									"Status changed from New to In Progress by John Doe.",
+							},
+							{
+								id: "act-2",
+								action: "Issue #4015 Created",
+								project: "Backend API",
+								time: "09:45",
+								details:
+									"New feature request added for API rate limiting.",
+							},
+							{
+								id: "act-3",
+								action: "Status changed to Resolved",
+								project: "Mobile App",
+								time: "08:15",
+								details:
+									"Issue #3990 has been marked as resolved. Awaiting QA.",
+							},
+							{
+								id: "act-4",
+								action: "Comment added on #3998",
+								project: "Frontend Rework",
+								time: "Yesterday",
+								details:
+									"Sarah Connor commented: 'I will take a look at this tomorrow morning.'",
+							},
+							{
+								id: "act-5",
+								action: "Issue #3980 Assigned to you",
+								project: "Frontend Rework",
+								time: "Yesterday",
+								details:
+									"High priority bug assigned regarding the login button on Safari.",
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "redmine-chart-row",
+		columns: [
+			{
+				id: "col-chart",
+				span: 12,
+				widgets: [
+					{
+						id: "chart-priority",
+						type: "chart",
+						title: "Issues by Priority",
+						chartType: "bar",
+						xKey: "priority",
+						data: [
+							{
+								priority: "Low",
+								open: 45,
+								closed: 120,
+							},
+							{
+								priority: "Normal",
+								open: 210,
+								closed: 540,
+							},
+							{
+								priority: "High",
+								open: 65,
+								closed: 180,
+							},
+							{
+								priority: "Urgent",
+								open: 22,
+								closed: 50,
+							},
+						],
+						series: [
+							{
+								key: "open",
+								label: "Open",
+								color: "var(--chart-1)",
+							},
+							{
+								key: "closed",
+								label: "Closed",
+								color: "var(--chart-2)",
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+];
+export const RedmineOverview: Story = {
+	render: () => (
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<GenUIGrid
+				rows={redmineJson}
+				className="mx-auto max-w-7xl"
+				showColumnHeaders
+				showWidgetHeaders
+			/>
+		</div>
+	),
+};
