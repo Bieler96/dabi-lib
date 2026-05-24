@@ -57,6 +57,7 @@ type DynamicDialogDrawerContentProps = DialogContentProps &
 	DrawerContentProps & {
 		dialogClassName?: string;
 		drawerClassName?: string;
+		scrollAreaClassName?: string;
 	};
 
 const DynamicDialogDrawerContext = React.createContext(false);
@@ -256,7 +257,9 @@ function DynamicDialogDrawerContent({
 	className,
 	dialogClassName,
 	drawerClassName,
+	scrollAreaClassName,
 	showCloseButton = true,
+	children,
 	...props
 }: DynamicDialogDrawerContentProps) {
 	const isMobile = useDynamicDialogDrawer();
@@ -264,9 +267,18 @@ function DynamicDialogDrawerContent({
 	if (isMobile) {
 		return (
 			<DrawerContent
-				className={cn(className, drawerClassName)}
+				className={cn("h-dvh max-h-dvh", className, drawerClassName)}
 				{...(props as React.ComponentProps<typeof DrawerContent>)}
-			/>
+			>
+				<div
+					className={cn(
+						"min-h-0 flex-1 overflow-y-auto overscroll-contain",
+						scrollAreaClassName,
+					)}
+				>
+					{children}
+				</div>
+			</DrawerContent>
 		);
 	}
 
@@ -275,7 +287,9 @@ function DynamicDialogDrawerContent({
 			className={cn(className, dialogClassName)}
 			showCloseButton={showCloseButton}
 			{...(props as React.ComponentProps<typeof DialogContent>)}
-		/>
+		>
+			{children}
+		</DialogContent>
 	);
 }
 

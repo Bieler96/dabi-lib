@@ -291,6 +291,25 @@ const liveStat = new GenUIWidget<RevenueRow>({
 	}),
 });
 
+const detailsDialog = new GenUIWidget<RevenueRow>({
+	id: "details-dialog",
+	type: "dynamic-dialog-drawer",
+	title: "Revenue details",
+	description: "Opens as a dialog on desktop and a drawer on mobile",
+	triggerLabel: "Open revenue details",
+	triggerProps: {
+		variant: "outline",
+	},
+	showWidgetHeaders: true,
+	widgets: [revenueStat, customerStat, revenueChart],
+	children: (
+		<div className="px-4 pb-4 text-sm text-muted-foreground md:px-0">
+			Review the latest revenue, customer growth, and monthly trend in one
+			responsive overlay.
+		</div>
+	),
+});
+
 const usersTable = new GenUIWidget<DummyUser>({
 	id: "dummy-users",
 	type: "data-table",
@@ -341,6 +360,11 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 				span: 4,
 				smSpan: 12,
 				widgets: [liveStat],
+			},
+			{
+				id: "details-dialog",
+				span: 12,
+				widgets: [detailsDialog],
 			},
 		],
 	},

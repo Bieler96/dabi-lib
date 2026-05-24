@@ -14,6 +14,7 @@ import {
 	YAxis,
 } from "recharts";
 
+import { Button } from "./Button";
 import {
 	ChartContainer,
 	ChartLegend,
@@ -23,6 +24,15 @@ import {
 	type ChartConfig,
 } from "./Chart";
 import { DataTable } from "./DataTable";
+import {
+	DynamicDialogDrawer,
+	DynamicDialogDrawerContent,
+	DynamicDialogDrawerDescription,
+	DynamicDialogDrawerFooter,
+	DynamicDialogDrawerHeader,
+	DynamicDialogDrawerTitle,
+	DynamicDialogDrawerTrigger,
+} from "./DynamicDialogDrawer";
 import {
 	FormBuilder,
 	type FormBuilderProps,
@@ -146,6 +156,26 @@ export type GenUIFormBuilderDefinition<
 		formClassName?: string;
 	};
 
+export interface GenUIDynamicDialogDrawerDefinition<
+	TRow extends GenUIRecord = GenUIRecord,
+> extends GenUIWidgetBaseDefinition {
+	type: "dynamic-dialog-drawer";
+	className?: string;
+	children?: React.ReactNode;
+	widgets?: GenUIWidgetInput<TRow>[];
+	trigger?: React.ReactElement;
+	triggerLabel?: React.ReactNode;
+	triggerProps?: React.ComponentProps<typeof Button>;
+	contentClassName?: string;
+	dialogClassName?: string;
+	drawerClassName?: string;
+	footer?: React.ReactNode;
+	showCloseButton?: boolean;
+	showWidgetHeaders?: boolean;
+	direction?: React.ComponentProps<typeof DynamicDialogDrawer>["direction"];
+	modal?: React.ComponentProps<typeof DynamicDialogDrawer>["modal"];
+}
+
 type GenUIDataWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIStatCardDefinition
 	| GenUIDataTableDefinition<TRow>
@@ -154,7 +184,8 @@ type GenUIDataWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 
 export type GenUIWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIDataWidgetDefinition<TRow>
-	| GenUIFormBuilderDefinition<TRow & FormBuilderValues>;
+	| GenUIFormBuilderDefinition<TRow & FormBuilderValues>
+	| GenUIDynamicDialogDrawerDefinition<TRow>;
 
 interface GenUIWidgetRendererProps<TRow extends GenUIRecord = GenUIRecord> {
 	definition: GenUIWidgetDefinition<TRow>;
@@ -648,6 +679,66 @@ function GenUIFormBuilder<TValues extends FormBuilderValues>({
 	);
 }
 
+function GenUIDynamicDialogDrawer<TRow extends GenUIRecord>({
+	definition,
+}: {
+	definition: GenUIDynamicDialogDrawerDefinition<TRow>;
+}) {
+	const trigger = definition.trigger ?? (
+		<Button {...definition.triggerProps}>
+			{definition.triggerLabel ?? definition.title}
+		</Button>
+	);
+
+	return (
+		<DynamicDialogDrawer
+			direction={definition.direction}
+			modal={definition.modal}
+		>
+			<DynamicDialogDrawerTrigger render={trigger} />
+			<DynamicDialogDrawerContent
+				className={definition.contentClassName}
+				dialogClassName={definition.dialogClassName}
+				drawerClassName={definition.drawerClassName}
+				showCloseButton={definition.showCloseButton}
+			>
+				<DynamicDialogDrawerHeader>
+					<DynamicDialogDrawerTitle>
+						{definition.title}
+					</DynamicDialogDrawerTitle>
+					{definition.description && (
+						<DynamicDialogDrawerDescription>
+							{definition.description}
+						</DynamicDialogDrawerDescription>
+					)}
+				</DynamicDialogDrawerHeader>
+				{definition.children}
+				{definition.widgets && definition.widgets.length > 0 && (
+					<div className="grid gap-3 px-4 pb-4 md:px-0 md:pb-0">
+						{definition.widgets.map((widget) => {
+							const widgetDefinition =
+								resolveWidgetDefinition(widget);
+
+							return (
+								<GenUIWidgetFrame
+									key={widgetDefinition.id}
+									definition={widgetDefinition}
+									showHeader={definition.showWidgetHeaders}
+								/>
+							);
+						})}
+					</div>
+				)}
+				{definition.footer && (
+					<DynamicDialogDrawerFooter>
+						{definition.footer}
+					</DynamicDialogDrawerFooter>
+				)}
+			</DynamicDialogDrawerContent>
+		</DynamicDialogDrawer>
+	);
+}
+
 function resolveWidgetDefinition<TRow extends GenUIRecord>(
 	widget: GenUIWidgetInput<TRow>,
 ) {
@@ -709,6 +800,16 @@ function GenUIDataWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 	definition,
 }: GenUIWidgetRendererProps<TRow>) {
+	if (definition.type === "dynamic-dialog-drawer") {
+		return (
+			<GenUIDynamicDialogDrawer
+				definition={
+					definition as GenUIDynamicDialogDrawerDefinition<TRow>
+				}
+			/>
+		);
+	}
+
 	if (definition.type === "form-builder") {
 		return (
 			<GenUIFormBuilder
