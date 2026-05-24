@@ -38,6 +38,7 @@ import {
 	type FormBuilderProps,
 	type FormBuilderValues,
 } from "./FormBuilder";
+import { List } from "./List";
 import {
 	Map as MapView,
 	MapClusterLayer,
@@ -63,6 +64,12 @@ type GenUIWidgetData<TRow extends GenUIRecord> =
 type GenUITableCell<TRow extends GenUIRecord> = {
 	bivarianceHack(value: TRow[keyof TRow], row: TRow): React.ReactNode;
 }["bivarianceHack"];
+type GenUIListCell<TRow extends GenUIRecord> = {
+	bivarianceHack(row: TRow): React.ReactNode;
+}["bivarianceHack"];
+type GenUIListNode<TRow extends GenUIRecord> =
+	| React.ReactNode
+	| GenUIListCell<TRow>;
 
 export interface GenUIWidgetBaseDefinition {
 	id: string;
@@ -103,6 +110,46 @@ export interface GenUIDataTableDefinition<
 	columns?: GenUITableColumn<TRow>[];
 	emptyMessage?: React.ReactNode;
 	maxHeight?: React.CSSProperties["maxHeight"];
+}
+
+export interface GenUIListSection<TRow extends GenUIRecord = GenUIRecord> {
+	id: string;
+	title?: React.ReactNode;
+	data: TRow[];
+}
+
+export interface GenUIListDialogDrawerDefinition<
+	TRow extends GenUIRecord = GenUIRecord,
+> {
+	title?: GenUIListNode<TRow>;
+	description?: GenUIListNode<TRow>;
+	children?: GenUIListCell<TRow>;
+	widgets?: (row: TRow) => GenUIWidgetInput<TRow>[];
+	contentClassName?: string;
+	dialogClassName?: string;
+	drawerClassName?: string;
+	footer?: GenUIListNode<TRow>;
+	showCloseButton?: boolean;
+	showWidgetHeaders?: boolean;
+	direction?: React.ComponentProps<typeof DynamicDialogDrawer>["direction"];
+	modal?: React.ComponentProps<typeof DynamicDialogDrawer>["modal"];
+}
+
+export interface GenUIListDefinition<
+	TRow extends GenUIRecord = GenUIRecord,
+> extends GenUIBaseWidgetDefinition<TRow[]> {
+	type: "list";
+	sections?: GenUIListSection<TRow>[];
+	itemKey?: keyof TRow & string;
+	titleKey?: keyof TRow & string;
+	descriptionKey?: keyof TRow & string;
+	metaKey?: keyof TRow & string;
+	leading?: GenUIListCell<TRow>;
+	trailing?: GenUIListCell<TRow>;
+	onItemClick?: (row: TRow) => void;
+	emptyMessage?: React.ReactNode;
+	showDividers?: boolean;
+	dialogDrawer?: GenUIListDialogDrawerDefinition<TRow>;
 }
 
 export interface GenUIChartSeries {
@@ -179,6 +226,7 @@ export interface GenUIDynamicDialogDrawerDefinition<
 type GenUIDataWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIStatCardDefinition
 	| GenUIDataTableDefinition<TRow>
+	| GenUIListDefinition<TRow>
 	| GenUIChartDefinition<TRow>
 	| GenUIMapDefinition;
 
@@ -417,6 +465,204 @@ function GenUIDataTable<TRow extends GenUIRecord>({
 	}
 
 	return <DataTable columns={columns} data={data} />;
+}
+
+function getListValue<TRow extends GenUIRecord>(
+	row: TRow,
+	key?: keyof TRow & string,
+) {
+	return key ? formatCellValue(row[key]) : undefined;
+}
+
+function resolveListNode<TRow extends GenUIRecord>(
+	value: GenUIListNode<TRow> | undefined,
+	row: TRow,
+) {
+	return typeof value === "function" ? value(row) : value;
+}
+
+function GenUIList<TRow extends GenUIRecord>({
+	definition,
+	data,
+}: {
+	definition: GenUIListDefinition<TRow>;
+	data: TRow[];
+}) {
+	const [selectedRow, setSelectedRow] = React.useState<TRow | null>(null);
+	const sections = definition.sections ?? [
+		{
+			id: definition.id,
+			data,
+		},
+	];
+	const itemCount = sections.reduce(
+		(count, section) => count + section.data.length,
+		0,
+	);
+	const dialogWidgets =
+		selectedRow && definition.dialogDrawer?.widgets
+			? definition.dialogDrawer.widgets(selectedRow)
+			: [];
+	const list = (
+		<List>
+			{sections.map((section) => (
+				<List.Section key={section.id}>
+					{section.title && (
+						<List.Subheader>{section.title}</List.Subheader>
+					)}
+					{section.data.map((row, index) => {
+						const itemKey =
+							definition.itemKey &&
+							row[definition.itemKey] !== undefined
+								? String(row[definition.itemKey])
+								: `${section.id}-${index}`;
+						const title = getListValue(row, definition.titleKey);
+						const description = getListValue(
+							row,
+							definition.descriptionKey,
+						);
+						const meta = getListValue(row, definition.metaKey);
+						const isLastItem = index === section.data.length - 1;
+
+						return (
+							<React.Fragment key={itemKey}>
+								<List.Item
+									onClick={
+										definition.onItemClick ||
+										definition.dialogDrawer
+											? () => {
+													definition.onItemClick?.(row);
+													if (definition.dialogDrawer) {
+														setSelectedRow(row);
+													}
+												}
+											: undefined
+									}
+								>
+									{definition.leading && (
+										<List.Leading>
+											{definition.leading(row)}
+										</List.Leading>
+									)}
+									<List.Content>
+										<List.Title>{title}</List.Title>
+										{description && (
+											<List.Description>
+												{description}
+											</List.Description>
+										)}
+									</List.Content>
+									{(meta || definition.trailing) && (
+										<List.Trailing>
+											{definition.trailing
+												? definition.trailing(row)
+												: meta && (
+														<List.Meta>
+															{meta}
+														</List.Meta>
+													)}
+										</List.Trailing>
+									)}
+								</List.Item>
+								{definition.showDividers !== false &&
+									!isLastItem && <List.Divider />}
+							</React.Fragment>
+						);
+					})}
+				</List.Section>
+			))}
+		</List>
+	);
+
+	if (itemCount === 0 && definition.emptyMessage) {
+		return (
+			<div className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+				{definition.emptyMessage}
+			</div>
+		);
+	}
+
+	if (definition.dialogDrawer) {
+		return (
+			<>
+				{list}
+				<DynamicDialogDrawer
+					direction={definition.dialogDrawer.direction}
+					modal={definition.dialogDrawer.modal}
+					onOpenChange={(open) => {
+						if (!open) {
+							setSelectedRow(null);
+						}
+					}}
+					open={Boolean(selectedRow)}
+				>
+					<DynamicDialogDrawerContent
+						className={definition.dialogDrawer.contentClassName}
+						dialogClassName={definition.dialogDrawer.dialogClassName}
+						drawerClassName={definition.dialogDrawer.drawerClassName}
+						showCloseButton={definition.dialogDrawer.showCloseButton}
+					>
+						{selectedRow && (
+							<>
+								<DynamicDialogDrawerHeader>
+									<DynamicDialogDrawerTitle>
+										{resolveListNode(
+											definition.dialogDrawer.title ??
+												definition.title,
+											selectedRow,
+										)}
+									</DynamicDialogDrawerTitle>
+									{definition.dialogDrawer.description && (
+										<DynamicDialogDrawerDescription>
+											{resolveListNode(
+												definition.dialogDrawer
+													.description,
+												selectedRow,
+											)}
+										</DynamicDialogDrawerDescription>
+									)}
+								</DynamicDialogDrawerHeader>
+								{definition.dialogDrawer.children?.(
+									selectedRow,
+								)}
+								{dialogWidgets.length > 0 && (
+									<div className="grid gap-3 px-4 pb-4 md:px-0 md:pb-0">
+										{dialogWidgets.map((widget) => {
+											const widgetDefinition =
+												resolveWidgetDefinition(widget);
+
+											return (
+												<GenUIWidgetFrame
+													key={widgetDefinition.id}
+													definition={widgetDefinition}
+													showHeader={
+														definition.dialogDrawer
+															?.showWidgetHeaders
+													}
+												/>
+											);
+										})}
+									</div>
+								)}
+								{definition.dialogDrawer.footer && (
+									<DynamicDialogDrawerFooter>
+										{resolveListNode(
+											definition.dialogDrawer.footer,
+											selectedRow,
+										)}
+									</DynamicDialogDrawerFooter>
+								)}
+							</>
+						)}
+					</DynamicDialogDrawerContent>
+				</DynamicDialogDrawer>
+			</>
+		);
+	}
+
+	return (
+		<>{list}</>
+	);
 }
 
 function buildChartConfig(series: GenUIChartSeries[]) {
@@ -774,6 +1020,15 @@ function GenUIDataWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 	if (definition.type === "data-table") {
 		return (
 			<GenUIDataTable
+				definition={definition}
+				data={(data ?? definition.data ?? []) as TRow[]}
+			/>
+		);
+	}
+
+	if (definition.type === "list") {
+		return (
+			<GenUIList
 				definition={definition}
 				data={(data ?? definition.data ?? []) as TRow[]}
 			/>

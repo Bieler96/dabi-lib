@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Activity, CreditCard, Users } from "lucide-react";
+import { Activity, CreditCard, TrendingUp, Users } from "lucide-react";
 
 import type { FormBuilderField } from "../components/FormBuilder";
 import { GenUIGrid, GenUIWidget, type GenUIGridRow } from "../components/GenUI";
@@ -9,6 +9,7 @@ type RevenueRow = {
 	revenue: number;
 	expenses: number;
 	customers: number;
+	status?: string;
 };
 
 type DummyUser = {
@@ -227,6 +228,43 @@ const revenueTable = new GenUIWidget<RevenueRow>({
 	],
 });
 
+const revenueList = new GenUIWidget<RevenueRow>({
+	id: "revenue-list",
+	type: "list",
+	title: "Revenue list",
+	description: "Monthly highlights",
+	data: revenueData.map((item) => ({
+		...item,
+		status: item.revenue > item.expenses * 2 ? "Healthy" : "Review",
+	})),
+	itemKey: "month",
+	titleKey: "month",
+	descriptionKey: "status",
+	metaKey: "revenue",
+	leading: () => <TrendingUp className="size-4" />,
+	emptyMessage: "No revenue rows available.",
+	dialogDrawer: {
+		title: (row) => `${row.month} revenue`,
+		description: (row) => `${row.customers} customers in this month`,
+		children: (row) => (
+			<div className="space-y-2 px-4 pb-4 text-sm md:px-0">
+				<div className="flex justify-between gap-4">
+					<span className="text-muted-foreground">Revenue</span>
+					<span className="font-medium">
+						{row.revenue.toLocaleString()} EUR
+					</span>
+				</div>
+				<div className="flex justify-between gap-4">
+					<span className="text-muted-foreground">Expenses</span>
+					<span className="font-medium">
+						{row.expenses.toLocaleString()} EUR
+					</span>
+				</div>
+			</div>
+		),
+	},
+});
+
 const locationsMap = new GenUIWidget<RevenueRow>({
 	id: "locations-map",
 	type: "map",
@@ -382,6 +420,17 @@ const rows: GenUIGridRow<RevenueRow>[] = [
 				title: "Table",
 				span: 5,
 				widgets: [revenueTable],
+			},
+		],
+	},
+	{
+		id: "list",
+		columns: [
+			{
+				id: "revenue-list",
+				title: "List",
+				span: 12,
+				widgets: [revenueList],
 			},
 		],
 	},
@@ -561,6 +610,43 @@ const llmJsonRows: GenUIGridRow[] = [
 							{ key: "email", header: "Email" },
 							{ key: "age", header: "Age" },
 						],
+					},
+				],
+			},
+			{
+				id: "llm-list",
+				span: 12,
+				title: "Generated list",
+				widgets: [
+					{
+						id: "llm-events-list",
+						type: "list",
+						title: "Recent events",
+						description: "Inline list data from JSON",
+						data: [
+							{
+								id: "evt-1",
+								name: "Prompt generated",
+								detail: "Dashboard JSON accepted",
+								time: "09:12",
+							},
+							{
+								id: "evt-2",
+								name: "Fetcher completed",
+								detail: "12 users loaded",
+								time: "09:13",
+							},
+							{
+								id: "evt-3",
+								name: "Chart rendered",
+								detail: "Usage series is available",
+								time: "09:14",
+							},
+						],
+						itemKey: "id",
+						titleKey: "name",
+						descriptionKey: "detail",
+						metaKey: "time",
 					},
 				],
 			},
