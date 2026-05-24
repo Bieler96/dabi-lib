@@ -155,7 +155,7 @@ function App() {
 
 ### Gen UI Widgets
 
-Für widgetbasierte Oberflächen kannst du deklarative Gen-UI-Widgets in einem flexiblen Row-/Column-Grid nutzen. Unterstützt werden `stat-card`, `data-table` und `chart`; Daten können direkt übergeben oder per `fetchUrl`/`fetcher` geladen werden.
+Für widgetbasierte Oberflächen kannst du deklarative Gen-UI-Widgets in einem flexiblen Row-/Column-Grid nutzen. Unterstützt werden `stat-card`, `data-table`, `chart`, `map` und `form-builder`; Daten können direkt übergeben oder per `fetchUrl`/`fetcher` geladen werden.
 
 ```tsx
 import { GenUIGrid, GenUIWidget } from "dabi-lib";
@@ -183,6 +183,18 @@ const liveTableWidget = new GenUIWidget({
 	],
 });
 
+const contactWidget = new GenUIWidget({
+	id: "contact",
+	type: "form-builder",
+	title: "Kontakt",
+	fields: [
+		{ name: "name", label: "Name", required: true },
+		{ name: "email", type: "email", label: "Email", required: true },
+	],
+	submitLabel: "Senden",
+	onSubmit: (values) => console.log(values),
+});
+
 function Dashboard() {
 	return (
 		<GenUIGrid
@@ -192,6 +204,7 @@ function Dashboard() {
 					columns: [
 						{ id: "stats", span: 4, widgets: [revenueWidget] },
 						{ id: "orders", span: 8, widgets: [liveTableWidget] },
+						{ id: "contact", span: 12, widgets: [contactWidget] },
 					],
 				},
 			]}

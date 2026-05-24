@@ -24,6 +24,11 @@ import {
 } from "./Chart";
 import { DataTable } from "./DataTable";
 import {
+	FormBuilder,
+	type FormBuilderProps,
+	type FormBuilderValues,
+} from "./FormBuilder";
+import {
 	Map as MapView,
 	MapClusterLayer,
 	MapControls,
@@ -129,11 +134,27 @@ export interface GenUIMapDefinition extends GenUIBaseWidgetDefinition<GenUIMapDa
 	mapProps?: Omit<MapProps, "children" | "className" | "center" | "zoom">;
 }
 
-export type GenUIWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
+export type GenUIFormBuilderDefinition<
+	TValues extends FormBuilderValues = FormBuilderValues,
+> = GenUIWidgetBaseDefinition &
+	Omit<
+		FormBuilderProps<TValues>,
+		keyof GenUIWidgetBaseDefinition | "className"
+	> & {
+		type: "form-builder";
+		className?: string;
+		formClassName?: string;
+	};
+
+type GenUIDataWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
 	| GenUIStatCardDefinition
 	| GenUIDataTableDefinition<TRow>
 	| GenUIChartDefinition<TRow>
 	| GenUIMapDefinition;
+
+export type GenUIWidgetDefinition<TRow extends GenUIRecord = GenUIRecord> =
+	| GenUIDataWidgetDefinition<TRow>
+	| GenUIFormBuilderDefinition<TRow & FormBuilderValues>;
 
 interface GenUIWidgetRendererProps<TRow extends GenUIRecord = GenUIRecord> {
 	definition: GenUIWidgetDefinition<TRow>;
@@ -603,15 +624,41 @@ function GenUIMap({
 	);
 }
 
+function GenUIFormBuilder<TValues extends FormBuilderValues>({
+	definition,
+}: {
+	definition: GenUIFormBuilderDefinition<TValues>;
+}) {
+	const formProps = {
+		...definition,
+	} as Partial<GenUIFormBuilderDefinition<TValues>>;
+
+	delete formProps.type;
+	delete formProps.id;
+	delete formProps.title;
+	delete formProps.description;
+	delete formProps.className;
+	delete formProps.formClassName;
+
+	return (
+		<FormBuilder<TValues>
+			{...(formProps as FormBuilderProps<TValues>)}
+			className={definition.formClassName}
+		/>
+	);
+}
+
 function resolveWidgetDefinition<TRow extends GenUIRecord>(
 	widget: GenUIWidgetInput<TRow>,
 ) {
 	return widget instanceof GenUIWidget ? widget.definition : widget;
 }
 
-function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
+function GenUIDataWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 	definition,
-}: GenUIWidgetRendererProps<TRow>) {
+}: {
+	definition: GenUIDataWidgetDefinition<TRow>;
+}) {
 	const { data, error, loading } = useGenUIData<GenUIWidgetData<TRow>>(
 		definition as GenUIDataSource<GenUIWidgetData<TRow>>,
 	);
@@ -657,6 +704,24 @@ function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
 			data={(data ?? definition.data ?? []) as TRow[]}
 		/>
 	);
+}
+
+function GenUIWidgetRenderer<TRow extends GenUIRecord = GenUIRecord>({
+	definition,
+}: GenUIWidgetRendererProps<TRow>) {
+	if (definition.type === "form-builder") {
+		return (
+			<GenUIFormBuilder
+				definition={
+					definition as GenUIFormBuilderDefinition<
+						TRow & FormBuilderValues
+					>
+				}
+			/>
+		);
+	}
+
+	return <GenUIDataWidgetRenderer definition={definition} />;
 }
 
 function GenUIWidgetFrame<TRow extends GenUIRecord = GenUIRecord>({

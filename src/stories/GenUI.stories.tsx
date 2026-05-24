@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Activity, CreditCard, Users } from "lucide-react";
 
+import type { FormBuilderField } from "../components/FormBuilder";
 import { GenUIGrid, GenUIWidget, type GenUIGridRow } from "../components/GenUI";
 
 type RevenueRow = {
@@ -21,6 +22,52 @@ type DummyUser = {
 		name?: string;
 	};
 };
+
+type LeadFormValues = {
+	name: string;
+	email: string;
+	plan: string;
+	message: string;
+	newsletter: boolean;
+};
+
+const leadFields: FormBuilderField<LeadFormValues>[] = [
+	{
+		name: "name",
+		label: "Name",
+		placeholder: "Jane Doe",
+		required: true,
+	},
+	{
+		name: "email",
+		type: "email",
+		label: "Email",
+		placeholder: "jane@example.com",
+		required: true,
+	},
+	{
+		name: "plan",
+		type: "select",
+		label: "Plan",
+		placeholder: "Plan auswaehlen",
+		options: [
+			{ value: "starter", label: "Starter" },
+			{ value: "growth", label: "Growth" },
+			{ value: "enterprise", label: "Enterprise" },
+		],
+	},
+	{
+		name: "message",
+		type: "textarea",
+		label: "Nachricht",
+		placeholder: "Was soll als Naechstes passieren?",
+	},
+	{
+		name: "newsletter",
+		type: "checkbox",
+		label: "Produktupdates erhalten",
+	},
+];
 
 const revenueData: RevenueRow[] = [
 	{ month: "Jan", revenue: 18600, expenses: 9800, customers: 120 },
@@ -211,6 +258,22 @@ const geoJsonMap = new GenUIWidget<RevenueRow>({
 	},
 });
 
+const leadForm = new GenUIWidget<LeadFormValues>({
+	id: "lead-form",
+	type: "form-builder",
+	title: "Lead form",
+	description: "FormBuilder embedded in GenUI",
+	fields: leadFields,
+	defaultValues: {
+		plan: "growth",
+		newsletter: true,
+	},
+	submitLabel: "Absenden",
+	showReset: true,
+	resetLabel: "Zuruecksetzen",
+	onSubmit: (values) => console.log(values),
+});
+
 const liveStat = new GenUIWidget<RevenueRow>({
 	id: "live-stat",
 	type: "stat-card",
@@ -330,6 +393,19 @@ const fetchedRows: GenUIGridRow<DummyUser>[] = [
 				id: "users-table",
 				span: 12,
 				widgets: [usersTable],
+			},
+		],
+	},
+];
+
+const formRows: GenUIGridRow<LeadFormValues>[] = [
+	{
+		id: "form",
+		columns: [
+			{
+				id: "lead-form",
+				span: 6,
+				widgets: [leadForm],
 			},
 		],
 	},
@@ -499,6 +575,18 @@ export const FetchedUsersTable: Story = {
 			<GenUIGrid
 				rows={fetchedRows}
 				className="mx-auto max-w-5xl"
+				showWidgetHeaders
+			/>
+		</div>
+	),
+};
+
+export const FormBuilderWidget: Story = {
+	render: () => (
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<GenUIGrid
+				rows={formRows}
+				className="mx-auto max-w-3xl"
 				showWidgetHeaders
 			/>
 		</div>
