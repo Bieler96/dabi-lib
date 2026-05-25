@@ -1,5 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Activity, CreditCard, TrendingUp, Users } from "lucide-react";
+import {
+	Activity,
+	AlertTriangle,
+	CheckCircle2,
+	CreditCard,
+	RadioTower,
+	TrendingUp,
+	Users,
+} from "lucide-react";
 
 import type { FormBuilderField } from "../components/FormBuilder";
 import { GenUIGrid, GenUIWidget, type GenUIGridRow } from "../components/GenUI";
@@ -30,6 +38,19 @@ type LeadFormValues = {
 	plan: string;
 	message: string;
 	newsletter: boolean;
+};
+
+type OtelLogRow = {
+	id: string;
+	timestamp: string;
+	severity: "INFO" | "WARN" | "ERROR";
+	service: string;
+	message: string;
+	traceId: string;
+	spanId: string;
+	environment: string;
+	attributes: string;
+	latencyMs: number;
 };
 
 const leadFields: FormBuilderField<LeadFormValues>[] = [
@@ -77,6 +98,78 @@ const revenueData: RevenueRow[] = [
 	{ month: "Apr", revenue: 29100, expenses: 14700, customers: 181 },
 	{ month: "May", revenue: 32600, expenses: 16300, customers: 204 },
 	{ month: "Jun", revenue: 35400, expenses: 17100, customers: 229 },
+];
+
+const otelLogData: OtelLogRow[] = [
+	{
+		id: "log-1001",
+		timestamp: "2026-05-25 09:41:12.245",
+		severity: "INFO",
+		service: "checkout-api",
+		message: "Payment intent created",
+		traceId: "4f6b2a8d0c9e41b7a612ef34d88c9012",
+		spanId: "7c9a21ef102ab883",
+		environment: "production",
+		attributes: "http.method=POST, http.route=/checkout",
+		latencyMs: 142,
+	},
+	{
+		id: "log-1002",
+		timestamp: "2026-05-25 09:41:13.018",
+		severity: "WARN",
+		service: "inventory-worker",
+		message: "Stock reservation retry scheduled",
+		traceId: "91ca640cf3ab4f1db3c258e6cb7ed6a9",
+		spanId: "5fe27d6b93a045aa",
+		environment: "production",
+		attributes: "messaging.system=kafka, retry.count=2",
+		latencyMs: 390,
+	},
+	{
+		id: "log-1003",
+		timestamp: "2026-05-25 09:41:15.774",
+		severity: "ERROR",
+		service: "billing-service",
+		message: "Invoice export failed",
+		traceId: "0ec3e45db4c74cf6b18e6b63246fd4b0",
+		spanId: "e317d1a4d55b42c0",
+		environment: "production",
+		attributes: "exception.type=TimeoutError, peer.service=sap",
+		latencyMs: 1840,
+	},
+	{
+		id: "log-1004",
+		timestamp: "2026-05-25 09:41:18.603",
+		severity: "INFO",
+		service: "frontend-web",
+		message: "Order confirmation rendered",
+		traceId: "4f6b2a8d0c9e41b7a612ef34d88c9012",
+		spanId: "2f7dd8c8b114c9e1",
+		environment: "production",
+		attributes: "browser.name=Chrome, user.segment=business",
+		latencyMs: 86,
+	},
+	{
+		id: "log-1005",
+		timestamp: "2026-05-25 09:41:22.117",
+		severity: "WARN",
+		service: "auth-service",
+		message: "Token refresh nearing rate limit",
+		traceId: "c7fd62f0ec874cf4a244f70e196e0d21",
+		spanId: "10bf231ca44dcf2e",
+		environment: "production",
+		attributes: "enduser.id=usr_4218, rate.limit.remaining=8",
+		latencyMs: 232,
+	},
+];
+
+const otelLogVolumeData = [
+	{ minute: "09:36", info: 188, warn: 21, error: 2 },
+	{ minute: "09:37", info: 214, warn: 18, error: 3 },
+	{ minute: "09:38", info: 201, warn: 27, error: 4 },
+	{ minute: "09:39", info: 236, warn: 31, error: 5 },
+	{ minute: "09:40", info: 248, warn: 26, error: 3 },
+	{ minute: "09:41", info: 259, warn: 34, error: 7 },
 ];
 
 const berlinMarkers = [
@@ -654,6 +747,244 @@ const llmJsonRows: GenUIGridRow[] = [
 	},
 ];
 
+const openTelemetryLoggingRows: GenUIGridRow[] = [
+	{
+		id: "otel-log-health",
+		columns: [
+			{
+				id: "otel-ingest-rate",
+				span: 4,
+				smSpan: 6,
+				widgets: [
+					{
+						id: "otel-ingest-rate-card",
+						type: "stat-card",
+						title: "Log ingest",
+						description: "OpenTelemetry logs pipeline",
+						data: {
+							label: "Events / min",
+							value: "1,842",
+							icon: <RadioTower className="size-4" />,
+							trend: {
+								value: "+9.4%",
+								direction: "up",
+								label: "last 15 min",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "otel-error-rate",
+				span: 4,
+				smSpan: 6,
+				widgets: [
+					{
+						id: "otel-error-rate-card",
+						type: "stat-card",
+						title: "Errors",
+						description: "SeverityText ERROR",
+						data: {
+							label: "Error logs",
+							value: "24",
+							icon: <AlertTriangle className="size-4" />,
+							trend: {
+								value: "+7",
+								direction: "up",
+								label: "last 5 min",
+							},
+						},
+					},
+				],
+			},
+			{
+				id: "otel-trace-coverage",
+				span: 4,
+				smSpan: 12,
+				widgets: [
+					{
+						id: "otel-trace-coverage-card",
+						type: "stat-card",
+						title: "Trace correlation",
+						description: "Logs with trace_id and span_id",
+						data: {
+							label: "Coverage",
+							value: "98.7%",
+							icon: <CheckCircle2 className="size-4" />,
+							trend: {
+								value: "stable",
+								direction: "neutral",
+								label: "production",
+							},
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "otel-log-analysis",
+		columns: [
+			{
+				id: "otel-volume-chart",
+				span: 5,
+				title: "Telemetry volume",
+				widgets: [
+					{
+						id: "otel-log-volume-chart",
+						type: "chart",
+						title: "Logs by severity",
+						description: "Grouped by OpenTelemetry SeverityText",
+						chartType: "bar",
+						xKey: "minute",
+						data: otelLogVolumeData,
+						series: [
+							{
+								key: "info",
+								label: "INFO",
+								color: "var(--chart-1)",
+							},
+							{
+								key: "warn",
+								label: "WARN",
+								color: "var(--chart-2)",
+							},
+							{
+								key: "error",
+								label: "ERROR",
+								color: "var(--chart-5)",
+							},
+						],
+					},
+				],
+			},
+			{
+				id: "otel-recent-events",
+				span: 7,
+				title: "Trace-linked events",
+				widgets: [
+					{
+						id: "otel-recent-events-list",
+						type: "list",
+						title: "Recent correlated logs",
+						description:
+							"Click an event to inspect resource and span metadata",
+						data: otelLogData,
+						itemKey: "id",
+						titleKey: "message",
+						descriptionKey: "service",
+						metaKey: "severity",
+						showDividers: true,
+						dialogDrawer: {
+							title: (row) => String(row.message ?? ""),
+							description: (row) =>
+								`${String(row.service ?? "")} | ${String(row.severity ?? "")}`,
+							children: (row) => (
+								<div className="space-y-3 px-4 pb-4 text-sm md:px-0">
+									<div className="grid gap-2">
+										<div className="flex justify-between gap-4">
+											<span className="text-muted-foreground">
+												Timestamp
+											</span>
+											<span className="font-medium">
+												{String(row.timestamp ?? "")}
+											</span>
+										</div>
+										<div className="flex justify-between gap-4">
+											<span className="text-muted-foreground">
+												Trace ID
+											</span>
+											<span className="break-all font-mono text-xs font-medium">
+												{String(row.traceId ?? "")}
+											</span>
+										</div>
+										<div className="flex justify-between gap-4">
+											<span className="text-muted-foreground">
+												Span ID
+											</span>
+											<span className="font-mono text-xs font-medium">
+												{String(row.spanId ?? "")}
+											</span>
+										</div>
+										<div className="flex justify-between gap-4">
+											<span className="text-muted-foreground">
+												Latency
+											</span>
+											<span className="font-medium">
+												{String(row.latencyMs ?? "")} ms
+											</span>
+										</div>
+									</div>
+									<p className="break-words rounded-md bg-muted p-3 font-mono text-xs text-muted-foreground">
+										{String(row.attributes ?? "")}
+									</p>
+								</div>
+							),
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "otel-log-table-row",
+		columns: [
+			{
+				id: "otel-log-table",
+				span: 12,
+				title: "Structured log records",
+				widgets: [
+					{
+						id: "otel-log-records-table",
+						type: "data-table",
+						title: "OpenTelemetry log records",
+						description:
+							"Resource, severity, trace_id, span_id and attributes in one table",
+						data: otelLogData,
+						maxHeight: 380,
+						columns: [
+							{ key: "timestamp", header: "Timestamp" },
+							{
+								key: "severity",
+								header: "SeverityText",
+								cell: (value) => (
+									<span className="font-semibold">
+										{String(value)}
+									</span>
+								),
+							},
+							{ key: "service", header: "service.name" },
+							{ key: "message", header: "Body" },
+							{
+								key: "traceId",
+								header: "trace_id",
+								cell: (value) => (
+									<span className="font-mono text-xs">
+										{String(value).slice(0, 12)}...
+									</span>
+								),
+							},
+							{
+								key: "spanId",
+								header: "span_id",
+								cell: (value) => (
+									<span className="font-mono text-xs">
+										{String(value)}
+									</span>
+								),
+							},
+							{
+								key: "environment",
+								header: "deployment.environment",
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+];
+
 const meta = {
 	title: "Components/GenUI",
 	component: GenUIExample,
@@ -708,6 +1039,19 @@ export const JsonGeneratedDashboard: Story = {
 		<div className="min-h-screen bg-background p-4 sm:p-6">
 			<GenUIGrid
 				rows={llmJsonRows}
+				className="mx-auto max-w-7xl"
+				showColumnHeaders
+				showWidgetHeaders
+			/>
+		</div>
+	),
+};
+
+export const OpenTelemetryLogging: Story = {
+	render: () => (
+		<div className="min-h-screen bg-background p-4 sm:p-6">
+			<GenUIGrid
+				rows={openTelemetryLoggingRows}
 				className="mx-auto max-w-7xl"
 				showColumnHeaders
 				showWidgetHeaders
