@@ -61,8 +61,6 @@ export default defineConfig(({ command }) => {
 						"glob",
 						"@hono/node-server",
 						"jsonwebtoken",
-						"better-sqlite3",
-						"drizzle-orm",
 						"commander",
 						"fs-extra",
 						"inquirer",

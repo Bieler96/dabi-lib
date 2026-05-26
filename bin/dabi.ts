@@ -43,7 +43,6 @@ program
 			const essentialFolders = [
 				"src/api",
 				"src/screens",
-				"src/db",
 				"src/components",
 				"src/core",
 				"src/hooks",
@@ -102,7 +101,6 @@ program
 					"tsconfig.app.json",
 					"tsconfig.node.json",
 					"vite.config.ts",
-					"drizzle.config.ts",
 					"eslint.config.js",
 					"index.html",
 					".gitignore",
@@ -169,7 +167,7 @@ program
 program
 	.command("generate <type> <name>")
 	.alias("g")
-	.description("Generate a new screen, api, or db schema (s, a, d)")
+	.description("Generate a new screen or api route (s, a)")
 	.action(async (type, name) => {
 		const normalizedType = type.toLowerCase();
 
@@ -177,8 +175,6 @@ program
 			await generateScreen(name);
 		} else if (["api", "a"].includes(normalizedType)) {
 			await generateApi(name);
-		} else if (["db", "schema", "d"].includes(normalizedType)) {
-			await generateDb(name);
 		} else {
 			console.error(pc.red(`Unknown generation type: ${type}`));
 		}
@@ -307,34 +303,4 @@ export const POST = async (c: Context) => {
 	await fs.writeFile(filePath, content);
 	console.log(pc.green(`Created API endpoint: ${filePath}`));
 }
-
-async function generateDb(name: string) {
-	const schemaPath = path.join(process.cwd(), "src", "db", "schema.ts");
-
-	if (!fs.existsSync(schemaPath)) {
-		console.error(pc.red(`Schema file not found at ${schemaPath}`));
-		return;
-	}
-
-	const tableName = name.toLowerCase();
-	const constantName = name.toLowerCase();
-
-	const tableContent = `\nexport const ${constantName} = sqliteTable('${tableName}', {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
-});\n`;
-
-	const currentContent = await fs.readFile(schemaPath, "utf-8");
-	if (currentContent.includes(`sqliteTable('${tableName}'`)) {
-		console.error(pc.red(`Table ${tableName} already exists in schema.ts`));
-		return;
-	}
-
-	await fs.appendFile(schemaPath, tableContent);
-	console.log(pc.green(`Added table ${tableName} to src/db/schema.ts`));
-	console.log(
-		pc.yellow(`Next step: Run 'npm run db:push' to update your database.`),
-	);
-}
-
 program.parse();

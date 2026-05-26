@@ -1,6 +1,6 @@
 # Dabi CLI 🚀
 
-Die **Dabi CLI** ist das Werkzeug zur Unterstützung der Entwicklung mit der `dabi-lib`. Sie ermöglicht es dir, blitzschnell neue Projekte zu initialisieren und zentrale Ressourcen wie Screens, API-Endpoints und Datenbank-Schemas zu generieren.
+Die **Dabi CLI** ist das Werkzeug zur Unterstützung der Entwicklung mit der `dabi-lib`. Sie ermöglicht es dir, blitzschnell neue Projekte zu initialisieren und zentrale Ressourcen wie Screens und API-Endpoints zu generieren.
 
 ## Installation
 
@@ -51,27 +51,12 @@ npx dabi g a orders
 
 _Generiert eine Datei in `src/api/orders.ts` mit GET und POST Handlern._
 
-#### Datenbank Schemas
-
-Fügt eine neue Tabelle zu deinem Drizzle-Schema hinzu.
-
-```bash
-npx dabi g db products
-# oder kurz
-npx dabi g d products
-```
-
-_Ergänzt `src/db/schema.ts` um die neue Tabelle. Vergiss nicht danach `npm run db:push` auszuführen!_
-
----
-
 ## Projektstruktur
 
 Wenn du Ressourcen generierst, folgt die CLI dieser Struktur:
 
 - **Screens:** `src/screens/*.tsx`
 - **API:** `src/api/*.ts`
-- **DB:** `src/db/schema.ts`
 
 ## Voraussetzungen
 

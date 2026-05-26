@@ -22,7 +22,6 @@ export default defineConfig(() => {
 					"src/server/**", // Exclude all server code
 					"src/api/**", // Exclude all api code
 					"src/screens/**",
-					"src/db/**", // Exclude db code
 					"src/vite/**", // Exclude vite plugin code
 				],
 				insertTypesEntry: true,
