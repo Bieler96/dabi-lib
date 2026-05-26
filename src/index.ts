@@ -6,6 +6,7 @@ export * from "./components/Button";
 export * from "./components/ButtonGroup";
 export * from "./components/Card";
 export * from "./components/Checkbox";
+export * from "./components/Chat";
 export * from "./components/Chip";
 export * from "./components/Confirm";
 export * from "./components/CopyButton";
