@@ -1,4 +1,9 @@
-import { Dialog } from "./Dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogTitle,
+} from "./Dialog";
 import { Button } from "./Button";
 
 export interface AlertProps {
@@ -17,14 +22,23 @@ export function Alert({
 	confirmText = "OK",
 }: AlertProps) {
 	return (
-		<Dialog open={open} onClose={onClose}>
-			<div className="space-y-[var(--space-4)] text-center">
-				<h2 className="text-xl font-semibold">{title}</h2>
-				<p className="text-on-surface-variant">{message}</p>
+		<Dialog
+			open={open}
+			onOpenChange={(nextOpen) => {
+				if (!nextOpen) onClose();
+			}}
+		>
+			<DialogContent>
+				<div className="space-y-[var(--space-4)] text-center">
+					<DialogTitle className="text-xl font-semibold">
+						{title}
+					</DialogTitle>
+					<DialogDescription>{message}</DialogDescription>
+				</div>
 				<div className="flex justify-end gap-[var(--space-2)]">
 					<Button onClick={onClose}>{confirmText}</Button>
 				</div>
-			</div>
+			</DialogContent>
 		</Dialog>
 	);
 }

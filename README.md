@@ -1,22 +1,12 @@
 # dabi-lib
 
-`dabi-lib` ist eine meinungsstarke Fullstack-Library für React-Anwendungen, die eine nahtlose Integration von Frontend und Backend bietet. Sie ist darauf ausgelegt, schnell moderne Webanwendungen zu entwickeln.
+`dabi-lib` ist eine meinungsstarke UI-Library für React-Anwendungen. Sie ist darauf ausgelegt, schnell moderne Webanwendungen zu entwickeln.
 
 ## Features
 
 - **Frontend**: React 19, Vite, TailwindCSS (v4), Lucide Icons.
-- **Backend**: API Routes integriert via `Hono` (Server-Side).
-- **Router**: Eingebauter datei-basierter API-Router und client-seitiger Router mit Guards.
+- **Router**: Client-seitiger Router mit Guards.
 - **UI Komponenten**: Fertige Komponenten wie DataTables, Sheets, Cards, etc.
-
-## Authentifizierung
-
-`dabi-lib` bietet flexible Authentifizierungsoptionen für Ihre API-Endpunkte. Dazu gehören:
-
-- **API-Key-basierte Authentifizierung**: Einfache und effektive Methode zur Absicherung von Endpunkten.
-- **JWT (JSON Web Token) Authentifizierung**: Robuste, standardbasierte Authentifizierung für zustandslose APIs.
-
-Weitere Details und Beispiele finden Sie in den Dateien `API_AUTH.md` und `JWT_EXAMPLE.md`.
 
 ## Installation & Setup
 
@@ -28,30 +18,10 @@ npm install
 
 2. **Entwicklungsserver starten:**
 
-Startet das Frontend und die API-Endpunkte gleichzeitig.
+Startet den Frontend-Entwicklungsserver.
 
 ```bash
 npm run dev
-```
-
-## API Routes
-
-API Routes werden automatisch aus dem Ordner `src/api` geladen. Die Dateistruktur definiert die URL.
-
-Beispiel: `src/api/users.ts` -> `/api/users`
-
-```typescript
-import type { Context } from "hono";
-
-export const GET = async (c: Context) => {
-	return c.json({ users: [] });
-};
-
-export const POST = async (c: Context) => {
-	const body = await c.req.json();
-	// ... Logik
-	return c.json({ success: true });
-};
 ```
 
 ## Installation via NPM
@@ -110,7 +80,7 @@ const liveTableWidget = new GenUIWidget({
 	id: "orders",
 	type: "data-table",
 	title: "Orders",
-	fetchUrl: "/api/orders",
+	fetchUrl: "/orders.json",
 	columns: [
 		{ key: "id", header: "ID" },
 		{ key: "customer", header: "Customer" },
@@ -160,7 +130,6 @@ npx dabi generate screen Dashboard
 
 ## Projektstruktur
 
-- `src/api`: Backend API Endpunkte.
 - `src/components`: Wiederverwendbare UI-Komponenten.
 - `src/core`: Kern-Logik wie Router.
 - `src/screens`: Seiten/Screens der App.

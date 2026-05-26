@@ -6,6 +6,8 @@ import { XIcon } from "lucide-react";
 import { cn } from "../utils/cn";
 import { Button } from "./Button";
 
+export type SheetSide = "top" | "right" | "bottom" | "left";
+
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
 	return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -42,7 +44,7 @@ function SheetContent({
 	showCloseButton = true,
 	...props
 }: SheetPrimitive.Popup.Props & {
-	side?: "top" | "right" | "bottom" | "left";
+	side?: SheetSide;
 	showCloseButton?: boolean;
 }) {
 	return (

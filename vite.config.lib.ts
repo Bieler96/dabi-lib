@@ -19,10 +19,7 @@ export default defineConfig(() => {
 				exclude: [
 					"src/App.tsx",
 					"src/main.tsx",
-					"src/server/**", // Exclude all server code
-					"src/api/**", // Exclude all api code
 					"src/screens/**",
-					"src/vite/**", // Exclude vite plugin code
 				],
 				insertTypesEntry: true,
 				tsconfigPath: "./tsconfig.app.json",

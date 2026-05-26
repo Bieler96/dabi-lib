@@ -125,11 +125,11 @@ export const TagInput: React.FC<TagInputProps> = ({
 					</div>
 					<Input
 						type="text"
-						variant="ghost"
 						value={inputValue}
 						onChange={handleInputChange}
 						onKeyDown={handleInputKeyDown}
 						placeholder={placeholder || "Add a tag"}
+						className="border-0 px-0 shadow-none focus-visible:border-transparent focus-visible:ring-0"
 						style={{
 							border: "none",
 							outline: "none",

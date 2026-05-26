@@ -1,6 +1,6 @@
 # Dabi CLI 🚀
 
-Die **Dabi CLI** ist das Werkzeug zur Unterstützung der Entwicklung mit der `dabi-lib`. Sie ermöglicht es dir, blitzschnell neue Projekte zu initialisieren und zentrale Ressourcen wie Screens und API-Endpoints zu generieren.
+Die **Dabi CLI** ist das Werkzeug zur Unterstützung der Entwicklung mit der `dabi-lib`. Sie ermöglicht es dir, blitzschnell neue Projekte zu initialisieren und Screens zu generieren.
 
 ## Installation
 
@@ -39,24 +39,11 @@ npx dabi g screen Shop
 npx dabi g s Shop
 ```
 
-#### API Endpoints
-
-Erstellt eine neue API-Route für das file-based Routing.
-
-```bash
-npx dabi g api orders
-# oder kurz
-npx dabi g a orders
-```
-
-_Generiert eine Datei in `src/api/orders.ts` mit GET und POST Handlern._
-
 ## Projektstruktur
 
 Wenn du Ressourcen generierst, folgt die CLI dieser Struktur:
 
 - **Screens:** `src/screens/*.tsx`
-- **API:** `src/api/*.ts`
 
 ## Voraussetzungen
 

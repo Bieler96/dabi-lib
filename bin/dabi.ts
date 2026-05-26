@@ -41,14 +41,11 @@ program
 
 			// 1. Create essential folders
 			const essentialFolders = [
-				"src/api",
 				"src/screens",
 				"src/components",
 				"src/core",
 				"src/hooks",
 				"src/utils",
-				"src/server",
-				"src/vite",
 				"public",
 			];
 
@@ -62,8 +59,6 @@ program
 				"src/core",
 				"src/hooks",
 				"src/utils",
-				"src/server",
-				"src/vite",
 			];
 
 			for (const folder of libFolders) {
@@ -78,7 +73,6 @@ program
 			const essentialFiles = [
 				"src/index.css",
 				"src/index.ts",
-				"src/server.ts",
 			];
 
 			for (const file of essentialFiles) {
@@ -167,14 +161,12 @@ program
 program
 	.command("generate <type> <name>")
 	.alias("g")
-	.description("Generate a new screen or api route (s, a)")
+	.description("Generate a new screen (s)")
 	.action(async (type, name) => {
 		const normalizedType = type.toLowerCase();
 
 		if (["screen", "s"].includes(normalizedType)) {
 			await generateScreen(name);
-		} else if (["api", "a"].includes(normalizedType)) {
-			await generateApi(name);
 		} else {
 			console.error(pc.red(`Unknown generation type: ${type}`));
 		}
@@ -269,38 +261,5 @@ export const ${fileName} = () => {
 			);
 		}
 	}
-}
-
-async function generateApi(name: string) {
-	const filePath = path.join(
-		process.cwd(),
-		"src",
-		"api",
-		`${name.toLowerCase()}.ts`,
-	);
-
-	if (fs.existsSync(filePath)) {
-		console.error(pc.red(`API endpoint ${name} already exists.`));
-		return;
-	}
-
-	const content = `import { Context } from 'hono';
-
-export const GET = async (c: Context) => {
-    return c.json({ message: 'Hello from ${name} API!' });
-};
-
-export const POST = async (c: Context) => {
-    const body = await c.req.json();
-    return c.json({ 
-        message: 'Data received',
-        data: body 
-    });
-};
-`;
-
-	await fs.ensureDir(path.dirname(filePath));
-	await fs.writeFile(filePath, content);
-	console.log(pc.green(`Created API endpoint: ${filePath}`));
 }
 program.parse();

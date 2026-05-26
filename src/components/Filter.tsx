@@ -8,7 +8,13 @@ import {
 	RefreshCcw,
 } from "lucide-react";
 import { Button } from "./Button";
-import { Select, type SelectOption } from "./Select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./Select";
 import { Input } from "./Input";
 import { Checkbox } from "./Checkbox";
 import clsx from "clsx";
@@ -34,6 +40,48 @@ export interface Operator {
 	label: string;
 	noValue?: boolean;
 }
+
+interface SelectOption<T extends string = string> {
+	value: T;
+	label: React.ReactNode;
+	disabled?: boolean;
+}
+
+interface FilterSelectProps<T extends string = string> {
+	value: T;
+	onChange: (value: T) => void;
+	options: SelectOption<T>[];
+	placeholder?: string;
+}
+
+const FilterSelect = <T extends string>({
+	value,
+	onChange,
+	options,
+	placeholder,
+}: FilterSelectProps<T>) => (
+	<Select
+		value={value}
+		onValueChange={(nextValue) => onChange((nextValue ?? "") as T)}
+		items={options}
+	>
+		<SelectTrigger className="w-full">
+			<SelectValue placeholder={placeholder} />
+		</SelectTrigger>
+		<SelectContent align="start" alignItemWithTrigger={false}>
+			{options.map((option) => (
+				<SelectItem
+					key={option.value}
+					value={option.value}
+					disabled={option.disabled}
+					label={String(option.label)}
+				>
+					{option.label}
+				</SelectItem>
+			))}
+		</SelectContent>
+	</Select>
+);
 
 const DEFAULT_OPERATORS: Record<FilterFieldType, Operator[]> = {
 	select: [
@@ -223,11 +271,11 @@ export const Filter = ({
 								>
 									{/* Field Selector */}
 									<div className="shrink-0 w-full md:w-48">
-										<Select
+										<FilterSelect
 											value={filter.field}
 											onChange={(val) =>
 												updateFilter(filter.id, {
-													field: val as string,
+													field: val,
 												})
 											}
 											options={fieldOptions}
@@ -236,11 +284,11 @@ export const Filter = ({
 
 									{/* Operator Selector */}
 									<div className="shrink-0 w-full md:w-40">
-										<Select
+										<FilterSelect
 											value={filter.operator}
 											onChange={(val) =>
 												updateFilter(filter.id, {
-													operator: val as string,
+													operator: val,
 												})
 											}
 											options={operators.map((op) => ({
@@ -255,13 +303,13 @@ export const Filter = ({
 										<div className="grow min-w-[200px]">
 											{fieldConfig.type === "select" &&
 											fieldConfig.options ? (
-												<Select
+												<FilterSelect
 													value={filter.value}
 													onChange={(val) =>
 														updateFilter(
 															filter.id,
 															{
-																value: val as string,
+																value: val,
 															},
 														)
 													}
@@ -320,10 +368,10 @@ export const Filter = ({
 					<div className="flex flex-col sm:flex-row items-center justify-between mt-[var(--space-6)] pt-[var(--space-5)] border-t border-outline-variant gap-[var(--space-4)]">
 						<div className="flex items-center gap-[var(--space-3)] w-full sm:w-auto">
 							<div className="w-full sm:w-[16rem]">
-								<Select
+								<FilterSelect
 									value=""
 									onChange={(val) => {
-										if (val) addFilter(val as string);
+										if (val) addFilter(val);
 									}}
 									options={[
 										{

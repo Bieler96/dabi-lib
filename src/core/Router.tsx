@@ -10,8 +10,20 @@ import {
 	type ReactNode,
 } from "react";
 import { DataTable } from "../components/DataTable";
-import { Dialog } from "../components/Dialog";
-import { Sheet } from "../components/Sheet";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "../components/Dialog";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+} from "../components/Sheet";
 import {
 	RouteBuilder,
 	type RouteConfig,
@@ -497,17 +509,32 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 				<Dialog
 					key={entry.id}
 					open={!entry.isExiting}
-					onClose={popBackStack}
-					title={entry.config.title}
-					description={entry.config.description}
-					ariaLabel={
-						typeof entry.config.title === "string"
-							? entry.config.title
-							: undefined
-					}
-					paperClassName={`max-w-2xl ${entry.config.className || ""}`}
+					onOpenChange={(open) => {
+						if (!open) void popBackStack();
+					}}
 				>
-					<Component {...entry.params} />
+					<DialogContent
+						aria-label={
+							entry.config.title ? undefined : "Dialog"
+						}
+						className={`max-w-2xl ${entry.config.className || ""}`}
+					>
+						{(entry.config.title || entry.config.description) && (
+							<DialogHeader>
+								{entry.config.title && (
+									<DialogTitle>
+										{entry.config.title}
+									</DialogTitle>
+								)}
+								{entry.config.description && (
+									<DialogDescription>
+										{entry.config.description}
+									</DialogDescription>
+								)}
+							</DialogHeader>
+						)}
+						<Component {...entry.params} />
+					</DialogContent>
 				</Dialog>
 			);
 		}
@@ -516,19 +543,32 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			return (
 				<Sheet
 					key={entry.id}
-					isOpen={!entry.isExiting}
-					onClose={popBackStack}
-					side="bottom"
-					title={entry.config.title}
-					description={entry.config.description}
-					ariaLabel={
-						typeof entry.config.title === "string"
-							? entry.config.title
-							: undefined
-					}
-					panelClassName={entry.config.className}
+					open={!entry.isExiting}
+					onOpenChange={(open) => {
+						if (!open) void popBackStack();
+					}}
 				>
-					<Component {...entry.params} />
+					<SheetContent
+						side="bottom"
+						aria-label={
+							entry.config.title ? undefined : "Bottom sheet"
+						}
+						className={entry.config.className}
+					>
+						{(entry.config.title || entry.config.description) && (
+							<SheetHeader>
+								{entry.config.title && (
+									<SheetTitle>{entry.config.title}</SheetTitle>
+								)}
+								{entry.config.description && (
+									<SheetDescription>
+										{entry.config.description}
+									</SheetDescription>
+								)}
+							</SheetHeader>
+						)}
+						<Component {...entry.params} />
+					</SheetContent>
 				</Sheet>
 			);
 		}
@@ -546,19 +586,39 @@ export const NavHost: FC<NavHostProps> = ({ startDestination, builder }) => {
 			return (
 				<Sheet
 					key={entry.id}
-					isOpen={!entry.isExiting}
-					onClose={popBackStack}
-					side={entry.config.side}
-					title={title || entry.config.title}
-					description={description || entry.config.description}
-					ariaLabel={
-						typeof (title || entry.config.title) === "string"
-							? ((title || entry.config.title) as string)
-							: undefined
-					}
-					panelClassName={entry.config.className}
+					open={!entry.isExiting}
+					onOpenChange={(open) => {
+						if (!open) void popBackStack();
+					}}
 				>
-					<Component {...entry.params} />
+					<SheetContent
+						side={entry.config.side}
+						aria-label={
+							title || entry.config.title ? undefined : "Sheet"
+						}
+						className={entry.config.className}
+					>
+						{(title ||
+							entry.config.title ||
+							description ||
+							entry.config.description) && (
+							<SheetHeader>
+								{(title || entry.config.title) && (
+									<SheetTitle>
+										{title || entry.config.title}
+									</SheetTitle>
+								)}
+								{(description ||
+									entry.config.description) && (
+									<SheetDescription>
+										{description ||
+											entry.config.description}
+									</SheetDescription>
+								)}
+							</SheetHeader>
+						)}
+						<Component {...entry.params} />
+					</SheetContent>
 				</Sheet>
 			);
 		}
