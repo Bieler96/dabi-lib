@@ -1,42 +1,17 @@
-import clsx from "clsx";
-import React, { type TextareaHTMLAttributes } from "react";
+import * as React from "react";
+import { cn } from "../utils/cn";
 
-export interface TextareaProps
-	extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-	label?: string;
-	variant?: "default" | "ghost";
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+	return (
+		<textarea
+			data-slot="textarea"
+			className={cn(
+				"flex field-sizing-content min-h-28 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-2.5 text-base leading-relaxed transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 sm:min-h-16 sm:px-2.5 sm:py-2 sm:text-sm sm:leading-normal dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
-export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-	({ label, className, variant = "default", ...props }, ref) => {
-		const base =
-			"w-full rounded-[var(--radius-component)] transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
-		const size = "p-3 text-base";
-
-		const variants = {
-			default:
-				"border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px]",
-			ghost: "border-none outline-none focus-visible:ring-0",
-		};
-
-		return (
-			<div>
-				{label && (
-					<label
-						htmlFor={props.id}
-						className="block text-sm font-medium text-on-surface"
-					>
-						{label}
-					</label>
-				)}
-				<textarea
-					ref={ref}
-					className={clsx(base, size, variants[variant], className)}
-					{...props}
-				/>
-			</div>
-		);
-	}
-);
-
-Textarea.displayName = "Textarea";
+export { Textarea };

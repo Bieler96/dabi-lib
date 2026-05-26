@@ -1,28 +1,24 @@
-import clsx from "clsx";
-import type { HTMLAttributes } from "react";
+"use client";
 
-export type Orientation = "horizontal" | "vertical";
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
+import { cn } from "../utils/cn";
 
-export interface SeparatorProps extends HTMLAttributes<HTMLDivElement> {
-	orientation?: Orientation;
-}
-
-export function Separator({
-	orientation = "horizontal",
+function Separator({
 	className,
+	orientation = "horizontal",
 	...props
-}: SeparatorProps) {
+}: SeparatorPrimitive.Props) {
 	return (
-		<div
-			role="separator"
-			className={clsx(
-				"shrink-0 bg-outline",
-				orientation === "horizontal"
-					? "h-px w-full"
-					: "w-px h-full",
-				className
+		<SeparatorPrimitive
+			data-slot="separator"
+			orientation={orientation}
+			className={cn(
+				"shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch",
+				className,
 			)}
 			{...props}
 		/>
 	);
 }
+
+export { Separator };

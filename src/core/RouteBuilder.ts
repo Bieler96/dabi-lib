@@ -6,10 +6,15 @@ export type RouteParams = Record<string, unknown>;
 export type ImperativeNavigate = (path: string, params?: RouteParams) => void;
 export type Guard = (
 	params?: RouteParams,
-	navigate?: ImperativeNavigate
+	navigate?: ImperativeNavigate,
 ) => boolean | Promise<boolean>;
 
-export type DestinationType = "screen" | "dialog" | "bottomSheet" | "sheet" | "list";
+export type DestinationType =
+	| "screen"
+	| "dialog"
+	| "bottomSheet"
+	| "sheet"
+	| "list";
 
 export interface RouteConfig {
 	path: string;
@@ -45,26 +50,57 @@ interface SheetOptions extends ScreenOptions {
 interface ListOptions<T extends object> extends ScreenOptions {
 	title: string;
 	description?: string;
-		columns: ColumnDef<T>[];
-		data: T[];
+	columns: ColumnDef<T>[];
+	data: T[];
 }
 
 export class RouteBuilder {
 	routes: Record<string, RouteConfig> = {};
 
-	screen<P extends object>(path: string, component: ComponentType<P>, options?: ScreenOptions) {
-		this.routes[path] = { path, component: component as ComponentType<object>, type: "screen", ...options };
+	screen<P extends object>(
+		path: string,
+		component: ComponentType<P>,
+		options?: ScreenOptions,
+	) {
+		this.routes[path] = {
+			path,
+			component: component as ComponentType<object>,
+			type: "screen",
+			...options,
+		};
 	}
 
-	dialog<P extends object>(path: string, component: ComponentType<P>, options?: ScreenOptions) {
-		this.routes[path] = { path, component: component as ComponentType<object>, type: "dialog", ...options };
+	dialog<P extends object>(
+		path: string,
+		component: ComponentType<P>,
+		options?: ScreenOptions,
+	) {
+		this.routes[path] = {
+			path,
+			component: component as ComponentType<object>,
+			type: "dialog",
+			...options,
+		};
 	}
 
-	bottomSheet<P extends object>(path: string, component: ComponentType<P>, options?: ScreenOptions) {
-		this.routes[path] = { path, component: component as ComponentType<object>, type: "bottomSheet", ...options };
+	bottomSheet<P extends object>(
+		path: string,
+		component: ComponentType<P>,
+		options?: ScreenOptions,
+	) {
+		this.routes[path] = {
+			path,
+			component: component as ComponentType<object>,
+			type: "bottomSheet",
+			...options,
+		};
 	}
 
-	sheet<P extends object>(path: string, component: ComponentType<P>, options?: SheetOptions) {
+	sheet<P extends object>(
+		path: string,
+		component: ComponentType<P>,
+		options?: SheetOptions,
+	) {
 		this.routes[path] = {
 			path,
 			component: component as ComponentType<object>,

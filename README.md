@@ -13,6 +13,7 @@
 ## Authentifizierung
 
 `dabi-lib` bietet flexible Authentifizierungsoptionen für Ihre API-Endpunkte. Dazu gehören:
+
 - **API-Key-basierte Authentifizierung**: Einfache und effektive Methode zur Absicherung von Endpunkten.
 - **JWT (JSON Web Token) Authentifizierung**: Robuste, standardbasierte Authentifizierung für zustandslose APIs.
 
@@ -51,13 +52,15 @@ Die Library nutzt [Drizzle ORM](https://orm.drizzle.team/) mit SQLite.
 Erstelle oder bearbeite Tabellen in `src/db/schema.ts`:
 
 ```typescript
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+export const users = sqliteTable("users", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	name: text("name").notNull(),
+	email: text("email").notNull().unique(),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.default(new Date()),
 });
 ```
 
@@ -80,16 +83,16 @@ npm run db:studio
 Importiere `db` aus `src/db` um Queries auszuführen (nur in API Routes oder Server-Dateien verwenden!):
 
 ```typescript
-import { db } from '../db';
-import { users } from '../db/schema';
+import { db } from "../db";
+import { users } from "../db/schema";
 
 // Alle User laden
 const allUsers = await db.select().from(users).all();
 
 // User erstellen
 await db.insert(users).values({
-    name: "Max Mustermann",
-    email: "max@example.com"
+	name: "Max Mustermann",
+	email: "max@example.com",
 });
 ```
 
@@ -100,19 +103,19 @@ API Routes werden automatisch aus dem Ordner `src/api` geladen. Die Dateistruktu
 Beispiel: `src/api/users.ts` -> `/api/users`
 
 ```typescript
-import type { Context } from 'hono';
-import { db } from '../db';
-import { users } from '../db/schema';
+import type { Context } from "hono";
+import { db } from "../db";
+import { users } from "../db/schema";
 
 export const GET = async (c: Context) => {
-    const data = await db.select().from(users).all();
-    return c.json(data);
+	const data = await db.select().from(users).all();
+	return c.json(data);
 };
 
 export const POST = async (c: Context) => {
-    const body = await c.req.json();
-    // ... Logik
-    return c.json({ success: true });
+	const body = await c.req.json();
+	// ... Logik
+	return c.json({ success: true });
 };
 ```
 
@@ -128,9 +131,10 @@ npm install dabi-lib
 
 1. **CSS importieren**:
    Importiere das CSS in deiner Haupteinstiegsdatei (z.B. `main.tsx`):
-   ```tsx
-   import 'dabi-lib/style.css';
-   ```
+
+    ```tsx
+    import "dabi-lib/style.css";
+    ```
 
 2. **Tailwind Konfiguration**:
    Da die Library Tailwind CSS nutzt, stelle sicher, dass dein Projekt Tailwind v4 unterstützt.
@@ -138,14 +142,74 @@ npm install dabi-lib
 ### Komponenten nutzen
 
 ```tsx
-import { Button, DataTable, Card } from 'dabi-lib';
+import { Button, DataTable, Card } from "dabi-lib";
 
 function App() {
-  return (
-    <Card>
-      <Button onClick={() => alert('Hello!')}>Klick mich</Button>
-    </Card>
-  );
+	return (
+		<Card>
+			<Button onClick={() => alert("Hello!")}>Klick mich</Button>
+		</Card>
+	);
+}
+```
+
+### Gen UI Widgets
+
+Für widgetbasierte Oberflächen kannst du deklarative Gen-UI-Widgets in einem flexiblen Row-/Column-Grid nutzen. Unterstützt werden `stat-card`, `data-table`, `chart`, `map` und `form-builder`; Daten können direkt übergeben oder per `fetchUrl`/`fetcher` geladen werden.
+
+```tsx
+import { GenUIGrid, GenUIWidget } from "dabi-lib";
+
+const revenueWidget = new GenUIWidget({
+	id: "revenue",
+	type: "stat-card",
+	title: "Revenue",
+	data: {
+		label: "Revenue",
+		value: "35.400 EUR",
+		trend: { value: "+8.6%", direction: "up" },
+	},
+});
+
+const liveTableWidget = new GenUIWidget({
+	id: "orders",
+	type: "data-table",
+	title: "Orders",
+	fetchUrl: "/api/orders",
+	columns: [
+		{ key: "id", header: "ID" },
+		{ key: "customer", header: "Customer" },
+		{ key: "total", header: "Total" },
+	],
+});
+
+const contactWidget = new GenUIWidget({
+	id: "contact",
+	type: "form-builder",
+	title: "Kontakt",
+	fields: [
+		{ name: "name", label: "Name", required: true },
+		{ name: "email", type: "email", label: "Email", required: true },
+	],
+	submitLabel: "Senden",
+	onSubmit: (values) => console.log(values),
+});
+
+function Dashboard() {
+	return (
+		<GenUIGrid
+			rows={[
+				{
+					id: "overview",
+					columns: [
+						{ id: "stats", span: 4, widgets: [revenueWidget] },
+						{ id: "orders", span: 8, widgets: [liveTableWidget] },
+						{ id: "contact", span: 12, widgets: [contactWidget] },
+					],
+				},
+			]}
+		/>
+	);
 }
 ```
 

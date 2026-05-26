@@ -11,7 +11,9 @@ export type HeaderGroup = {
 	children: string[];
 };
 
-export function getHeaderGroups(data: Array<Record<string, unknown>>): HeaderGroup[] {
+export function getHeaderGroups(
+	data: Array<Record<string, unknown>>,
+): HeaderGroup[] {
 	const allKeys = new Set<string>();
 	data.forEach((row) => {
 		Object.keys(row).forEach((key) => {

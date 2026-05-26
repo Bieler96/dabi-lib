@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import cx from 'clsx';
-import { X } from 'lucide-react';
+import React, { useState } from "react";
+import cx from "clsx";
+import { X } from "lucide-react";
 
 export type ChipProps = {
-	variant?: 'assist' | 'filter' | 'input' | 'suggestion';
+	variant?: "assist" | "filter" | "input" | "suggestion";
 	label: string;
 	icon?: React.ReactNode;
 	avatar?: React.ReactNode;
@@ -25,7 +25,7 @@ export type ChipProps = {
 };
 
 export const Chip: React.FC<ChipProps> = ({
-	variant = 'assist',
+	variant = "assist",
 	label,
 	icon,
 	avatar,
@@ -38,33 +38,35 @@ export const Chip: React.FC<ChipProps> = ({
 }) => {
 	const [isHovered, setIsHovered] = useState(false);
 
-		const baseClasses = 'text-on-surface inline-flex items-center justify-center rounded-[var(--radius-component)] border border-outline-variant px-2 py-1 text-sm text-on-surface transition-colors duration-150';
+	const baseClasses =
+		"text-on-surface inline-flex items-center justify-center rounded-[var(--radius-component)] border border-outline-variant px-2 py-1 text-sm text-on-surface transition-colors duration-150";
 
 	const variantClasses = {
-		assist: 'hover:bg-primary/10 dark:hover:bg-primary/20',
+		assist: "hover:bg-primary/10 dark:hover:bg-primary/20",
 		filter: selected
-			? 'border-transparent bg-primary-container text-on-primary-container cursor-pointer'
-			: ' hover:bg-gray-50 cursor-pointer',
-		input: '',
-		suggestion: 'hover:bg-primary/10 dark:hover:bg-primary/20',
+			? "border-transparent bg-primary-container text-on-primary-container cursor-pointer"
+			: " hover:bg-gray-50 cursor-pointer",
+		input: "",
+		suggestion: "hover:bg-primary/10 dark:hover:bg-primary/20",
 	};
 
 	const chipClasses = cx(baseClasses, variantClasses[variant]);
 
 	const dynamicClasses = cx({
-		[colors?.backgroundColorClass ?? '']: !selected && !isHovered,
-		[colors?.textColorClass ?? '']: !selected,
-		[colors?.borderColorClass ?? '']: !selected,
-		[colors?.hoverBackgroundColorClass ?? '']: !selected && isHovered,
+		[colors?.backgroundColorClass ?? ""]: !selected && !isHovered,
+		[colors?.textColorClass ?? ""]: !selected,
+		[colors?.borderColorClass ?? ""]: !selected,
+		[colors?.hoverBackgroundColorClass ?? ""]: !selected && isHovered,
 
-		[colors?.selectedBackgroundColorClass ?? '']: selected && !isHovered,
-		[colors?.selectedTextColorClass ?? '']: selected,
-		[colors?.selectedBorderColorClass ?? '']: selected,
-		[colors?.selectedHoverBackgroundColorClass ?? '']: selected && isHovered,
+		[colors?.selectedBackgroundColorClass ?? ""]: selected && !isHovered,
+		[colors?.selectedTextColorClass ?? ""]: selected,
+		[colors?.selectedBorderColorClass ?? ""]: selected,
+		[colors?.selectedHoverBackgroundColorClass ?? ""]:
+			selected && isHovered,
 
-		'cursor-pointer': onClick && !disabled,
-		'pointer-events-none opacity-50': disabled
-		});
+		"cursor-pointer": onClick && !disabled,
+		"pointer-events-none opacity-50": disabled,
+	});
 
 	return (
 		<div

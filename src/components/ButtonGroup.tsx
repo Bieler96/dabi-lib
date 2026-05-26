@@ -16,7 +16,7 @@ const buttonGroupVariants = cva(
 		defaultVariants: {
 			orientation: "horizontal",
 		},
-	}
+	},
 );
 
 export function ButtonGroup({
@@ -32,7 +32,7 @@ export function ButtonGroup({
 			className={cn(buttonGroupVariants({ orientation }), className)}
 			{...props}
 		/>
-	)
+	);
 }
 
 export function ButtonGroupText({
@@ -43,11 +43,11 @@ export function ButtonGroupText({
 		<div
 			className={cn(
 				"bg-muted flex items-center gap-[var(--space-2)] rounded-[var(--radius-control)] border px-[var(--space-4)] py-[var(--space-2)] text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
-				className
+				className,
 			)}
 			{...props}
 		/>
-	)
+	);
 }
 
 export function ButtonGroupSeparator({
@@ -61,9 +61,9 @@ export function ButtonGroupSeparator({
 			orientation={orientation}
 			className={cn(
 				"bg-input relative m-0! self-stretch data-[orientation=vertical]:h-auto",
-				className
+				className,
 			)}
 			{...props}
 		/>
-	)
+	);
 }

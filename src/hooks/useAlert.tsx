@@ -1,7 +1,7 @@
-import { useState, useCallback, type JSX } from 'react';
-import { Alert, type AlertProps } from '../components/Alert';
+import { useState, useCallback, type JSX } from "react";
+import { Alert, type AlertProps } from "../components/Alert";
 
-type AlertOptions = Omit<AlertProps, 'open' | 'onClose'>;
+type AlertOptions = Omit<AlertProps, "open" | "onClose">;
 
 type UseAlertReturn = {
 	alert: (options: AlertOptions) => Promise<void>;
@@ -35,9 +35,7 @@ export const useAlert = (): UseAlertReturn => {
 		if (!options) {
 			return null;
 		}
-		return (
-			<Alert open={open} onClose={handleClose} {...options} />
-		);
+		return <Alert open={open} onClose={handleClose} {...options} />;
 	}, [options, open, handleClose]);
 
 	return { alert, AlertDialog };

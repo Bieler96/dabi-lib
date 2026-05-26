@@ -1,201 +1,507 @@
-import { TestScreen } from "./screens/TestScreen";
-import { useState } from "react";
-import { Button } from "./components/Button";
-import { NavHost, useNavigation } from "./core/Router";
-import { Sheet } from "./components/Sheet";
-import { DataTableDemo, UserDetailsSheet, EditProfileSheet, BlockUserDialog } from "./screens/DataTableDemo";
-import { users, userColumns } from "./screens/UserList";
-import { JiraBoard, JiraTaskDetails } from "./screens/JiraClone";
-import { ButtonGroup, ButtonGroupSeparator } from "./components/ButtonGroup";
-import { GuardDemoScreen, ProtectedPage, DirtyPage, authGuard, confirmExitGuard } from "./screens/GuardDemo";
-import { UserManagement } from "./screens/UserManagement";
-import { FilterDemo } from "./screens/FilterDemo";
-import { SidebarDemo } from "./screens/SidebarDemo";
+import * as React from "react";
+import {
+	BarChart3,
+	ChevronRight,
+	Folder,
+	Home,
+	Layers,
+	Plus,
+	Settings,
+} from "lucide-react";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "./components/Collapsible";
+import {
+	FormBuilder,
+	type FormBuilderField,
+} from "./components/FormBuilder";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarHeader,
+	SidebarInset,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarProvider,
+	SidebarRail,
+	SidebarSeparator,
+	SidebarTrigger,
+} from "./components/Sidebar";
 
-// Screens.tsx
-const HomeScreen = () => {
-	const nav = useNavigation();
-	return (
-		<div className="p-8">
-			<h1 className="text-3xl font-bold mb-6">Dabi-lib Components</h1>
-			<div className="flex flex-col gap-4 items-start">
-				<Button variant="filled" onClick={() => nav.navigate('details', { id: 42 })}>Go to Router Demo</Button>
-				<Button variant="outlined" onClick={() => nav.navigate('sheet-demo')}>Go to Sheet Demo</Button>
-				<Button variant="outlined" onClick={() => nav.navigate('user-list')}>Go to User List (Router Type)</Button>
-				<ButtonGroup>
-					<Button variant="tonal" onClick={() => nav.navigate('datatable-demo')}>Go to DataTable Demo</Button>
-					<ButtonGroupSeparator />
-					<Button variant="tonal" onClick={() => nav.navigate('jira-board')}>Go to Jira Clone</Button>
-				</ButtonGroup>
-				<Button variant="outlined" onClick={() => nav.navigate('sidebar-demo')}>Go to Side Menu Demo</Button>
-				<Button variant="outlined" onClick={() => nav.navigate('guard-demo')}>Go to Guard Demo</Button>
-				<Button variant="tonal" onClick={() => nav.navigate('filter-demo')}>Filter Component Demo</Button>
-				<Button variant="filled" className="bg-tertiary text-on-tertiary" onClick={() => nav.navigate('user-management')}>
-					Manage Users (Fullstack)
-				</Button>
-			</div>
-		</div>
-	);
+type SidebarMenuItemConfig = {
+	id: string;
+	title: string;
+	description: string;
+	icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-const SheetDemo = () => {
-	const [activeSheet, setActiveSheet] = useState<"left" | "right" | "top" | "bottom" | null>(null);
+type SidebarMenuGroupConfig = {
+	id: string;
+	label: string;
+	items: SidebarMenuItemConfig[];
+};
+
+type NewSidebarItemFormValues = {
+	title: string;
+	groupId: string;
+};
+
+type NewSidebarGroupFormValues = {
+	label: string;
+};
+
+const UNGROUPED_GROUP_ID = "__ungrouped__";
+
+const initialUngroupedMenuItems: SidebarMenuItemConfig[] = [
+	{
+		id: "dashboard",
+		title: "Dashboard",
+		description: "Kennzahlen und aktuelle Aktivitaeten",
+		icon: Home,
+	},
+	{
+		id: "projects",
+		title: "Projekte",
+		description: "Alle laufenden Projektbereiche",
+		icon: Folder,
+	},
+];
+
+const initialMenuGroups: SidebarMenuGroupConfig[] = [
+	{
+		id: "workspace",
+		label: "Workspace",
+		items: [
+			{
+				id: "analytics",
+				title: "Analytics",
+				description: "Reports, Trends und Auswertungen",
+				icon: BarChart3,
+			},
+			{
+				id: "settings",
+				title: "Einstellungen",
+				description: "Workspace und Nutzerverwaltung",
+				icon: Settings,
+			},
+		],
+	},
+];
+
+function createMenuItem(title: string): SidebarMenuItemConfig {
+	const id = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
+
+	return {
+		id,
+		title,
+		description: `Dynamisch erstellte Seite fuer ${title}`,
+		icon: Layers,
+	};
+}
+
+function createMenuGroup(label: string): SidebarMenuGroupConfig {
+	const id = `${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
+
+	return {
+		id,
+		label,
+		items: [],
+	};
+}
+
+function getMenuItems(
+	ungroupedItems: SidebarMenuItemConfig[],
+	groups: SidebarMenuGroupConfig[],
+) {
+	return [
+		...ungroupedItems,
+		...groups.flatMap((group) => group.items),
+	];
+}
+
+function SidebarMenuEntry({
+	item,
+	isActive,
+	onSelect,
+}: {
+	item: SidebarMenuItemConfig;
+	isActive: boolean;
+	onSelect: () => void;
+}) {
+	const Icon = item.icon;
 
 	return (
-		<div className="p-8">
-			<h1 className="text-2xl font-bold mb-6">Sheet Side Demo</h1>
-			<div className="grid grid-cols-2 gap-4 max-w-md">
-				<Button variant="tonal" onClick={() => setActiveSheet("left")}>Open Left</Button>
-				<Button variant="tonal" onClick={() => setActiveSheet("right")}>Open Right</Button>
-				<Button variant="tonal" onClick={() => setActiveSheet("top")}>Open Top</Button>
-				<Button variant="tonal" onClick={() => setActiveSheet("bottom")}>Open Bottom</Button>
-			</div>
-
-			<Sheet
-				isOpen={activeSheet !== null}
-				onClose={() => setActiveSheet(null)}
-				side={activeSheet || "right"}
-				title={`Sheet ${activeSheet}`}
-				description={`This is the ${activeSheet} side navigation panel.`}
+		<SidebarMenuItem>
+			<SidebarMenuButton
+				isActive={isActive}
+				tooltip={item.title}
+				onClick={onSelect}
 			>
-				<div className="py-4">
-					<p className="text-on-surface-variant">
-						Content for the {activeSheet} sheet goes here.
-						You can put anything inside!
-					</p>
-					<div className="mt-8 flex flex-col gap-2">
-						<Button variant="filled" onClick={() => setActiveSheet(null)}>Close Action</Button>
-						<Button variant="ghost" onClick={() => setActiveSheet(null)}>Cancel</Button>
-					</div>
-				</div>
-			</Sheet>
-		</div>
-	);
-};
-
-const DetailsScreen = ({ id }: { id: number }) => {
-	const nav = useNavigation();
-	return (
-		<div className="p-8">
-			<h1 className="text-2xl font-bold mb-4">Details Screen (ID: {id})</h1>
-			<div className="flex flex-col gap-4 items-start">
-				<Button onClick={() => nav.navigate('confirm-dialog')}>
-					Open Dialog
-				</Button>
-				<Button onClick={() => nav.navigate('options-sheet')}>
-					Open Bottom Sheet (Router)
-				</Button>
-				<Button onClick={() => nav.navigate('settings-sheet')}>
-					Open Right Sheet (Router)
-				</Button>
-				<Button variant="ghost" onClick={() => nav.popBackStack()}>
-					Back
-				</Button>
-			</div>
-		</div>
-	);
-};
-
-const SettingsPage = () => {
-	const nav = useNavigation();
-	return (
-		<div className="flex flex-col gap-4">
-			<div className="space-y-4">
-				<div className="flex items-center justify-between p-3 rounded-lg bg-surface-variant/50">
-					<span>Dark Mode</span>
-					<div className="w-10 h-6 bg-primary rounded-full" />
-				</div>
-				<div className="flex items-center justify-between p-3 rounded-lg bg-surface-variant/50">
-					<span>Notifications</span>
-					<div className="w-10 h-6 bg-outline-variant rounded-full" />
-				</div>
-			</div>
-			<Button variant="filled" className="mt-4" onClick={() => nav.popBackStack()}>
-				Save Changes
-			</Button>
-		</div>
-	);
-};
-
-const ConfirmDialog = () => {
-	const nav = useNavigation();
-	return (
-		<div className="flex flex-col gap-2 p-2">
-			<h3 className="text-lg font-semibold">Wirklich löschen?</h3>
-			<p className="text-on-surface-variant">Diese Aktion kann nicht rückgängig gemacht werden.</p>
-			<div className="flex flex-row gap-2 justify-end mt-4">
-				<Button variant="ghost" onClick={nav.popBackStack}>Abbrechen</Button>
-				<Button variant="filled" onClick={nav.popBackStack}>Löschen</Button>
-			</div>
-		</div>
-	);
-};
-
-const OptionsSheet = () => {
-	return (
-		<div className="p-2">
-			<h3 className="text-lg font-semibold mb-4">Optionen</h3>
-			<div className="flex flex-col gap-2">
-				<Button variant="ghost" className="justify-start">Teilen</Button>
-				<Button variant="ghost" className="justify-start">Kopieren</Button>
-				<Button variant="ghost" className="justify-start">Verschieben</Button>
-			</div>
-		</div>
-	);
-};
-
-// App.tsx
-export default function App() {
-	return (
-		<NavHost
-			startDestination="home"
-			builder={(nav) => {
-				nav.screen('testscreen', TestScreen);
-
-				nav.screen('home', HomeScreen);
-				nav.screen('sheet-demo', SheetDemo);
-				nav.screen('details', DetailsScreen);
-				nav.screen('datatable-demo', DataTableDemo);
-
-				nav.dialog('confirm-dialog', ConfirmDialog);
-				nav.bottomSheet('options-sheet', OptionsSheet);
-				nav.sheet('settings-sheet', SettingsPage, {
-					side: 'right',
-					title: 'Settings',
-					description: 'Manage your application preferences'
-				});
-				nav.sheet('user-details', UserDetailsSheet, {
-					side: 'right',
-					title: 'Benutzerdetails',
-					description: 'Detaillierte Informationen und Aktionen'
-				});
-				nav.sheet('edit-profile', EditProfileSheet, {
-					side: 'right',
-					title: 'Profil bearbeiten',
-					description: 'Aktualisiere die Benutzerinformationen'
-				});
-				nav.list('user-list', {
-					title: "Users",
-					description: "List of all registered users managed via Router 'list' type.",
-					columns: userColumns,
-					data: users
-				});
-				nav.screen('jira-board', JiraBoard);
-				nav.sheet('jira-task-details', JiraTaskDetails, {
-					side: 'right',
-					title: ' ', // Empty title to let the component handle it or looks better without standard header duplications
-					className: '!max-w-2xl'
-				});
-				nav.dialog('block-user', BlockUserDialog);
-
-				nav.screen('guard-demo', GuardDemoScreen);
-				nav.screen('sidebar-demo', SidebarDemo);
-				nav.screen('protected-page', ProtectedPage, { canActivate: [authGuard] });
-				nav.screen('dirty-page', DirtyPage, { canDeactivate: [confirmExitGuard] });
-
-				nav.screen('user-management', UserManagement);
-				nav.screen('filter-demo', FilterDemo);
-			}}
-		/>
+				<Icon />
+				<span>{item.title}</span>
+			</SidebarMenuButton>
+		</SidebarMenuItem>
 	);
 }
+
+function CollapsibleSidebarGroup({
+	group,
+	activeItemId,
+	onSelectItem,
+}: {
+	group: SidebarMenuGroupConfig;
+	activeItemId: string;
+	onSelectItem: (itemId: string) => void;
+}) {
+	const [open, setOpen] = React.useState(true);
+
+	return (
+		<Collapsible open={open} onOpenChange={setOpen}>
+			<SidebarGroup>
+				<CollapsibleTrigger className="flex h-8 w-full items-center gap-2 rounded-md px-2 text-left text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 group-data-[collapsible=icon]:hidden">
+					<ChevronRight
+						className={
+							open
+								? "size-4 rotate-90 transition-transform"
+								: "size-4 transition-transform"
+						}
+					/>
+					<span className="truncate">{group.label}</span>
+				</CollapsibleTrigger>
+				<CollapsibleContent>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							{group.items.map((item) => (
+								<SidebarMenuEntry
+									key={item.id}
+									item={item}
+									isActive={activeItemId === item.id}
+									onSelect={() => onSelectItem(item.id)}
+								/>
+							))}
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</CollapsibleContent>
+			</SidebarGroup>
+		</Collapsible>
+	);
+}
+
+function App() {
+	const [ungroupedMenuItems, setUngroupedMenuItems] = React.useState<
+		SidebarMenuItemConfig[]
+	>(initialUngroupedMenuItems);
+	const [menuGroups, setMenuGroups] =
+		React.useState<SidebarMenuGroupConfig[]>(initialMenuGroups);
+	const [activeItemId, setActiveItemId] = React.useState(
+		initialUngroupedMenuItems[0].id,
+	);
+	const [formValues, setFormValues] =
+		React.useState<NewSidebarItemFormValues>({
+			title: "",
+			groupId: UNGROUPED_GROUP_ID,
+		});
+	const [groupFormValues, setGroupFormValues] =
+		React.useState<NewSidebarGroupFormValues>({
+			label: "",
+		});
+
+	const formFields = React.useMemo<
+		FormBuilderField<NewSidebarItemFormValues>[]
+	>(
+		() => [
+			{
+				name: "title",
+				label: "Titel",
+				placeholder: "z.B. Kunden",
+				required: true,
+				validate: (value) =>
+					typeof value === "string" && value.trim().length >= 2
+						? undefined
+						: "Bitte gib mindestens 2 Zeichen ein.",
+			},
+			{
+				name: "groupId",
+				type: "select",
+				label: "Gruppe optional",
+				placeholder: "Ohne Gruppe",
+				options: [
+					{
+						value: UNGROUPED_GROUP_ID,
+						label: "Ohne Gruppe",
+					},
+					...menuGroups.map((group) => ({
+						value: group.id,
+						label: group.label,
+					})),
+				],
+			},
+		],
+		[menuGroups],
+	);
+	const groupFormFields = React.useMemo<
+		FormBuilderField<NewSidebarGroupFormValues>[]
+	>(
+		() => [
+			{
+				name: "label",
+				label: "Gruppenname",
+				placeholder: "z.B. Admin",
+				required: true,
+				validate: (value) =>
+					typeof value === "string" && value.trim().length >= 2
+						? undefined
+						: "Bitte gib mindestens 2 Zeichen ein.",
+			},
+		],
+		[],
+	);
+
+	const menuItems = React.useMemo(
+		() => getMenuItems(ungroupedMenuItems, menuGroups),
+		[ungroupedMenuItems, menuGroups],
+	);
+	const activeItem =
+		menuItems.find((item) => item.id === activeItemId) ?? menuItems[0];
+
+	function handleAddItem(values: NewSidebarItemFormValues) {
+		const trimmedTitle = values.title.trim();
+		if (!trimmedTitle) {
+			return;
+		}
+
+		const item = createMenuItem(trimmedTitle);
+
+		if (values.groupId === UNGROUPED_GROUP_ID) {
+			setUngroupedMenuItems((currentItems) => [...currentItems, item]);
+		} else {
+			setMenuGroups((currentGroups) =>
+				currentGroups.map((group) =>
+					group.id === values.groupId
+						? {
+								...group,
+								items: [...group.items, item],
+							}
+						: group,
+				),
+			);
+		}
+
+		setActiveItemId(item.id);
+		setFormValues({ title: "", groupId: values.groupId });
+	}
+
+	function handleAddGroup(values: NewSidebarGroupFormValues) {
+		const trimmedLabel = values.label.trim();
+		if (!trimmedLabel) {
+			return;
+		}
+
+		const group = createMenuGroup(trimmedLabel);
+		setMenuGroups((currentGroups) => [...currentGroups, group]);
+		setFormValues((currentValues) => ({
+			...currentValues,
+			groupId: group.id,
+		}));
+		setGroupFormValues({ label: "" });
+	}
+
+	return (
+		<SidebarProvider>
+			<Sidebar collapsible="icon">
+				<SidebarHeader>
+					<div className="flex min-h-10 items-center gap-2 px-2">
+						<div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+							<Layers className="size-4" />
+						</div>
+						<div className="min-w-0 group-data-[collapsible=icon]:hidden">
+							<p className="truncate text-sm font-semibold">
+								Dynamic App
+							</p>
+							<p className="truncate text-xs text-sidebar-foreground/70">
+								Sidebar Menu
+							</p>
+						</div>
+					</div>
+				</SidebarHeader>
+				<SidebarSeparator />
+				<SidebarContent>
+					{ungroupedMenuItems.length > 0 && (
+						<SidebarGroup>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{ungroupedMenuItems.map((item) => (
+										<SidebarMenuEntry
+											key={item.id}
+											item={item}
+											isActive={activeItem.id === item.id}
+											onSelect={() =>
+												setActiveItemId(item.id)
+											}
+										/>
+									))}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					)}
+					{menuGroups.map((group) => (
+						<CollapsibleSidebarGroup
+							key={group.id}
+							group={group}
+							activeItemId={activeItem.id}
+							onSelectItem={setActiveItemId}
+						/>
+					))}
+				</SidebarContent>
+				<SidebarRail />
+			</Sidebar>
+
+			<SidebarInset>
+				<header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4">
+					<SidebarTrigger />
+					<div className="min-w-0">
+						<h1 className="truncate text-base font-semibold">
+							{activeItem.title}
+						</h1>
+						<p className="truncate text-xs text-muted-foreground">
+							{activeItem.description}
+						</p>
+					</div>
+				</header>
+
+				<main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+					<section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+						<div className="flex flex-col gap-1">
+							<h2 className="text-xl font-semibold">
+								{activeItem.title}
+							</h2>
+							<p className="max-w-2xl text-sm text-muted-foreground">
+								{activeItem.description}. Jeder Eintrag in der
+								Sidebar kann ohne Gruppe oder innerhalb einer
+								Gruppe erstellt werden.
+							</p>
+						</div>
+					</section>
+
+					<section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+						<div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+							<h3 className="text-sm font-semibold">
+								Aktuelle Menu Items
+							</h3>
+							<div className="mt-4 grid gap-4">
+								<div className="grid gap-2">
+									<p className="text-xs font-medium text-muted-foreground">
+										Ohne Gruppe
+									</p>
+									{ungroupedMenuItems.map((item) => (
+										<button
+											key={item.id}
+											type="button"
+											onClick={() =>
+												setActiveItemId(item.id)
+											}
+											className="flex min-h-11 w-full items-center gap-3 rounded-md border border-border bg-background px-3 text-left text-sm transition-colors hover:bg-muted"
+										>
+											<item.icon className="size-4 shrink-0 text-primary" />
+											<span className="min-w-0 flex-1">
+												<span className="block truncate font-medium">
+													{item.title}
+												</span>
+												<span className="block truncate text-xs text-muted-foreground">
+													{item.description}
+												</span>
+											</span>
+										</button>
+									))}
+									{ungroupedMenuItems.length === 0 && (
+										<p className="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+											Keine Eintraege ohne Gruppe.
+										</p>
+									)}
+								</div>
+
+								{menuGroups.map((group) => (
+									<div key={group.id} className="grid gap-2">
+										<p className="text-xs font-medium text-muted-foreground">
+											{group.label}
+										</p>
+										{group.items.map((item) => (
+											<button
+												key={item.id}
+												type="button"
+												onClick={() =>
+													setActiveItemId(item.id)
+												}
+												className="flex min-h-11 w-full items-center gap-3 rounded-md border border-border bg-background px-3 text-left text-sm transition-colors hover:bg-muted"
+											>
+												<item.icon className="size-4 shrink-0 text-primary" />
+												<span className="min-w-0 flex-1">
+													<span className="block truncate font-medium">
+														{item.title}
+													</span>
+													<span className="block truncate text-xs text-muted-foreground">
+														{item.description}
+													</span>
+												</span>
+											</button>
+										))}
+										{group.items.length === 0 && (
+											<p className="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+												Keine Eintraege in dieser Gruppe.
+											</p>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+
+						<div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+							<h3 className="text-sm font-semibold">
+								Neuen Sidebar Punkt erstellen
+							</h3>
+							<FormBuilder<NewSidebarItemFormValues>
+								className="mt-4"
+								fields={formFields}
+								values={formValues}
+								onChange={setFormValues}
+								onSubmit={handleAddItem}
+								submitLabel={
+									<>
+										<Plus data-icon="inline-start" />
+										Hinzufuegen
+									</>
+								}
+							/>
+
+							<div className="my-5 h-px bg-border" />
+
+							<h3 className="text-sm font-semibold">
+								Neue Gruppe erstellen
+							</h3>
+							<FormBuilder<NewSidebarGroupFormValues>
+								className="mt-4"
+								fields={groupFormFields}
+								values={groupFormValues}
+								onChange={setGroupFormValues}
+								onSubmit={handleAddGroup}
+								submitLabel={
+									<>
+										<Plus data-icon="inline-start" />
+										Gruppe erstellen
+									</>
+								}
+							/>
+						</div>
+					</section>
+				</main>
+			</SidebarInset>
+		</SidebarProvider>
+	);
+}
+
+export default App;

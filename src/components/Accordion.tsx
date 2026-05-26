@@ -1,126 +1,146 @@
-import { createContext, forwardRef, type HTMLAttributes, useCallback, useContext, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
-import { clsx } from 'clsx'
+import {
+	createContext,
+	forwardRef,
+	type HTMLAttributes,
+	useCallback,
+	useContext,
+	useState,
+} from "react";
+import { ChevronDown } from "lucide-react";
+import { clsx } from "clsx";
 
 type AccordionContextProps = {
-	value: string[]
-	onItemClick: (value: string) => void
-}
+	value: string[];
+	onItemClick: (value: string) => void;
+};
 
-const AccordionContext = createContext<AccordionContextProps | null>(null)
+const AccordionContext = createContext<AccordionContextProps | null>(null);
 
 const useAccordion = () => {
-	const context = useContext(AccordionContext)
+	const context = useContext(AccordionContext);
 
 	if (!context) {
-		throw new Error('useAccordion must be used within an Accordion')
+		throw new Error("useAccordion must be used within an Accordion");
 	}
 
-	return context
-}
+	return context;
+};
 
-type AccordionBaseProps = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'>
+type AccordionBaseProps = Omit<HTMLAttributes<HTMLDivElement>, "onSelect">;
 
 type AccordionSingleProps = {
-	type: 'single'
-	value?: string
-	defaultValue?: string
-	collapsible?: boolean
-	onValueChange?: (value: string | undefined) => void
-}
+	type: "single";
+	value?: string;
+	defaultValue?: string;
+	collapsible?: boolean;
+	onValueChange?: (value: string | undefined) => void;
+};
 
 type AccordionMultipleProps = {
-	type?: 'multiple'
-	value?: string[]
-	defaultValue?: string[]
-	onValueChange?: (value: string[]) => void
-}
+	type?: "multiple";
+	value?: string[];
+	defaultValue?: string[];
+	onValueChange?: (value: string[]) => void;
+};
 
-type AccordionProps = AccordionBaseProps & (AccordionSingleProps | AccordionMultipleProps)
+type AccordionProps = AccordionBaseProps &
+	(AccordionSingleProps | AccordionMultipleProps);
 
 export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(
 	(props, ref) => {
 		const {
-			type = 'multiple',
+			type = "multiple",
 			value: valueProp,
 			defaultValue,
 			onValueChange,
 			children,
 			className,
 			...rest
-		} = props as AccordionProps & { collapsible?: boolean }
+		} = props as AccordionProps & { collapsible?: boolean };
 
-		const collapsible = props.type === 'single' && props.collapsible
+		const collapsible = props.type === "single" && props.collapsible;
 
-		const [internalValue, setInternalValue] = useState(defaultValue)
-		const isControlled = valueProp !== undefined
-		const value = isControlled ? valueProp : internalValue
+		const [internalValue, setInternalValue] = useState(defaultValue);
+		const isControlled = valueProp !== undefined;
+		const value = isControlled ? valueProp : internalValue;
 
 		const onItemClick = useCallback(
 			(itemValue: string) => {
-				let newValue: string | string[] | undefined
+				let newValue: string | string[] | undefined;
 
-				if (type === 'single') {
-					const currentSingleValue = value as string | undefined
-					newValue = currentSingleValue === itemValue && collapsible ? undefined : itemValue
+				if (type === "single") {
+					const currentSingleValue = value as string | undefined;
+					newValue =
+						currentSingleValue === itemValue && collapsible
+							? undefined
+							: itemValue;
 					if (onValueChange) {
-						(onValueChange as (v: string | undefined) => void)(newValue)
+						(onValueChange as (v: string | undefined) => void)(
+							newValue,
+						);
 					}
 				} else {
-					const currentValues = (value as string[]) || []
+					const currentValues = (value as string[]) || [];
 					newValue = currentValues.includes(itemValue)
 						? currentValues.filter((v) => v !== itemValue)
-						: [...currentValues, itemValue]
+						: [...currentValues, itemValue];
 					if (onValueChange) {
-						(onValueChange as (v: string[]) => void)(newValue)
+						(onValueChange as (v: string[]) => void)(newValue);
 					}
 				}
 
 				if (!isControlled) {
-					setInternalValue(newValue)
+					setInternalValue(newValue);
 				}
 			},
-			[type, value, collapsible, isControlled, onValueChange]
-		)
+			[type, value, collapsible, isControlled, onValueChange],
+		);
 
 		const contextValue = {
-			value: Array.isArray(value) ? value : (value ? [value] : []),
-			onItemClick
-		}
+			value: Array.isArray(value) ? value : value ? [value] : [],
+			onItemClick,
+		};
 
 		return (
 			<AccordionContext.Provider value={contextValue}>
 				<div
 					ref={ref}
-					className={clsx('overflow-hidden rounded-[var(--radius-component)] border border-outline', className)}
+					className={clsx(
+						"overflow-hidden rounded-[var(--radius-component)] border border-outline",
+						className,
+					)}
 					{...rest}
 				>
 					{children}
 				</div>
 			</AccordionContext.Provider>
-		)
-	}
-)
+		);
+	},
+);
 
 type AccordionItemContextProps = {
-	value: string
-}
+	value: string;
+};
 
-const AccordionItemContext = createContext<AccordionItemContextProps | null>(null)
+const AccordionItemContext = createContext<AccordionItemContextProps | null>(
+	null,
+);
 
 const useAccordionItem = () => {
-	const context = useContext(AccordionItemContext)
+	const context = useContext(AccordionItemContext);
 
 	if (!context) {
-		throw new Error('useAccordionItem must be used within an AccordionItem')
+		throw new Error(
+			"useAccordionItem must be used within an AccordionItem",
+		);
 	}
 
-	return context
-}
+	return context;
+};
 
 type AccordionItemProps = {
-	value: string
-} & HTMLAttributes<HTMLDivElement>
+	value: string;
+} & HTMLAttributes<HTMLDivElement>;
 
 export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
 	({ children, className, value, ...props }, ref) => {
@@ -128,31 +148,34 @@ export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
 			<AccordionItemContext.Provider value={{ value }}>
 				<div
 					ref={ref}
-					className={clsx('border-b last-of-type:border-b-0 border-outline', className)}
+					className={clsx(
+						"border-b last-of-type:border-b-0 border-outline",
+						className,
+					)}
 					{...props}
 				>
 					{children}
 				</div>
 			</AccordionItemContext.Provider>
-		)
-	}
-)
+		);
+	},
+);
 
 export const AccordionTrigger = forwardRef<
 	HTMLButtonElement,
 	HTMLAttributes<HTMLButtonElement>
 >(({ children, className, ...props }, ref) => {
-	const { onItemClick, value: accordionValue } = useAccordion()
-	const { value } = useAccordionItem()
+	const { onItemClick, value: accordionValue } = useAccordion();
+	const { value } = useAccordionItem();
 
-	const isOpen = accordionValue.includes(value)
+	const isOpen = accordionValue.includes(value);
 
 	return (
 		<button
 			ref={ref}
 			className={clsx(
-				'flex w-full items-center justify-between p-[var(--space-4)] font-medium transition-all hover:bg-surface-variant [&[data-state=open]>svg]:rotate-180',
-				className
+				"flex w-full items-center justify-between p-[var(--space-4)] font-medium transition-all hover:bg-surface-variant [&[data-state=open]>svg]:rotate-180",
+				className,
 			)}
 			onClick={() => onItemClick(value)}
 			{...props}
@@ -160,37 +183,39 @@ export const AccordionTrigger = forwardRef<
 			{children}
 			<ChevronDown
 				className={clsx(
-					'h-4 w-4 shrink-0 transition-transform duration-150',
-					isOpen && 'rotate-180'
+					"h-4 w-4 shrink-0 transition-transform duration-150",
+					isOpen && "rotate-180",
 				)}
 			/>
 		</button>
-	)
-})
+	);
+});
 
 export const AccordionContent = forwardRef<
 	HTMLDivElement,
 	HTMLAttributes<HTMLDivElement>
 >(({ children, className, ...props }, ref) => {
-	const { value: accordionValue } = useAccordion()
-	const { value } = useAccordionItem()
+	const { value: accordionValue } = useAccordion();
+	const { value } = useAccordionItem();
 
-	const isOpen = accordionValue.includes(value)
+	const isOpen = accordionValue.includes(value);
 
 	if (!isOpen) {
-		return
+		return;
 	}
 
 	return (
 		<div
 			ref={ref}
 			className={clsx(
-				'overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
-				className
+				"overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+				className,
 			)}
 			{...props}
 		>
-			<div className="pb-[var(--space-4)] pl-[var(--space-4)] pr-[var(--space-4)]">{children}</div>
+			<div className="pb-[var(--space-4)] pl-[var(--space-4)] pr-[var(--space-4)]">
+				{children}
+			</div>
 		</div>
-	)
-})
+	);
+});

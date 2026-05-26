@@ -1,5 +1,5 @@
-import { Dialog } from './Dialog';
-import { Button } from './Button';
+import { Dialog } from "./Dialog";
+import { Button } from "./Button";
 
 export interface ConfirmProps {
 	open: boolean;
@@ -17,8 +17,8 @@ export function Confirm({
 	onConfirm,
 	title,
 	message,
-	confirmText = 'Confirm',
-	cancelText = 'Cancel',
+	confirmText = "Confirm",
+	cancelText = "Cancel",
 }: ConfirmProps) {
 	return (
 		<Dialog open={open} onClose={onClose}>
@@ -29,9 +29,7 @@ export function Confirm({
 					<Button variant="outlined" onClick={onClose}>
 						{cancelText}
 					</Button>
-					<Button onClick={onConfirm}>
-						{confirmText}
-					</Button>
+					<Button onClick={onConfirm}>{confirmText}</Button>
 				</div>
 			</div>
 		</Dialog>

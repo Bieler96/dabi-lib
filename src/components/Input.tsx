@@ -1,41 +1,19 @@
-import clsx from "clsx";
-import React, { type InputHTMLAttributes } from "react";
+import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
+import { cn } from "../utils/cn";
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-	label?: string;
-	variant?: "default" | "ghost";
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+	return (
+		<InputPrimitive
+			type={type}
+			data-slot="input"
+			className={cn(
+				"min-h-11 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-2 text-base transition-colors outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 sm:h-8 sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-	({ label, className, variant = "default", ...props }, ref) => {
-		const base =
-			"w-full rounded-[var(--radius-component)] transition duration-150 disabled:opacity-50 disabled:pointer-events-none";
-		const size = "h-12 md:h-10 px-3 py-1 text-base";
-
-		const variants = {
-			default:
-				"border border-outline-variant outline-none focus-visible:ring-primary/50 focus-visible:ring-[3px]",
-			ghost: "border-none outline-none focus-visible:ring-none",
-		};
-
-		return (
-			<div>
-				{label && (
-					<label
-						htmlFor={props.id}
-						className="block text-sm font-medium text-on-surface"
-					>
-						{label}
-					</label>
-				)}
-				<input
-					ref={ref}
-					className={clsx(base, size, variants[variant], className)}
-					{...props}
-				/>
-			</div>
-		);
-	}
-);
-
-Input.displayName = "Input";
+export { Input };

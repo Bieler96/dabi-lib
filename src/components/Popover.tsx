@@ -89,35 +89,47 @@ export function Popover({
 				}
 			};
 			document.addEventListener("mousedown", handleClickOutside);
-			return () => document.removeEventListener("mousedown", handleClickOutside);
+			return () =>
+				document.removeEventListener("mousedown", handleClickOutside);
 		}
 	}, [open, onHover, refs, setOpen]);
 
-	const setReferenceRef = useCallback((node: HTMLDivElement | null) => {
-		refs.setReference(node);
-	}, [refs]);
+	const setReferenceRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			refs.setReference(node);
+		},
+		[refs],
+	);
 
-	const setFloatingRef = useCallback((node: HTMLDivElement | null) => {
-		refs.setFloating(node);
-	}, [refs]);
+	const setFloatingRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			refs.setFloating(node);
+		},
+		[refs],
+	);
 
 	const triggerProps = onHover
 		? {
-			onMouseEnter: handleMouseEnter,
-			onMouseLeave: handleMouseLeave,
-		}
+				onMouseEnter: handleMouseEnter,
+				onMouseLeave: handleMouseLeave,
+			}
 		: {
-			onClick: () => {
-				setOpen(!open);
-				update();
-			},
-		};
+				onClick: () => {
+					setOpen(!open);
+					update();
+				},
+			};
 
 	return (
-		<div className={clsx("relative", fullWidth ? "w-full" : "inline-block")}>
+		<div
+			className={clsx("relative", fullWidth ? "w-full" : "inline-block")}
+		>
 			<div
 				ref={setReferenceRef}
-				className={clsx("cursor-pointer", fullWidth ? "w-full" : "inline-block")}
+				className={clsx(
+					"cursor-pointer",
+					fullWidth ? "w-full" : "inline-block",
+				)}
 				{...triggerProps}
 			>
 				{trigger}
@@ -136,10 +148,14 @@ export function Popover({
 								open
 									? "opacity-100 scale-100 pointer-events-auto"
 									: "opacity-0 scale-95",
-								className
+								className,
 							)}
-							onMouseEnter={onHover ? handleMouseEnter : undefined}
-							onMouseLeave={onHover ? handleMouseLeave : undefined}
+							onMouseEnter={
+								onHover ? handleMouseEnter : undefined
+							}
+							onMouseLeave={
+								onHover ? handleMouseLeave : undefined
+							}
 						>
 							{content}
 						</div>

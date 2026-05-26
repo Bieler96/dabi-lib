@@ -14,19 +14,23 @@ npx dabi init <projekt-name>
 ## Befehle
 
 ### 1. Initialisierung (`init`)
+
 Erstellt ein neues Projekt basierend auf dem `dabi-lib` Template.
 
 ```bash
 npx dabi init my-awesome-app
 ```
-*Kopiert alle notwendigen Dateien, konfiguriert die Struktur und bereitet alles für `npm install` vor.*
+
+_Kopiert alle notwendigen Dateien, konfiguriert die Struktur und bereitet alles für `npm install` vor._
 
 ---
 
 ### 2. Generierung (`generate` oder `g`)
+
 Erstellt neue Komponenten und integriert sie (wo möglich) automatisch in deine App.
 
 #### Screens (Seiten)
+
 Erstellt eine neue Screen-Komponente und registriert sie im Router (`src/App.tsx`).
 
 ```bash
@@ -36,6 +40,7 @@ npx dabi g s Shop
 ```
 
 #### API Endpoints
+
 Erstellt eine neue API-Route für das file-based Routing.
 
 ```bash
@@ -43,9 +48,11 @@ npx dabi g api orders
 # oder kurz
 npx dabi g a orders
 ```
-*Generiert eine Datei in `src/api/orders.ts` mit GET und POST Handlern.*
+
+_Generiert eine Datei in `src/api/orders.ts` mit GET und POST Handlern._
 
 #### Datenbank Schemas
+
 Fügt eine neue Tabelle zu deinem Drizzle-Schema hinzu.
 
 ```bash
@@ -53,17 +60,20 @@ npx dabi g db products
 # oder kurz
 npx dabi g d products
 ```
-*Ergänzt `src/db/schema.ts` um die neue Tabelle. Vergiss nicht danach `npm run db:push` auszuführen!*
+
+_Ergänzt `src/db/schema.ts` um die neue Tabelle. Vergiss nicht danach `npm run db:push` auszuführen!_
 
 ---
 
 ## Projektstruktur
 
 Wenn du Ressourcen generierst, folgt die CLI dieser Struktur:
+
 - **Screens:** `src/screens/*.tsx`
 - **API:** `src/api/*.ts`
 - **DB:** `src/db/schema.ts`
 
 ## Voraussetzungen
+
 - Node.js (v18+)
 - `tsx` (wird automatisch mit `npx` verwendet)
