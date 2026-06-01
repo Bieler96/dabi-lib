@@ -87,6 +87,17 @@ export const Default: Story = {
 					</div>
 
 					<div className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
+						<h2 className="text-xl font-semibold">Text movement</h2>
+						<p
+							data-cursor
+							data-cursor-variant="text"
+							className="mt-3 text-sm leading-6 text-neutral-600"
+						>
+							The cursor forms into a pill to better select text.
+						</p>
+					</div>
+
+					<div className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
 						<h2 className="text-xl font-semibold">
 							Default movement
 						</h2>

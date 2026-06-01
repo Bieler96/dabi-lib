@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMotionValue, useSpring } from "motion/react";
 
-type CursorVariant = "default" | "magnetic" | "grow";
+type CursorVariant = "default" | "magnetic" | "grow" | "text";
 
 export function useCursor() {
 	const hoveredElement = useRef<HTMLElement | null>(null);
@@ -58,13 +58,23 @@ export function useCursor() {
 				width.set(42);
 				height.set(42);
 				radius.set(999);
-			} else {
-				x.set(rect.left + rect.width / 2);
-				y.set(rect.top + rect.height / 2);
-				width.set(rect.width + 14);
-				height.set(rect.height + 14);
-				radius.set(Number(element.dataset.cursorRadius ?? 18));
+				return;
 			}
+
+			if (cursorVariant === "text") {
+				x.set(pointer.current.x);
+				y.set(pointer.current.y);
+				width.set(Number(element.dataset.cursorWidth ?? 4));
+				height.set(Number(element.dataset.cursorHeight ?? 32));
+				radius.set(Number(element.dataset.cursorRadius ?? 999));
+				return;
+			}
+
+			x.set(rect.left + rect.width / 2);
+			y.set(rect.top + rect.height / 2);
+			width.set(rect.width + 14);
+			height.set(rect.height + 14);
+			radius.set(Number(element.dataset.cursorRadius ?? 18));
 		};
 
 		const updateDefault = () => {
