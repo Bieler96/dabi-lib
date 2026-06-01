@@ -116,7 +116,7 @@ export function TabsTrigger({ value, children, className }: TabsTriggerProps) {
 			onClick={() => setValue(value)}
 			onPointerEnter={() => setHoveredValue(value)}
 			className={[
-				"relative rounded-lg min-h-11 gap-1.5 px-3 py-2 sm:h-8 sm:min-h-0 sm:px-2.5 sm:py-0",
+				"cursor-pointer relative rounded-lg min-h-11 gap-1.5 px-3 py-2 sm:h-8 sm:min-h-0 sm:px-2.5 sm:py-0",
 				className,
 			].join(" ")}
 		>
