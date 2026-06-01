@@ -211,8 +211,6 @@ export const Login: Story = {
 					remember: true,
 				}}
 				submitLabel="Einloggen"
-				showReset
-				resetLabel="Leeren"
 				onSubmit={(values) => console.log(values)}
 			/>
 		</div>
