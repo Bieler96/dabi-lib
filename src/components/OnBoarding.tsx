@@ -110,7 +110,7 @@ const OnboardingSteps = ({
 	children,
 	className,
 }: React.HTMLAttributes<HTMLDivElement>) => {
-	const { step, direction, setTotal, next, back, isFirst, isLast } =
+	const { step, direction, layout, setTotal, next, back, isFirst, isLast } =
 		useOnboarding();
 	const steps = React.Children.toArray(children);
 
@@ -145,7 +145,10 @@ const OnboardingSteps = ({
 						if (power < -threshold && !isLast) next();
 						else if (power > threshold && !isFirst) back();
 					}}
-					className="absolute inset-0 flex cursor-grab flex-col overflow-y-auto active:cursor-grabbing"
+					className={cn(
+						"absolute inset-0 flex cursor-grab flex-col overflow-y-auto active:cursor-grabbing",
+						layout === "split" && "lg:overflow-hidden",
+					)}
 				>
 					{active}
 				</motion.div>
@@ -167,7 +170,7 @@ const OnboardingStep = React.forwardRef<
 				// center content & cap width on larger screens
 				"mx-auto w-full max-w-2xl",
 				layout === "split" &&
-					"lg:grid lg:max-w-6xl lg:grid-cols-2 lg:items-center lg:gap-14 lg:pb-44 lg:pt-24 xl:gap-20",
+					"lg:grid lg:h-full lg:min-h-0 lg:max-w-6xl lg:grid-cols-2 lg:items-stretch lg:gap-14 lg:overflow-hidden lg:pb-44 lg:pt-24 xl:gap-20",
 				className,
 			)}
 			{...props}
@@ -189,7 +192,7 @@ const OnboardingVisual = React.forwardRef<
 			className={cn(
 				"mx-auto mb-10 flex aspect-square w-full max-w-[220px] items-center justify-center rounded-[2.5rem] bg-gradient-to-br from-accent to-secondary text-foreground/80 shadow-inner sm:max-w-[260px]",
 				layout === "split" &&
-					"lg:mx-0 lg:mb-0 lg:max-w-none lg:rounded-[3rem]",
+					"lg:mx-0 lg:mb-0 lg:h-full lg:min-h-0 lg:max-w-none lg:aspect-auto lg:overflow-y-auto lg:rounded-[3rem]",
 				className,
 			)}
 			{...props}
@@ -201,13 +204,20 @@ OnboardingVisual.displayName = "OnboardingVisual";
 const OnboardingBody = React.forwardRef<
 	HTMLDivElement,
 	React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-	<div
-		ref={ref}
-		className={cn("min-w-0", className)}
-		{...props}
-	/>
-));
+>(({ className, ...props }, ref) => {
+	const { layout } = useOnboarding();
+	return (
+		<div
+			ref={ref}
+			className={cn(
+				"min-w-0",
+				layout === "split" && "lg:h-full lg:min-h-0 lg:overflow-y-auto",
+				className,
+			)}
+			{...props}
+		/>
+	);
+});
 OnboardingBody.displayName = "OnboardingBody";
 
 const OnboardingTitle = React.forwardRef<

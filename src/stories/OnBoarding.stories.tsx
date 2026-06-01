@@ -66,6 +66,10 @@ function OnboardingExample({
 }) {
 	const [step, setStep] = useState(defaultStep);
 	const [completed, setCompleted] = useState(false);
+	const handleComplete = () => {
+		setStep(steps.length - 1);
+		setCompleted(true);
+	};
 
 	return (
 		<Onboarding
@@ -73,7 +77,7 @@ function OnboardingExample({
 			defaultStep={defaultStep}
 			step={controlled ? step : undefined}
 			onStepChange={setStep}
-			onComplete={() => setCompleted(true)}
+			onComplete={handleComplete}
 			className="min-h-[720px]"
 		>
 			<OnboardingHeader>
@@ -128,6 +132,76 @@ function OnboardingExample({
 	);
 }
 
+function SplitScrollableAreasExample() {
+	const visualItems = Array.from({ length: 10 }, (_, index) => index + 1);
+	const bodyItems = Array.from({ length: 14 }, (_, index) => index + 1);
+
+	return (
+		<Onboarding
+			layout="split"
+			onComplete={() => undefined}
+			className="min-h-[720px]"
+		>
+			<OnboardingHeader>Unabhaengig scrollbar</OnboardingHeader>
+
+			<OnboardingSteps>
+				<OnboardingStep>
+					<OnboardingVisual className="flex-col justify-start gap-4 p-6 lg:items-stretch">
+						{visualItems.map((item) => (
+							<div
+								key={item}
+								className="min-h-24 rounded-2xl border border-foreground/10 bg-background/70 p-4 text-sm text-foreground shadow-sm"
+							>
+								<p className="font-medium">
+									Visual Bereich {item}
+								</p>
+								<p className="mt-2 text-muted-foreground">
+									Dieser Inhalt gehoert zur linken Spalte und
+									scrollt getrennt vom Textbereich.
+								</p>
+							</div>
+						))}
+					</OnboardingVisual>
+
+					<OnboardingBody>
+						<OnboardingTitle>
+							Beide Split-Bereiche scrollen fuer sich
+						</OnboardingTitle>
+						<OnboardingDescription>
+							Auf Desktop-Groessen bleibt der Step selbst fest.
+							Die linke Visual-Spalte und die rechte
+							Body-Spalte haben jeweils ihre eigene Scrollflaeche.
+						</OnboardingDescription>
+						<OnboardingContent>
+							{bodyItems.map((item) => (
+								<div
+									key={item}
+									className="rounded-lg border bg-card p-4 text-sm text-card-foreground shadow-sm"
+								>
+									<p className="font-medium">
+										Body Inhalt {item}
+									</p>
+									<p className="mt-2 text-muted-foreground">
+										Dieser Block gehoert zur rechten Spalte.
+										Beim Scrollen bleibt die linke Spalte
+										unabhaengig bedienbar.
+									</p>
+								</div>
+							))}
+						</OnboardingContent>
+					</OnboardingBody>
+				</OnboardingStep>
+			</OnboardingSteps>
+
+			<OnboardingFooter>
+				<OnboardingNext className="w-full" lastLabel="Fertig">
+					Weiter
+				</OnboardingNext>
+			</OnboardingFooter>
+		</Onboarding>
+	);
+}
+
 const meta = {
 	title: "Components/OnBoarding",
 	component: Onboarding,
@@ -164,6 +238,10 @@ export const Split: Story = {
 	args: {
 		layout: "split",
 	},
+};
+
+export const SplitScrollableAreas: Story = {
+	render: () => <SplitScrollableAreasExample />,
 };
 
 export const StartAtThirdStep: Story = {
