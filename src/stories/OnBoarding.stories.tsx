@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Bell, Check, Palette, ShieldCheck, Sparkles } from "lucide-react";
 import {
 	Onboarding,
+	OnboardingBody,
 	OnboardingContent,
 	OnboardingDescription,
 	OnboardingFooter,
@@ -88,7 +89,7 @@ function OnboardingExample({
 							<Icon className="size-16" strokeWidth={1.5} />
 						</OnboardingVisual>
 
-						<div>
+						<OnboardingBody>
 							<OnboardingTitle>{title}</OnboardingTitle>
 							<OnboardingDescription>
 								{description}
@@ -106,7 +107,7 @@ function OnboardingExample({
 									</div>
 								))}
 							</OnboardingContent>
-						</div>
+						</OnboardingBody>
 					</OnboardingStep>
 				))}
 			</OnboardingSteps>

@@ -198,6 +198,18 @@ const OnboardingVisual = React.forwardRef<
 });
 OnboardingVisual.displayName = "OnboardingVisual";
 
+const OnboardingBody = React.forwardRef<
+	HTMLDivElement,
+	React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+	<div
+		ref={ref}
+		className={cn("min-w-0", className)}
+		{...props}
+	/>
+));
+OnboardingBody.displayName = "OnboardingBody";
+
 const OnboardingTitle = React.forwardRef<
 	HTMLHeadingElement,
 	React.HTMLAttributes<HTMLHeadingElement>
@@ -351,6 +363,7 @@ export {
 	OnboardingSteps,
 	OnboardingStep,
 	OnboardingVisual,
+	OnboardingBody,
 	OnboardingTitle,
 	OnboardingDescription,
 	OnboardingContent,
