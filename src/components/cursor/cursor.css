@@ -1,0 +1,68 @@
+@media (pointer: fine) {
+	* {
+		cursor: none;
+	}
+}
+
+/* .custom-cursor {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 9999;
+	pointer-events: none;
+
+	translate: -50% -50%;
+
+	background: rgba(40, 40, 40, 0.28);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+
+	mix-blend-mode: multiply;
+} */
+
+.custom-cursor--magnetic {
+	background: rgba(40, 40, 40, 0.16);
+}
+
+@media (pointer: coarse) {
+	.custom-cursor {
+		display: none;
+	}
+
+	* {
+		cursor: auto;
+	}
+}
+
+.custom-cursor {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 9999;
+	pointer-events: none;
+
+	translate: -50% -50%;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	background: rgba(40, 40, 40, 0.28);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+
+	mix-blend-mode: multiply;
+}
+
+.custom-cursor--drag {
+	background: rgba(40, 40, 40, 0.16);
+	mix-blend-mode: normal;
+}
+
+.custom-cursor__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	color: rgba(20, 20, 20, 0.85);
+}

@@ -56,7 +56,7 @@ const meta = {
 				</div>
 			</CardContent>
 			<CardFooter>
-				<Button className="w-full shrink-active" variant="outline">
+				<Button className="w-full" variant="outline">
 					View details
 				</Button>
 			</CardFooter>
@@ -109,9 +109,7 @@ export const WithAction: Story = {
 				<CardTitle>Subscription</CardTitle>
 				<CardDescription>Team plan renews on June 12.</CardDescription>
 				<CardAction>
-					<Button className="shrink-active" variant="outline">
-						Manage
-					</Button>
+					<Button variant="outline">Manage</Button>
 				</CardAction>
 			</CardHeader>
 			<CardContent>
@@ -140,15 +138,10 @@ export const WithFooter: Story = {
 				</p>
 			</CardContent>
 			<CardFooter className="flex justify-end gap-2">
-				<Button
-					className="flex-1 sm:flex-initial shrink-active"
-					variant="ghost"
-				>
+				<Button className="flex-1 sm:flex-initial" variant="ghost">
 					Cancel
 				</Button>
-				<Button className="flex-1 sm:flex-initial shrink-active">
-					Send invite
-				</Button>
+				<Button className="flex-1 sm:flex-initial">Send invite</Button>
 			</CardFooter>
 		</Card>
 	),

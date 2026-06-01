@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "../components/Button";
+import { MotionWrapper } from "../components/MotionWrapper";
 
 const meta = {
 	title: "Components/Button",
@@ -55,6 +56,9 @@ export const Variants: Story = {
 			<Button variant="ghost">Ghost</Button>
 			<Button variant="destructive">Destructive</Button>
 			<Button variant="link">Link</Button>
+			<MotionWrapper size="lg">
+				<Button variant="default">Default</Button>
+			</MotionWrapper>
 		</div>
 	),
 };
@@ -68,31 +72,6 @@ export const Sizes: Story = {
 			<Button size="lg">Large</Button>
 			<Button size="icon" aria-label="Add item">
 				+
-			</Button>
-		</div>
-	),
-};
-
-export const CustomMotionClasses: Story = {
-	render: () => (
-		<div className="grid gap-3 sm:grid-cols-2">
-			<Button className="shrink-hover" variant="outline">
-				shrink-hover
-			</Button>
-			<Button className="shrink-active" variant="outline">
-				shrink-active
-			</Button>
-			<Button className="grow-hover" variant="secondary">
-				grow-hover
-			</Button>
-			<Button className="grow-active" variant="secondary">
-				grow-active
-			</Button>
-			<Button className="shrink-hover grow-active" variant="default">
-				shrink-hover + grow-active
-			</Button>
-			<Button className="grow-hover shrink-active" variant="default">
-				grow-hover + shrink-active
 			</Button>
 		</div>
 	),
