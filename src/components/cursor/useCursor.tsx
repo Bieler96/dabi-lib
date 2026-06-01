@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useMotionValue, useSpring } from "motion/react";
 
-type CursorVariant = "default" | "magnetic" | "grow" | "text";
+type CursorVariant = "default" | "magnetic" | "grow" | "text" | "icon";
 
 export function useCursor() {
+	const [icon, setIcon] = useState<string | null>(null);
 	const hoveredElement = useRef<HTMLElement | null>(null);
 	const pointer = useRef({ x: 0, y: 0 });
 
@@ -69,6 +70,18 @@ export function useCursor() {
 				radius.set(Number(element.dataset.cursorRadius ?? 999));
 				return;
 			}
+
+			if (cursorVariant === "icon") {
+				x.set(pointer.current.x);
+				y.set(pointer.current.y);
+				width.set(Number(element.dataset.cursorSize ?? 52));
+				height.set(Number(element.dataset.cursorSize ?? 52));
+				radius.set(Number(element.dataset.cursorRadius ?? 999));
+				setIcon(element.dataset.cursorIcon ?? "grip");
+				return;
+			}
+
+			setIcon(null);
 
 			x.set(rect.left + rect.width / 2);
 			y.set(rect.top + rect.height / 2);
@@ -141,6 +154,7 @@ export function useCursor() {
 
 	return {
 		variant,
+		icon,
 		style: {
 			x: springX,
 			y: springY,

@@ -91,10 +91,52 @@ export const Default: Story = {
 						<p
 							data-cursor
 							data-cursor-variant="text"
-							className="mt-3 text-sm leading-6 text-neutral-600"
+							className="mt-3 text-sm leading-6 text-neutral-600 w-fit"
 						>
 							The cursor forms into a pill to better select text.
 						</p>
+					</div>
+					<div className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
+						<h2 className="text-xl font-semibold">Icon variants</h2>
+
+						<div className="grid grid-cols-3 gap-4">
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="grip"
+							></div>
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="move"
+							></div>
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="play"
+							></div>
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="plus"
+							></div>
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="search"
+							></div>
+							<div
+								className="bg-primary size-10 rounded-lg"
+								data-cursor
+								data-cursor-variant="icon"
+								data-cursor-icon="zoom"
+							></div>
+						</div>
 					</div>
 
 					<div className="rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm">
