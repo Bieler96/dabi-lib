@@ -41,8 +41,12 @@ export * from "./components/command-menu/CommandMenu";
 export * from "./components/command-menu/CommandMenuItem";
 
 // Core
-export * from "./core/Router";
-export * from "./core/RouteBuilder";
+export {
+	RouterProvider,
+	Link,
+	Outlet,
+	useNavigate,
+} from "@tanstack/react-router";
 
 // Hooks
 export * from "./hooks/useAlert";

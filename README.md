@@ -5,7 +5,7 @@
 ## Features
 
 - **Frontend**: React 19, Vite, TailwindCSS (v4), Lucide Icons.
-- **Router**: Client-seitiger Router mit Guards.
+- **Router**: TanStack Router Grundaufbau fuer neue Projekte.
 - **UI Komponenten**: Fertige Komponenten wie DataTables, Sheets, Cards, etc.
 
 ## Installation & Setup
@@ -131,5 +131,5 @@ npx dabi generate screen Dashboard
 ## Projektstruktur
 
 - `src/components`: Wiederverwendbare UI-Komponenten.
-- `src/core`: Kern-Logik wie Router.
+- `src/router.tsx`: TanStack Router Setup.
 - `src/screens`: Seiten/Screens der App.

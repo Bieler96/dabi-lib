@@ -43,7 +43,6 @@ program
 			const essentialFolders = [
 				"src/screens",
 				"src/components",
-				"src/core",
 				"src/hooks",
 				"src/utils",
 				"public",
@@ -53,13 +52,8 @@ program
 				await fs.ensureDir(path.join(targetDir, folder));
 			}
 
-			// 2. Copy library core folders (synced/overwritten)
-			const libFolders = [
-				"src/components",
-				"src/core",
-				"src/hooks",
-				"src/utils",
-			];
+			// 2. Copy library folders (synced/overwritten)
+			const libFolders = ["src/components", "src/hooks", "src/utils"];
 
 			for (const folder of libFolders) {
 				const src = path.join(templateDir, folder);
@@ -70,10 +64,7 @@ program
 			}
 
 			// 3. Copy individual essential files
-			const essentialFiles = [
-				"src/index.css",
-				"src/index.ts",
-			];
+			const essentialFiles = ["src/index.css", "src/index.ts"];
 
 			for (const file of essentialFiles) {
 				const src = path.join(templateDir, file);
@@ -111,8 +102,14 @@ program
 					}
 				}
 
-				// Copy basic App/main if they don't exist
-				const appFiles = ["src/App.tsx", "src/main.tsx"];
+				// Copy the TanStack Router starter if files don't exist
+				const appFiles = [
+					"src/App.tsx",
+					"src/main.tsx",
+					"src/router.tsx",
+					"src/screens/Home.tsx",
+					"src/screens/Settings.tsx",
+				];
 				for (const file of appFiles) {
 					const src = path.join(templateDir, file);
 					const dest = path.join(targetDir, file);
@@ -173,7 +170,9 @@ program
 	});
 
 async function generateScreen(name: string) {
-	const fileName = name.charAt(0).toUpperCase() + name.slice(1);
+	const fileName = toPascalCase(name);
+	const routePath = toRoutePath(name);
+	const routeName = `${toCamelCase(name)}Route`;
 	const filePath = path.join(
 		process.cwd(),
 		"src",
@@ -186,21 +185,35 @@ async function generateScreen(name: string) {
 		return;
 	}
 
-	const content = `import { useNavigation } from "../core/Router";
-import { Button } from "../components/Button";
+	const content = `import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { buttonVariants } from "../components/Button";
+import { cn } from "../utils/cn";
 
 export const ${fileName} = () => {
-    const nav = useNavigation();
-    
-    return (
-        <div className="p-8">
-            <h1 className="text-3xl font-bold mb-6">${fileName} Screen</h1>
-            <p className="mb-4">Welcome to your new screen!</p>
-            <Button variant="outlined" onClick={() => nav.popBackStack()}>
-                Back
-            </Button>
-        </div>
-    );
+	return (
+		<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-8">
+			<div className="grid gap-2">
+				<h1 className="text-3xl font-semibold tracking-normal">
+					${fileName}
+				</h1>
+				<p className="max-w-2xl text-sm text-muted-foreground">
+					Welcome to your new screen.
+				</p>
+			</div>
+
+			<Link
+				to="/"
+				className={cn(
+					buttonVariants({ variant: "outlined" }),
+					"w-fit",
+				)}
+			>
+				<ArrowLeft data-icon="inline-start" />
+				Back
+			</Link>
+		</div>
+	);
 };
 `;
 
@@ -208,58 +221,113 @@ export const ${fileName} = () => {
 	await fs.writeFile(filePath, content);
 	console.log(pc.green(`Created screen: ${filePath}`));
 
-	// Try to register in App.tsx
-	const appPath = path.join(process.cwd(), "src", "App.tsx");
-	if (fs.existsSync(appPath)) {
-		let appContent = await fs.readFile(appPath, "utf-8");
-
-		// Add import
-		const importName = `${fileName}`;
-		const importPath = `./screens/${fileName}`;
-
-		if (!appContent.includes(importPath)) {
-			// Find last import
-			const lines = appContent.split("\n");
-			let lastImportIndex = -1;
-			for (let i = 0; i < lines.length; i++) {
-				if (lines[i].startsWith("import ")) {
-					lastImportIndex = i;
-				}
-			}
-
-			if (lastImportIndex !== -1) {
-				lines.splice(
-					lastImportIndex + 1,
-					0,
-					`import { ${importName} } from "${importPath}";`,
-				);
-				appContent = lines.join("\n");
-			} else {
-				appContent =
-					`import { ${importName} } from "${importPath}";\n` +
-					appContent;
-			}
-		}
-
-		// Add route to builder
-		const routeAddition = `\t\t\t\tnav.screen('${name.toLowerCase()}', ${fileName});`;
-		if (
-			appContent.includes("builder={(nav) => {") &&
-			!appContent.includes(`'${name.toLowerCase()}'`)
-		) {
-			appContent = appContent.replace(
-				"builder={(nav) => {",
-				`builder={(nav) => {\n${routeAddition}`,
-			);
-			await fs.writeFile(appPath, appContent);
-			console.log(pc.blue(`Registered screen in src/App.tsx`));
-		} else if (appContent.includes(`'${name.toLowerCase()}'`)) {
-			console.log(
-				pc.yellow(
-					`Route '${name.toLowerCase()}' already exists in src/App.tsx`,
-				),
-			);
-		}
+	const routerPath = path.join(process.cwd(), "src", "router.tsx");
+	if (fs.existsSync(routerPath)) {
+		await registerTanStackRoute(routerPath, {
+			componentName: fileName,
+			importPath: `./screens/${fileName}`,
+			routeName,
+			routePath,
+		});
+		console.log(
+			pc.blue(`Registered route '/${routePath}' in src/router.tsx`),
+		);
+	} else {
+		console.log(
+			pc.yellow(
+				`src/router.tsx not found. Add the route manually for '/${routePath}'.`,
+			),
+		);
 	}
+}
+
+function toPascalCase(value: string) {
+	const words = value.match(/[a-zA-Z0-9]+/g) ?? ["Screen"];
+	return words
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join("");
+}
+
+function toCamelCase(value: string) {
+	const pascal = toPascalCase(value);
+	return pascal.charAt(0).toLowerCase() + pascal.slice(1);
+}
+
+function toRoutePath(value: string) {
+	return (
+		value
+			.trim()
+			.replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "") || "screen"
+	);
+}
+
+async function registerTanStackRoute(
+	routerPath: string,
+	route: {
+		componentName: string;
+		importPath: string;
+		routeName: string;
+		routePath: string;
+	},
+) {
+	let routerContent = await fs.readFile(routerPath, "utf-8");
+	const routeTreeIncludesRoute = new RegExp(
+		`rootRoute\\.addChildren\\(\\[[\\s\\S]*\\b${route.routeName}\\b[\\s\\S]*\\]\\);`,
+	).test(routerContent);
+
+	if (!routerContent.includes(route.importPath)) {
+		const lines = routerContent.split("\n");
+		let lastImportIndex = -1;
+
+		for (let index = 0; index < lines.length; index++) {
+			if (lines[index].startsWith("import ")) {
+				lastImportIndex = index;
+			}
+		}
+
+		lines.splice(
+			lastImportIndex + 1,
+			0,
+			`import { ${route.componentName} } from "${route.importPath}";`,
+		);
+		routerContent = lines.join("\n");
+	}
+
+	if (!routerContent.includes(`const ${route.routeName} = createRoute({`)) {
+		const routeDeclaration = `const ${route.routeName} = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/${route.routePath}",
+	component: ${route.componentName},
+});
+
+`;
+
+		routerContent = routerContent.replace(
+			"const routeTree = rootRoute.addChildren([",
+			`${routeDeclaration}const routeTree = rootRoute.addChildren([`,
+		);
+	}
+
+	if (!routeTreeIncludesRoute) {
+		routerContent = routerContent.replace(
+			/const routeTree = rootRoute\.addChildren\(\[([\s\S]*?)\]\);/,
+			(_match, children: string) => {
+				const existingRoutes = children
+					.split(",")
+					.map((child) => child.trim())
+					.filter(Boolean);
+				const routes = [route.routeName, ...existingRoutes];
+
+				return `const routeTree = rootRoute.addChildren([
+	${routes.join(",\n\t")},
+]);`;
+			},
+		);
+	}
+
+	await fs.writeFile(routerPath, routerContent);
 }
 program.parse();

@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "../components/Button";
 import { MotionWrapper } from "../components/MotionWrapper";
 import { ExpressiveSurface } from "../components/Expressive";
-import { Card } from "../components/Card";
 
 const meta = {
 	title: "Components/Button",
@@ -92,9 +91,8 @@ export const Expressive: Story = {
 			active={true}
 			activeRadius="xl"
 			pressedRadius="md"
-			pressedScale={1.0}
-			hoverScale={1.0}
 			transitionPreset="emphasized"
+			interaction="scale"
 		>
 			<Button className="transition-none">Button</Button>
 		</ExpressiveSurface>

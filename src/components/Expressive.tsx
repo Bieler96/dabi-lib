@@ -28,6 +28,35 @@ type ExpressiveSize = "xs" | "sm" | "md" | "lg" | "xl";
 type ExpressiveRadiusToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type ExpressiveRadius = ExpressiveRadiusToken | number | string;
 
+const expressiveInteractionStates: Record<
+	Exclude<ExpressiveInteraction, "none">,
+	{
+		hoverScale: number;
+		hoverY: number;
+		pressedScale: number;
+		pressedY: number;
+	}
+> = {
+	scale: {
+		hoverScale: 1.035,
+		hoverY: 0,
+		pressedScale: 0.94,
+		pressedY: 0,
+	},
+	lift: {
+		hoverScale: 1.015,
+		hoverY: -1,
+		pressedScale: 0.985,
+		pressedY: 1,
+	},
+	press: {
+		hoverScale: 1,
+		hoverY: 0,
+		pressedScale: 0.96,
+		pressedY: 1,
+	},
+};
+
 const expressiveMotionTransitions = {
 	spatialDefault: {
 		type: "spring",
@@ -160,15 +189,16 @@ function getExpressiveState({
 		};
 	}
 
+	const interactionState = expressiveInteractionStates[interaction];
 	const hover = {
 		borderRadius: activeHoverRadius ?? animateRadius,
-		scale: hoverScale ?? (interaction === "press" ? 1 : 1.035),
-		y: 0,
+		scale: hoverScale ?? interactionState.hoverScale,
+		y: interactionState.hoverY,
 	};
 	const tap = {
 		borderRadius: activePressedRadius,
-		scale: pressedScale ?? 0.94,
-		y: interaction === "lift" ? 1 : 0,
+		scale: pressedScale ?? interactionState.pressedScale,
+		y: interactionState.pressedY,
 	};
 
 	return {
@@ -287,8 +317,8 @@ function ExpressiveSurface({
 	activeRadius,
 	hoverRadius,
 	pressedRadius,
-	hoverScale = 1.015,
-	pressedScale = 0.985,
+	hoverScale,
+	pressedScale,
 	syncChildRadius = true,
 	transitionPreset = "soft",
 	transition,

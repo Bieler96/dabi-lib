@@ -31,7 +31,7 @@ Erstellt neue Komponenten und integriert sie (wo möglich) automatisch in deine 
 
 #### Screens (Seiten)
 
-Erstellt eine neue Screen-Komponente und registriert sie im Router (`src/App.tsx`).
+Erstellt eine neue Screen-Komponente und registriert sie im TanStack Router (`src/router.tsx`).
 
 ```bash
 npx dabi g screen Shop
