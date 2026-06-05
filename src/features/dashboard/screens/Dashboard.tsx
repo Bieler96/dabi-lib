@@ -1,10 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Boxes, Sparkles } from "lucide-react";
-import { buttonVariants } from "../components/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
-import { cn } from "../utils/cn";
+import { buttonVariants } from "../../../components/Button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "../../../components/Card";
+import { cn } from "../../../utils/cn";
 
-export function Home() {
+export function Dashboard() {
 	return (
 		<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-8">
 			<section className="grid gap-3">
@@ -16,8 +21,8 @@ export function Home() {
 						Dashboard
 					</h1>
 					<p className="max-w-2xl text-sm text-muted-foreground">
-						Ein schlanker Startpunkt fuer neue Projekte mit dabi-lib
-						Komponenten und TanStack Router.
+						Ein schlanker Startpunkt fuer neue Projekte mit
+						feature-basierter Architektur und TanStack Router.
 					</p>
 				</div>
 			</section>
@@ -32,15 +37,15 @@ export function Home() {
 					</CardHeader>
 					<CardContent className="grid gap-4 text-sm text-muted-foreground">
 						<p>
-							Die Route-Definitionen liegen zentral in
+							Feature-Code liegt unter
+							<code className="mx-1 rounded bg-muted px-1 py-0.5">
+								src/features
+							</code>
+							. Routen werden zentral in
 							<code className="mx-1 rounded bg-muted px-1 py-0.5">
 								src/router.tsx
 							</code>
-							und werden in
-							<code className="mx-1 rounded bg-muted px-1 py-0.5">
-								src/main.tsx
-							</code>
-							gerendert.
+							registriert.
 						</p>
 						<Link
 							to="/settings"
@@ -58,17 +63,21 @@ export function Home() {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-base">
-							Neue Screens
+							Neue Features
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="text-sm text-muted-foreground">
 						<p>
 							Mit
 							<code className="mx-1 rounded bg-muted px-1 py-0.5">
-								dabi generate screen Name
+								dabi generate feature customers
 							</code>
-							entsteht ein Screen und die passende TanStack Route
-							wird direkt registriert.
+							entsteht ein Feature-Grundgeruest. Screens kannst du
+							mit
+							<code className="mx-1 rounded bg-muted px-1 py-0.5">
+								dabi generate screen List --feature customers
+							</code>
+							direkt darin ablegen.
 						</p>
 					</CardContent>
 				</Card>

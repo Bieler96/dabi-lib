@@ -4,8 +4,8 @@ import {
 	createRouter,
 } from "@tanstack/react-router";
 import App from "./App";
-import { Home } from "./screens/Home";
-import { Settings } from "./screens/Settings";
+import { Dashboard } from "./features/dashboard";
+import { Settings } from "./features/settings";
 
 const rootRoute = createRootRoute({
 	component: App,
@@ -14,7 +14,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
-	component: Home,
+	component: Dashboard,
 });
 
 const settingsRoute = createRoute({

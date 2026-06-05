@@ -125,11 +125,13 @@ function Dashboard() {
 ```bash
 npx dabi init mein-projekt
 cd mein-projekt
+npx dabi generate feature customers
 npx dabi generate screen Dashboard
+npx dabi generate screen List --feature customers
 ```
 
 ## Projektstruktur
 
 - `src/components`: Wiederverwendbare UI-Komponenten.
+- `src/features`: Feature-basierte App-Bereiche mit eigenen Screens, Components, Hooks, API und Utils.
 - `src/router.tsx`: TanStack Router Setup.
-- `src/screens`: Seiten/Screens der App.

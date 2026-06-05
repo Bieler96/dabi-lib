@@ -1,9 +1,14 @@
 import { CheckCircle2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "../../../components/Card";
 
 const settings = [
 	"TanStack Router ist eingerichtet",
-	"Routing laeuft ueber src/router.tsx",
+	"Feature-Code liegt unter src/features",
 	"Die CLI registriert neue Screens automatisch",
 ];
 
@@ -15,8 +20,8 @@ export function Settings() {
 					Settings
 				</h1>
 				<p className="max-w-2xl text-sm text-muted-foreground">
-					Diese Seite ist Teil des Starter-Routings und kann als
-					Vorlage fuer eigene Bereiche dienen.
+					Diese Seite ist Teil des Settings-Features und kann als
+					Vorlage fuer eigene Feature-Bereiche dienen.
 				</p>
 			</div>
 

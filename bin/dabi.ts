@@ -41,7 +41,7 @@ program
 
 			// 1. Create essential folders
 			const essentialFolders = [
-				"src/screens",
+				"src/features",
 				"src/components",
 				"src/hooks",
 				"src/utils",
@@ -107,8 +107,10 @@ program
 					"src/App.tsx",
 					"src/main.tsx",
 					"src/router.tsx",
-					"src/screens/Home.tsx",
-					"src/screens/Settings.tsx",
+					"src/features/dashboard/index.ts",
+					"src/features/dashboard/screens/Dashboard.tsx",
+					"src/features/settings/index.ts",
+					"src/features/settings/screens/Settings.tsx",
 				];
 				for (const file of appFiles) {
 					const src = path.join(templateDir, file);
@@ -159,36 +161,80 @@ program
 	.command("generate <type> <name>")
 	.alias("g")
 	.description("Generate a new screen (s)")
-	.action(async (type, name) => {
+	.option("-f, --feature <feature>", "Place a screen inside a feature")
+	.action(async (type, name, options: { feature?: string }) => {
 		const normalizedType = type.toLowerCase();
 
 		if (["screen", "s"].includes(normalizedType)) {
-			await generateScreen(name);
+			await generateScreen(name, options.feature);
+		} else if (["feature", "f"].includes(normalizedType)) {
+			await generateFeature(name);
 		} else {
 			console.error(pc.red(`Unknown generation type: ${type}`));
 		}
 	});
 
-async function generateScreen(name: string) {
-	const fileName = toPascalCase(name);
-	const routePath = toRoutePath(name);
-	const routeName = `${toCamelCase(name)}Route`;
-	const filePath = path.join(
-		process.cwd(),
-		"src",
-		"screens",
-		`${fileName}.tsx`,
+async function generateFeature(name: string) {
+	const featureName = toRoutePath(name);
+	const featureDir = path.join(process.cwd(), "src", "features", featureName);
+
+	if (fs.existsSync(featureDir)) {
+		console.error(pc.red(`Feature ${featureName} already exists.`));
+		return;
+	}
+
+	const folders = ["screens", "components", "hooks", "api", "utils"];
+	for (const folder of folders) {
+		await fs.ensureDir(path.join(featureDir, folder));
+	}
+
+	await fs.writeFile(
+		path.join(featureDir, "index.ts"),
+		`// Export feature screens, components, hooks, and utilities from here.\n`,
 	);
+
+	console.log(pc.green(`Created feature: ${featureDir}`));
+}
+
+async function generateScreen(name: string, feature?: string) {
+	const fileName = toPascalCase(name);
+	const featureName = feature ? toRoutePath(feature) : undefined;
+	const routePath = featureName
+		? `${featureName}/${toRoutePath(name)}`
+		: toRoutePath(name);
+	const routeName = featureName
+		? `${toCamelCase(featureName)}${fileName}Route`
+		: `${toCamelCase(name)}Route`;
+	const screenDir = featureName
+		? path.join(process.cwd(), "src", "features", featureName, "screens")
+		: path.join(
+				process.cwd(),
+				"src",
+				"features",
+				toRoutePath(name),
+				"screens",
+			);
+	const filePath = path.join(screenDir, `${fileName}.tsx`);
+	const importPrefix = featureName ? "../../.." : "../../..";
 
 	if (fs.existsSync(filePath)) {
 		console.error(pc.red(`Screen ${fileName} already exists.`));
 		return;
 	}
 
+	if (!featureName) {
+		await ensureFeatureIndex(path.dirname(screenDir), fileName);
+	} else {
+		await ensureFeatureIndex(
+			path.join(process.cwd(), "src", "features", featureName),
+			fileName,
+		);
+	}
+
 	const content = `import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { buttonVariants } from "../components/Button";
-import { cn } from "../utils/cn";
+import { buttonVariants } from "${importPrefix}/components/Button";
+import { cn } from "${importPrefix}/utils/cn";
 
 export const ${fileName} = () => {
 	return (
@@ -225,7 +271,9 @@ export const ${fileName} = () => {
 	if (fs.existsSync(routerPath)) {
 		await registerTanStackRoute(routerPath, {
 			componentName: fileName,
-			importPath: `./screens/${fileName}`,
+			importPath: featureName
+				? `./features/${featureName}/screens/${fileName}`
+				: `./features/${toRoutePath(name)}/screens/${fileName}`,
 			routeName,
 			routePath,
 		});
@@ -237,6 +285,29 @@ export const ${fileName} = () => {
 			pc.yellow(
 				`src/router.tsx not found. Add the route manually for '/${routePath}'.`,
 			),
+		);
+	}
+}
+
+async function ensureFeatureIndex(featureDir: string, screenName: string) {
+	await fs.ensureDir(path.join(featureDir, "components"));
+	await fs.ensureDir(path.join(featureDir, "hooks"));
+	await fs.ensureDir(path.join(featureDir, "api"));
+	await fs.ensureDir(path.join(featureDir, "utils"));
+
+	const indexPath = path.join(featureDir, "index.ts");
+	const exportLine = `export * from "./screens/${screenName}";`;
+
+	if (!fs.existsSync(indexPath)) {
+		await fs.writeFile(indexPath, `${exportLine}\n`);
+		return;
+	}
+
+	const indexContent = await fs.readFile(indexPath, "utf-8");
+	if (!indexContent.includes(exportLine)) {
+		await fs.writeFile(
+			indexPath,
+			`${indexContent.trim()}\n${exportLine}\n`,
 		);
 	}
 }
