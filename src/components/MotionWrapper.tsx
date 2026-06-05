@@ -27,6 +27,8 @@ function MotionWrapper({
 	size?: "sm" | "md" | "lg";
 	disabled?: boolean;
 }) {
+	void size;
+
 	return (
 		<motion.span
 			initial={false}

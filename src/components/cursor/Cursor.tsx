@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useCursor } from "./useCursor";
-import "./cursor.css";
+// import "./cursor.css";
 import {
 	Grip,
 	Move,
